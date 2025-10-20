@@ -1,5 +1,5 @@
 // src/components/RecommendationCard.jsx 
-const RecommendationCard = ({ recommendation }) => { 
+const RecommendationCard = ({ recommendation, isLoading, error }) => { 
   return ( 
     <div style={{ 
       marginTop: "20px", 
@@ -8,9 +8,22 @@ const RecommendationCard = ({ recommendation }) => {
       borderRadius: "10px" 
     }}> 
       <h4>Recommended Study Time:</h4> 
-      <p>{recommendation}</p> 
+      {isLoading && <p>Loading...</p>}
+      {error && <p>Error: {error}</p>}
+      {!isLoading && !error && recommendation ? (
+        <p>{recommendation}</p>
+      ) : (
+        !isLoading && !error && <p>No recommendation yet</p>
+      )}
     </div> 
   ); 
 }; 
+
+// Default props
+RecommendationCard.defaultProps = {
+  recommendation: null,
+  isLoading: false,
+  error: null
+};
 
 export default RecommendationCard;

@@ -11,17 +11,25 @@ load_dotenv()
 def initialize_firebase():
     """Initialize Firebase Admin SDK with service account credentials."""
     try:
-        # For development purposes, use a mock Firebase initialization
-        # In production, you would use real Firebase credentials
-        print("Using mock Firebase initialization for development")
+        # Initialize Firebase with project ID from environment variables
         if not firebase_admin._apps:
-            firebase_admin.initialize_app()
-        print("Firebase initialized successfully (mock mode)")
+            firebase_project_id = os.getenv("FIREBASE_PROJECT_ID", "study-pulse-85ca1")
+            cred = credentials.Certificate({
+                "type": "service_account",
+                "project_id": firebase_project_id,
+                "private_key": os.getenv("FIREBASE_PRIVATE_KEY", "").replace("\\n", "\n"),
+                "client_email": os.getenv("FIREBASE_CLIENT_EMAIL", "")
+            })
+            firebase_admin.initialize_app(cred)
+            print("Firebase initialized successfully")
         return True
     except Exception as e:
         print(f"Firebase initialization error: {str(e)}")
-        # Continue without Firebase for development purposes
-        return False
+        # Fall back to mock mode for development
+        if not firebase_admin._apps:
+            firebase_admin.initialize_app()
+        print("Firebase initialized in mock mode")
+        return True
 
 def verify_firebase_token(id_token):
     """Verify Firebase ID token and return user ID."""
