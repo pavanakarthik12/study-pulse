@@ -4,20 +4,19 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { startStudySession, endStudySession, getStudyRecommendations } from '../services/api';
 import RecommendationCard from './RecommendationCard';
+import SequentialTimers from './SequentialTimers';
 
 const Dashboard = () => {
   const [user, loading] = useAuthState(auth);
   const navigate = useNavigate();
-  const [studyTime, setStudyTime] = useState(0);
-  const [isTimerActive, setIsTimerActive] = useState(false);
-  const [timerInterval, setTimerInterval] = useState(null);
-  const [currentSessionId, setCurrentSessionId] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [recommendations, setRecommendations] = useState({
     recommended_schedule: [],
     confidence: 0
   });
+  const [showTimers, setShowTimers] = useState(false);
+  const [confirmedSchedule, setConfirmedSchedule] = useState([]);
   
   // Available subjects
   const availableSubjects = [
@@ -100,103 +99,52 @@ const Dashboard = () => {
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
+    setShowTimers(false); // Hide timers when generating new schedule
     fetchRecommendations();
   };
 
-  // Timer functionality with API integration
-  const startTimer = async () => {
-    if (!isTimerActive) {
-      // Only start a new session if we don't already have one
-      if (!currentSessionId) {
-        try {
-          // Start session in backend
-          const response = await startStudySession(preferences.subject);
-          setCurrentSessionId(response.session_id);
-          setError(null);
-        } catch (err) {
-          setError('Failed to start study session. Please try again.');
-          console.error(err);
-          return; // Don't start timer if API call fails
-        }
-      }
-      
-      // Start local timer
-      setIsTimerActive(true);
-      const interval = setInterval(() => {
-        setStudyTime(prevTime => prevTime + 1);
-      }, 1000);
-      setTimerInterval(interval);
-    } else {
-      // Resume timer if it was paused
-      const interval = setInterval(() => {
-        setStudyTime(prevTime => prevTime + 1);
-      }, 1000);
-      setTimerInterval(interval);
-      setIsTimerActive(true);
-    }
-  };
-
-  const stopTimer = async () => {
-    if (isTimerActive) {
-      // Pause timer without ending session
-      clearInterval(timerInterval);
-      setIsTimerActive(false);
-      
-      // Only end session if explicitly requested
-      if (currentSessionId && window.confirm('End this study session?')) {
-        try {
-          // End session in backend
-          await endStudySession(currentSessionId, preferences.focusLevel);
-          setCurrentSessionId(null);
-          setStudyTime(0);
-          
-          // Refresh recommendations after session ends
-          fetchRecommendations();
-          setError(null);
-        } catch (err) {
-          setError('Failed to end study session. Please try again.');
-          console.error(err);
-        }
-      }
-    }
-  };
-
-  const resetTimer = async () => {
-    // Clear the timer
-    clearInterval(timerInterval);
-    setIsTimerActive(false);
-    
-    // End the current session if one exists
-    if (currentSessionId) {
-      try {
-        await endStudySession(currentSessionId, preferences.focusLevel);
-        setCurrentSessionId(null);
-        setError(null);
-      } catch (err) {
-        setError('Failed to end study session. Timer reset but session may still be active.');
-        console.error(err);
-      }
+  // Handle schedule confirmation
+  const handleConfirmSchedule = () => {
+    if (recommendations.recommended_schedule.length === 0) {
+      setError('No schedule to confirm. Generate a study plan first.');
+      return;
     }
     
-    setStudyTime(0);
+    setConfirmedSchedule(recommendations.recommended_schedule);
+    setShowTimers(true);
   };
 
-  // Format time for display
-  const formatTime = (seconds) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  // Handle schedule adjustment
+  const handleAdjustSchedule = () => {
+    setShowTimers(false);
+    // Could add UI for manual adjustments here
+    alert('Schedule adjustment feature - coming soon! For now, modify your preferences and regenerate.');
   };
 
-  // Clean up interval on unmount
+  // Handle timer completion
+  const handleTimersComplete = (completedSubjects) => {
+    console.log('Completed subjects:', completedSubjects);
+    setShowTimers(false);
+    setError(null);
+    alert(`🎉 Great work! You completed ${completedSubjects.length} study session(s)!`);
+    // Could store completed sessions in Firebase here
+  };
+
+  // Handle timer cancellation
+  const handleTimersCancel = (completedSubjects) => {
+    console.log('Cancelled after completing:', completedSubjects);
+    setShowTimers(false);
+    if (completedSubjects.length > 0) {
+      alert(`You completed ${completedSubjects.length} session(s) before canceling.`);
+    }
+  };
+
+  // Clean up on unmount
   useEffect(() => {
     return () => {
-      if (timerInterval) {
-        clearInterval(timerInterval);
-      }
+      // Cleanup if needed
     };
-  }, [timerInterval]);
+  }, []);
 
   if (loading) {
     return <div className="loading">Loading...</div>;
@@ -288,31 +236,41 @@ const Dashboard = () => {
             </div>
             
             <div className="form-group">
-              <button type="submit" className="btn btn-primary submit-btn">
-                Get Study Plan
+              <button type="submit" className="btn btn-primary submit-btn" disabled={isLoading}>
+                {isLoading ? 'Generating...' : 'Get Study Plan'}
               </button>
             </div>
           </form>
         </div>
-      
-        <div className="stats-container">
-          <h3>Your Study Stats</h3>
-          
-          <div className="study-timer">
-            <h4>Study Timer</h4>
-            <div className="timer-display">{formatTime(studyTime)}</div>
-            <div className="timer-controls">
-              {!isTimerActive ? (
-                <button onClick={startTimer} className="btn btn-primary timer-btn">Start</button>
-              ) : (
-                <button onClick={stopTimer} className="btn btn-secondary timer-btn">Pause</button>
-              )}
-              <button onClick={resetTimer} className="btn btn-secondary timer-btn">Reset</button>
-            </div>
-          </div>
-        </div>
         
-        <RecommendationCard recommendations={recommendations} isLoading={isLoading} />
+        <div className="recommendations-section">
+          <RecommendationCard recommendations={recommendations} isLoading={isLoading} />
+          
+          {!showTimers && recommendations.recommended_schedule.length > 0 && (
+            <div className="schedule-actions">
+              <button 
+                className="btn btn-success btn-large" 
+                onClick={handleConfirmSchedule}
+              >
+                ✓ Confirm & Start Timers
+              </button>
+              <button 
+                className="btn btn-secondary" 
+                onClick={handleAdjustSchedule}
+              >
+                Adjust Schedule
+              </button>
+            </div>
+          )}
+          
+          {showTimers && confirmedSchedule.length > 0 && (
+            <SequentialTimers 
+              schedule={confirmedSchedule}
+              onComplete={handleTimersComplete}
+              onCancel={handleTimersCancel}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

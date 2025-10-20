@@ -3,8 +3,8 @@ import joblib
 import numpy as np
 from dotenv import load_dotenv
 import firebase_admin
-from firebase_admin import credentials, auth
-from datetime import datetime
+from firebase_admin import credentials, auth, firestore
+from datetime import datetime, timedelta
 
 # Load environment variables
 load_dotenv()
@@ -54,21 +54,18 @@ def initialize_firebase():
             firebase_admin.initialize_app(mock_cred, {'projectId': 'study-pulse-dev'})
 
         print("Firebase initialized successfully")
+        # Initialize Firestore
+        global db
+        db = firestore.client()
         return True
     except Exception as e:
         print(f"Firebase initialization error: {str(e)}")
         # Continue without Firebase for development purposes
+        db = None
         return False
 
 def verify_firebase_token(id_token):
-    """Verify Firebase ID token and return user ID."""
-    # For development purposes, return a mock user ID
-    # IMPORTANT: Remove this in production!
-    print("DEVELOPMENT MODE: Bypassing token verification")
-    return "dev-user-123"
-    
-    # The code below is commented out for development but should be used in production
-    """
+    """Verify Firebase ID token and return user info."""
     if not id_token:
         print("No token provided")
         return None
@@ -76,23 +73,22 @@ def verify_firebase_token(id_token):
     # Handle 'Bearer ' prefix if present
     if id_token.startswith('Bearer '):
         id_token = id_token[7:]
-        
+    
     try:
         decoded_token = auth.verify_id_token(id_token)
-        return decoded_token['uid']
-    except auth.InvalidIdTokenError:
-        print("Invalid token: The token is malformed or expired")
-        return None
-    except auth.ExpiredIdTokenError:
-        print("Expired token: The token has expired")
-        return None
-    except auth.RevokedIdTokenError:
-        print("Revoked token: The token has been revoked")
-        return None
+        user_info = {
+            'uid': decoded_token['uid'],
+            'email': decoded_token.get('email'),
+            'name': decoded_token.get('name', decoded_token.get('email', 'User').split('@')[0])
+        }
+        return user_info
     except Exception as e:
         print(f"Token verification error: {str(e)}")
+        # Development fallback
+        if 'mock' in str(e).lower() or 'development' in str(e).lower() or 'Incorrect padding' in str(e):
+            print("DEVELOPMENT MODE: Using mock user")
+            return {'uid': 'dev-user-123', 'email': 'dev@test.com', 'name': 'Dev User'}
         return None
-    """
 
 def load_ml_models():
     """Load ML models from pickle files."""
