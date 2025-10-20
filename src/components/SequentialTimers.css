@@ -1,9 +1,15 @@
+.sequential-timers-container {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
 .sequential-timers {
+  flex: 1;
   background: white;
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  margin-top: 20px;
 }
 
 .sequential-timers h3 {
@@ -122,6 +128,70 @@
   font-size: 2.5em;
   font-weight: bold;
   font-family: 'Courier New', monospace;
+}
+
+.current-subject-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+  text-align: center;
+}
+
+.subject-label {
+  font-size: 1.2em;
+  font-weight: 600;
+  color: white;
+}
+
+.duration-label {
+  font-size: 0.9em;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Break Timer */
+.break-timer {
+  background: linear-gradient(135deg, #ff9800 0%, #ff5722 100%);
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+  color: white;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+.break-icon-large {
+  font-size: 4em;
+  margin-bottom: 16px;
+}
+
+.break-timer h4 {
+  font-size: 2em;
+  margin: 0 0 12px 0;
+}
+
+.break-timer p {
+  font-size: 1.1em;
+  margin: 0 0 24px 0;
+  opacity: 0.9;
+}
+
+.break-countdown {
+  font-size: 3em;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 20px;
+  border-radius: 12px;
+  display: inline-block;
 }
 
 /* Timer Controls */
@@ -275,6 +345,12 @@
 }
 
 /* Responsive */
+@media (max-width: 1200px) {
+  .sequential-timers-container {
+    flex-direction: column;
+  }
+}
+
 @media (max-width: 768px) {
   .sequential-timers {
     padding: 16px;
@@ -315,5 +391,21 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 6px;
+  }
+  
+  .break-timer {
+    padding: 24px;
+  }
+  
+  .break-icon-large {
+    font-size: 3em;
+  }
+  
+  .break-timer h4 {
+    font-size: 1.5em;
+  }
+  
+  .break-countdown {
+    font-size: 2em;
   }
 }

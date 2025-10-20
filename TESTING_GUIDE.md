@@ -1,277 +1,415 @@
 # Study Pulse - Testing Guide
 
-## Backend API Testing
+## 🚀 Quick Start
 
-### 1. Test `/predict_schedule` Endpoint
+### 1. Start Both Servers
 
-**Valid Request:**
-```powershell
-$body = '{"subjects": ["Math", "Physics", "Chemistry"], "focus_level": 0.8, "available_time": "09:00 - 17:00", "preferred_duration": 45, "past_sessions": []}'; $headers = @{"Content-Type"="application/json"; "Authorization"="Bearer test-token"}; (Invoke-WebRequest -Uri http://localhost:5000/predict_schedule -Method POST -Headers $headers -Body $body).Content
+**Terminal 1 - React Frontend:**
+```bash
+cd c:\Users\pavan\OneDrive\Desktop\study-pulse
+npm start
 ```
+✅ Frontend runs on: `http://localhost:3000`
 
-**Expected Response:**
-```json
-{
-  "recommended_schedule": [
-    {
-      "subject": "Math",
-      "start": "09:00 AM",
-      "end": "10:07 AM",
-      "duration": 67,
-      "priority": 4
-    },
-    {
-      "break": 10
-    },
-    {
-      "subject": "Physics",
-      "start": "10:17 AM",
-      "end": "11:26 AM",
-      "duration": 69,
-      "priority": 4
-    },
-    ...
-  ],
-  "confidence": 0.8
-}
-```
-
-**Test Missing Fields (Should return 422):**
-```powershell
-$body = '{"subjects": ["Math"]}'; $headers = @{"Content-Type"="application/json"; "Authorization"="Bearer test-token"}; try { (Invoke-WebRequest -Uri http://localhost:5000/predict_schedule -Method POST -Headers $headers -Body $body).Content } catch { $_.Exception.Response.StatusCode.value__; $_.ErrorDetails.Message }
-```
-
-**Expected Response:**
-- Status Code: 422
-- Error message indicating missing fields
-
-### 2. Test `/sessions/start` Endpoint
-
-**Valid Request:**
-```powershell
-$body = '{"user_id": "test-user-123", "start_time": "2025-10-20 09:00:00", "focus_rating": 4, "subject": "Math", "day_of_week": 0}'; $headers = @{"Content-Type"="application/json"}; (Invoke-WebRequest -Uri http://localhost:5000/sessions/start -Method POST -Headers $headers -Body $body).Content
-```
-
-**Expected Response:**
-```json
-{
-  "message": "Session started successfully",
-  "session_id": 1
-}
-```
-
-**Test Missing Fields (Should return 422):**
-```powershell
-$body = '{"user_id": "test-user"}'; $headers = @{"Content-Type"="application/json"}; try { (Invoke-WebRequest -Uri http://localhost:5000/sessions/start -Method POST -Headers $headers -Body $body).Content } catch { $_.Exception.Response.StatusCode.value__; $_.ErrorDetails.Message }
-```
-
-**Expected Response:**
-- Status Code: 422
-- Error object with missing field details
-
-### 3. Test `/test_ml` Endpoint
-
-**Request:**
-```powershell
-(Invoke-WebRequest -Uri http://localhost:5000/test_ml -Method GET).Content
-```
-
-**Expected Response:**
-```json
-{
-  "message": "ML test completed successfully",
-  "results": [
-    {
-      "focus_rating": 3,
-      "day_of_week": 2,
-      "predicted_start_hour": 10,
-      "predicted_duration_minutes": 45
-    },
-    ...
-  ]
-}
-```
-
-## Frontend Testing
-
-### 1. Access the Application
-- Open your browser and navigate to: http://localhost:3000
-- Or click the preview browser button provided
-
-### 2. Test Login/Signup Flow
-1. If redirected to login, use Firebase authentication
-2. For development, you may bypass auth (check console for dev mode messages)
-
-### 3. Test Dashboard Features
-
-#### A. Study Preferences Form
-1. **Select Multiple Subjects:**
-   - Hold Ctrl (or Cmd on Mac)
-   - Click multiple subjects from the list
-   - Verify multiple subjects are selected
-
-2. **Set Focus Level:**
-   - Use the slider to adjust focus level (1-10)
-   - Verify the value changes
-
-3. **Set Available Time:**
-   - Set start time (e.g., 09:00)
-   - Set end time (e.g., 17:00)
-   - Ensure end time is after start time
-
-4. **Set Preferred Duration:**
-   - Enter duration in minutes (15-180)
-   - Verify input validation
-
-#### B. Generate Study Plan
-1. Click "Get Study Plan" button
-2. Verify loading state appears
-3. Wait for recommendations to load
-
-#### C. Recommendations Display
-1. **Verify Schedule Shows:**
-   - Each selected subject with emoji icon
-   - Start and end times for each subject
-   - Break times between subjects
-   - Priority scores (if enabled)
-
-2. **Verify Confidence Score:**
-   - Displayed as percentage (0-100%)
-   - Warning message if confidence < 70%
-
-3. **Test Different Scenarios:**
-   - Single subject
-   - Multiple subjects (2-5)
-   - Different focus levels
-   - Different time ranges
-   - Different durations
-
-#### D. Study Timer
-1. Click "Start" to begin timer
-2. Verify timer counts up
-3. Click "Pause" to pause
-4. Click "Reset" to reset to 00:00:00
-
-## ML Model Validation
-
-### 1. Check Models Exist
-```powershell
-Test-Path "c:\Users\pavan\OneDrive\Desktop\study-pulse\backend\models\start_time_model.pkl"
-Test-Path "c:\Users\pavan\OneDrive\Desktop\study-pulse\backend\models\duration_model.pkl"
-```
-
-Both should return `True`
-
-### 2. Verify Predictions are Realistic
-- Start times should be between 6 AM and 9 PM
-- Durations should be between 20 and 90 minutes
-- Breaks should be 5-10 minutes
-- Total schedule fits within available time
-- Subjects are prioritized appropriately
-
-### 3. Test with Past Sessions
-Send a request with past_sessions data:
-```powershell
-$body = '{"subjects": ["Math"], "focus_level": 0.7, "available_time": "09:00 - 15:00", "preferred_duration": 45, "past_sessions": [{"subject": "Math", "focus_rating": 3, "start": "09:00 AM", "duration": 40}, {"subject": "Math", "focus_rating": 4, "start": "10:00 AM", "duration": 50}]}'; $headers = @{"Content-Type"="application/json"; "Authorization"="Bearer test-token"}; (Invoke-WebRequest -Uri http://localhost:5000/predict_schedule -Method POST -Headers $headers -Body $body).Content
-```
-
-Verify:
-- Confidence score increases with more past sessions
-- Predictions adapt based on past performance
-
-## Error Handling Tests
-
-### 1. Invalid JSON Input
-```powershell
-$body = 'invalid json'; $headers = @{"Content-Type"="application/json"}; try { (Invoke-WebRequest -Uri http://localhost:5000/predict_schedule -Method POST -Headers $headers -Body $body).Content } catch { $_.Exception.Response.StatusCode.value__; $_.ErrorDetails.Message }
-```
-Expected: 422 status code
-
-### 2. Invalid Time Format
-```powershell
-$body = '{"subjects": ["Math"], "focus_level": 0.8, "available_time": "invalid", "preferred_duration": 45}'; $headers = @{"Content-Type"="application/json"; "Authorization"="Bearer test-token"}; try { (Invoke-WebRequest -Uri http://localhost:5000/predict_schedule -Method POST -Headers $headers -Body $body).Content } catch { $_.Exception.Response.StatusCode.value__; $_.ErrorDetails.Message }
-```
-Expected: 422 status code with error message
-
-### 3. Focus Rating Out of Range
-```powershell
-$body = '{"user_id": "test", "start_time": "2025-10-20 09:00:00", "focus_rating": 10}'; $headers = @{"Content-Type"="application/json"}; try { (Invoke-WebRequest -Uri http://localhost:5000/sessions/start -Method POST -Headers $headers -Body $body).Content } catch { $_.Exception.Response.StatusCode.value__; $_.ErrorDetails.Message }
-```
-Expected: 422 status code
-
-## Browser Console Testing
-
-1. Open browser DevTools (F12)
-2. Go to Console tab
-3. Verify no errors when:
-   - Loading the page
-   - Submitting the form
-   - Receiving recommendations
-4. Check Network tab:
-   - POST to `/predict_schedule` returns 200
-   - Response contains valid JSON
-   - Authorization header is included
-
-## Common Issues and Solutions
-
-### Issue: "ML models not loaded"
-**Solution:** Run the training scripts:
-```powershell
-cd c:\Users\pavan\OneDrive\Desktop\study-pulse\backend\ml
-python train_start_time.py
-python train_duration.py
-```
-
-### Issue: "Database errors"
-**Solution:** Reinitialize the database:
-```powershell
+**Terminal 2 - Flask Backend:**
+```bash
 cd c:\Users\pavan\OneDrive\Desktop\study-pulse\backend
-Remove-Item study_pulse.db
-python -c "from app import app, init_db; init_db(); print('Database initialized')"
+python app.py
+```
+✅ Backend runs on: `http://localhost:5000`
+
+---
+
+## 🧪 Complete Testing Workflow
+
+### Step 1: User Authentication
+1. Open browser to `http://localhost:3000`
+2. Click "Sign Up" or "Login"
+3. Create account or login with Firebase
+4. ✅ Should redirect to Dashboard with "Welcome Back, [Name]"
+
+### Step 2: Set Study Preferences
+1. On Dashboard, fill out the form:
+   - **Subjects**: Hold Ctrl and select multiple (e.g., Math, Physics, Chemistry)
+   - **Preferred Duration**: Set to 45 minutes
+   - **Available Time Start**: 09:00
+   - **Available Time End**: 18:00
+   - **Focus Level**: Slide to 8/10
+2. Click **"Get Study Plan"** button
+3. ✅ Should see loading state, then ML predictions appear
+
+### Step 3: Review ML Predictions
+After clicking "Get Study Plan", you should see:
+- ✅ Recommended schedule with subjects, start/end times
+- ✅ Break times between subjects
+- ✅ Confidence score percentage
+- ✅ Two buttons: "Confirm & Start Timers" and "Adjust Schedule"
+
+**Example Prediction:**
+```
+📚 Math
+  Start: 09:00 AM
+  End: 09:45 AM
+  Duration: 45 mins
+
+☕ Break: 10 mins
+
+📚 Physics
+  Start: 09:55 AM
+  End: 10:40 AM
+  Duration: 45 mins
 ```
 
-### Issue: "CORS errors in browser"
-**Solution:** Ensure backend has CORS enabled (already configured in app.py)
+### Step 4: Adjust Schedule (Optional)
+1. Click **"Adjust Schedule"** button
+2. ✅ Modal overlay should appear with editable schedule
+3. **Test editing:**
+   - Change "Math" to "Calculus"
+   - Adjust start time to 10:00 AM
+   - Change duration from 45 to 60 minutes
+   - ✅ End time should auto-update
+4. **Test adding subject:**
+   - Click "+ Add Another Subject"
+   - ✅ New subject with default 45 mins should appear
+5. **Test removing subject:**
+   - Click 🗑️ button on any subject (must have 2+ subjects)
+   - ✅ Subject should be removed
+6. **Test break adjustment:**
+   - Change break from 10 to 15 minutes
+   - ✅ Should update immediately
+7. Click **"Save & Start Sessions"**
+8. ✅ Modal should close, timers should start with adjusted schedule
 
-### Issue: "Firebase authentication errors"
-**Solution:** App runs in development mode with mock authentication. For production, configure Firebase credentials in .env file.
+### Step 5: Start Sequential Timers
+1. Click **"Confirm & Start Timers"** (or save from editor)
+2. ✅ Should see Sequential Timers component with:
+   - Progress indicator (Subject 1 of 3)
+   - Current subject name and time
+   - Circular progress ring
+   - **Only current subject's remaining time** (e.g., "45:00")
+   - Start button
+   - Upcoming subjects queue
+   - Notification sidebar on the right
 
-### Issue: "No recommendations displayed"
-**Solution:** 
-1. Check browser console for errors
-2. Verify backend is running on port 5000
-3. Check Network tab for failed requests
-4. Ensure all required fields are filled in the form
+### Step 6: Test Timer Functionality
 
-## Success Criteria
+#### Timer Shows ONLY Current Subject Time
+1. Click **"Start Math"** button
+2. ✅ Timer should count down: 45:00 → 44:59 → 44:58...
+3. ✅ **IMPORTANT**: Should show ONLY Math's time, NOT cumulative
+4. ✅ Display should say "Math: 44:58" (not "Math + Physics: 90:00")
 
-✅ Backend starts without errors
-✅ ML models load successfully
-✅ `/predict_schedule` returns valid JSON with schedule
-✅ `/sessions/start` creates sessions successfully
-✅ Missing fields return 422 status code
-✅ Frontend loads without errors
-✅ Form accepts user input
-✅ "Get Study Plan" button triggers API call
-✅ Recommendations display with subjects, times, and breaks
-✅ Confidence score is shown
-✅ Timer functions correctly
-✅ All errors are logged and handled gracefully
+#### Test Pause/Resume
+1. While timer is running, click **"Pause"** button
+2. ✅ Timer should freeze
+3. ✅ "Resume" button should appear
+4. Click **"Resume"**
+5. ✅ Timer should continue counting down
 
-## Quick Test Script
+#### Test Skip
+1. Click **"Skip"** button
+2. ✅ Confirmation dialog appears
+3. Click "OK"
+4. ✅ Should move to break timer (if break exists) or next subject
 
-Run this in PowerShell to test all endpoints:
+#### Test Cancel All
+1. Click **"Cancel All"** button
+2. ✅ Confirmation dialog appears
+3. Click "OK"
+4. ✅ Should stop all timers and show completion summary
 
-```powershell
-# Test predict_schedule
-Write-Host "Testing /predict_schedule..." -ForegroundColor Cyan
-$body = '{"subjects": ["Math", "Physics"], "focus_level": 0.8, "available_time": "09:00 - 17:00", "preferred_duration": 45, "past_sessions": []}'; $headers = @{"Content-Type"="application/json"; "Authorization"="Bearer test-token"}; (Invoke-WebRequest -Uri http://localhost:5000/predict_schedule -Method POST -Headers $headers -Body $body).Content
+### Step 7: Test Notifications Sidebar
 
-Write-Host "`nTesting /sessions/start..." -ForegroundColor Cyan
-$body = '{"user_id": "test-user", "start_time": "2025-10-20 09:00:00", "focus_rating": 4, "subject": "Math"}'; $headers = @{"Content-Type"="application/json"}; (Invoke-WebRequest -Uri http://localhost:5000/sessions/start -Method POST -Headers $headers -Body $body).Content
+The sidebar should display notifications based on timer state:
 
-Write-Host "`nTesting /test_ml..." -ForegroundColor Cyan
-(Invoke-WebRequest -Uri http://localhost:5000/test_ml -Method GET).Content | ConvertFrom-Json | Select-Object -ExpandProperty results | Select-Object -First 3
+#### Session Start Notification
+- When you click "Start Math"
+- ✅ Should show: "🎯 Session Starting! Ready to study Math? Let's focus!"
 
-Write-Host "`nAll tests completed!" -ForegroundColor Green
+#### Halfway Notification
+- When timer reaches 50% (e.g., 22:30 for 45-min session)
+- ✅ Should show: "⏰ Halfway There! You're halfway through Math. Keep going!"
+
+#### 5-Minute Warning
+- When timer reaches 5:00
+- ✅ Should show: "⏱️ 5 Minutes Left - Wrap up Math soon!"
+
+#### Hydration Reminder
+- Every 20 minutes (at 25:00, 5:00, etc.)
+- ✅ Should show: "💧 Stay Hydrated! Take a sip of water while studying."
+
+#### Dismiss Notifications
+1. Click "×" on any notification
+2. ✅ Notification should disappear
+
+#### Next Subject Preview
+- ✅ Should show next subject with start time and duration
+- ✅ Example: "⏭️ Coming Next: Physics - 09:55 AM - 45 mins"
+
+#### Progress Summary
+- ✅ Should show current subject number (e.g., "1/3")
+- ✅ Should show time remaining (e.g., "40m 30s")
+
+### Step 8: Test Break Timer
+
+1. Let first subject timer complete (or skip it)
+2. ✅ Should show break timer screen:
+   - Large ☕ icon
+   - "Break Time!" heading
+   - "Relax and recharge" message
+   - Countdown timer (e.g., 10:00 → 09:59...)
+3. ✅ Notification should appear: "☕ Break Time! Take a short break..."
+4. ✅ After break completes, should auto-advance to next subject
+
+**Test Break Timer Countdown:**
+- ✅ Should count down in real-time
+- ✅ Format: "MM:SS" (e.g., "10:00" → "09:59" → "00:01" → "00:00")
+
+### Step 9: Test Auto-Progression
+
+1. Start first subject timer
+2. Wait for it to complete (or skip)
+3. ✅ Should automatically show break timer
+4. Wait for break to complete
+5. ✅ Should automatically show next subject timer
+6. ✅ Timer should be reset to next subject's duration
+7. ✅ "Start [Subject]" button should appear
+
+### Step 10: Test Confetti Celebration 🎉
+
+1. Complete all subjects (can use Skip to speed up)
+2. When last subject timer reaches 00:00:
+   - ✅ Should trigger confetti animation
+   - ✅ Confetti should fire from both left and right sides
+   - ✅ Animation should last 3 seconds
+   - ✅ Colors should be purple/blue gradient (#667eea, #764ba2, #f093fb, #4facfe)
+   - ✅ Alert should appear: "🎉 Congratulations! You completed all your study sessions!"
+
+### Step 11: Test Multiple Subjects
+
+1. Set preferences with 5+ subjects
+2. Generate study plan
+3. ✅ Should see all subjects in queue
+4. ✅ Each subject should have own timer
+5. ✅ Breaks should appear between subjects
+6. ✅ Queue should show remaining subjects
+7. ✅ Completed list should grow as you finish
+
+### Step 12: Test Responsive Design
+
+#### Desktop View (> 1200px)
+- ✅ Timers on left, notifications sidebar on right
+- ✅ Side-by-side layout
+
+#### Mobile View (< 1200px)
+1. Resize browser to mobile width (< 768px)
+2. ✅ Sidebar should move below timers
+3. ✅ All elements should stack vertically
+4. ✅ Touch-friendly buttons
+
+---
+
+## 🎯 Expected Behaviors
+
+### ✅ Timer Shows ONLY Current Subject Time
+- **CORRECT**: When studying Math (45 mins), shows "45:00" → "30:00" → "00:00"
+- **INCORRECT**: Shows "90:00" (Math + Physics combined) ❌
+
+### ✅ Break Timer Countdown
+- **CORRECT**: Break timer counts down: "10:00" → "09:59" → "00:00"
+- **INCORRECT**: Break timer stays at "10:00" ❌
+
+### ✅ Auto-Progression
+- **CORRECT**: Subject → Break → Next Subject (automatic)
+- **INCORRECT**: Gets stuck on break screen ❌
+
+### ✅ Confetti on Completion
+- **CORRECT**: Confetti fires after last subject completes
+- **INCORRECT**: No confetti or fires too early ❌
+
+### ✅ Notifications Appear
+- **CORRECT**: Notifications show in sidebar at right times
+- **INCORRECT**: No notifications or wrong timing ❌
+
+---
+
+## 🔍 Common Issues & Solutions
+
+### Issue: ML Predictions Not Showing
+**Solution:**
+1. Check backend is running on `http://localhost:5000`
+2. Check browser console for CORS errors
+3. Verify ML models exist in `backend/models/` directory
+4. Check backend terminal for errors
+
+### Issue: Timer Doesn't Count Down
+**Solution:**
+1. Make sure you clicked "Start [Subject]" button
+2. Check browser console for JavaScript errors
+3. Verify timer state is not paused
+
+### Issue: Break Timer Doesn't Count Down
+**Solution:**
+1. Check console for errors
+2. Verify break duration > 0 in schedule
+3. Check `isBreakTime` state is true
+
+### Issue: Confetti Doesn't Fire
+**Solution:**
+1. Verify all subjects completed (not just skipped)
+2. Check `canvas-confetti` is installed: `npm list canvas-confetti`
+3. Check browser console for import errors
+
+### Issue: Notifications Don't Appear
+**Solution:**
+1. Verify timer is running (not paused)
+2. Check `NotificationSidebar` component is rendered
+3. Check browser console for errors
+4. Verify timeRemaining is updating
+
+### Issue: Schedule Editor Modal Doesn't Open
+**Solution:**
+1. Check "Adjust Schedule" button onClick handler
+2. Verify `showEditor` state updates to true
+3. Check browser console for errors
+4. Verify `ScheduleEditor.css` is loaded
+
+---
+
+## 📊 Performance Checklist
+
+- [ ] Frontend compiles without errors
+- [ ] Backend starts without errors
+- [ ] ML models load successfully
+- [ ] User can login/signup
+- [ ] Predictions generate in < 3 seconds
+- [ ] Timers count down smoothly (no lag)
+- [ ] Notifications appear at correct times
+- [ ] Break timer counts down in real-time
+- [ ] Auto-progression works seamlessly
+- [ ] Confetti fires on completion
+- [ ] Schedule editor saves changes
+- [ ] Mobile responsive design works
+- [ ] No console errors during normal usage
+
+---
+
+## 🎨 Visual Testing
+
+### Color Scheme
+- Primary: `#667eea` (purple)
+- Secondary: `#764ba2` (deep purple)
+- Accent: `#f093fb` (pink)
+- Highlight: `#4facfe` (blue)
+
+### Fonts & Spacing
+- Timer font should be large and readable
+- Buttons should have hover effects
+- Progress ring should be smooth
+- Notifications should have distinct colors
+
+### Animations
+- Circular progress should fill smoothly
+- Confetti should be colorful and playful
+- Transitions should be smooth (0.3s)
+- No janky animations or flickering
+
+---
+
+## 📝 Testing Checklist Summary
+
+### Core Features
+- [ ] User authentication works
+- [ ] ML predictions generate correctly
+- [ ] Schedule adjustment modal opens
+- [ ] Can edit subjects, times, durations
+- [ ] Can add/remove subjects
+- [ ] Can adjust break lengths
+- [ ] Timer shows ONLY current subject time
+- [ ] Timer counts down correctly
+- [ ] Pause/Resume works
+- [ ] Skip subject works
+- [ ] Cancel all works
+
+### Advanced Features
+- [ ] Break timer appears between subjects
+- [ ] Break timer counts down in real-time
+- [ ] Auto-advances to next subject after break
+- [ ] Notifications appear at correct times
+- [ ] Can dismiss notifications
+- [ ] Next subject preview shows
+- [ ] Progress summary updates
+- [ ] Confetti fires on completion
+- [ ] Works for multiple subjects (5+)
+- [ ] Responsive design on mobile
+
+### Edge Cases
+- [ ] Works with 1 subject only
+- [ ] Works with 10+ subjects
+- [ ] Handles 0-minute breaks correctly
+- [ ] Handles very long durations (180 mins)
+- [ ] Handles very short durations (5 mins)
+- [ ] Survives page refresh (loses state - expected)
+- [ ] Error handling for failed predictions
+
+---
+
+## 🎉 Success Criteria
+
+**If all these work, the app is fully functional:**
+
+1. ✅ User can login and see dashboard
+2. ✅ User can generate ML-powered study plan
+3. ✅ User can adjust schedule before starting
+4. ✅ Sequential timers show ONLY current subject time
+5. ✅ Break timer counts down and auto-advances
+6. ✅ Notifications appear in sidebar
+7. ✅ Confetti celebrates completion
+8. ✅ Works for multiple subjects
+9. ✅ No console errors
+10. ✅ Smooth, professional UX
+
+---
+
+## 🐛 Bug Reporting Template
+
+If you find a bug, report it with:
+
 ```
+**Bug Description:**
+[What happened?]
+
+**Expected Behavior:**
+[What should happen?]
+
+**Steps to Reproduce:**
+1. [First step]
+2. [Second step]
+3. [etc.]
+
+**Environment:**
+- Browser: [Chrome/Firefox/Safari]
+- OS: [Windows/Mac/Linux]
+- Screen size: [Desktop/Mobile]
+
+**Console Errors:**
+[Paste any errors from browser console]
+
+**Screenshots:**
+[If applicable]
+```
+
+---
+
+## 🚀 Ready to Test!
+
+Your Study Pulse app is fully implemented with:
+- ML-powered predictions
+- Schedule adjustment
+- Sequential timers (shows ONLY current subject)
+- Break timers with countdown
+- Real-time notifications
+- Confetti celebration
+- Clean, responsive design
+
+**Start testing and enjoy your personalized study sessions!** 🎓✨

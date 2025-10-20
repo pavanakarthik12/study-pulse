@@ -2,9 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { auth } from '../firebase/config';
 import { useNavigate } from 'react-router-dom';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { startStudySession, endStudySession, getStudyRecommendations } from '../services/api';
+import { getStudyRecommendations } from '../services/api';
 import RecommendationCard from './RecommendationCard';
 import SequentialTimers from './SequentialTimers';
+import ScheduleEditor from './ScheduleEditor';
 
 const Dashboard = () => {
   const [user, loading] = useAuthState(auth);
@@ -17,6 +18,7 @@ const Dashboard = () => {
   });
   const [showTimers, setShowTimers] = useState(false);
   const [confirmedSchedule, setConfirmedSchedule] = useState([]);
+  const [showEditor, setShowEditor] = useState(false);
   
   // Available subjects
   const availableSubjects = [
@@ -117,8 +119,19 @@ const Dashboard = () => {
   // Handle schedule adjustment
   const handleAdjustSchedule = () => {
     setShowTimers(false);
-    // Could add UI for manual adjustments here
-    alert('Schedule adjustment feature - coming soon! For now, modify your preferences and regenerate.');
+    setShowEditor(true);
+  };
+
+  // Handle editor save
+  const handleEditorSave = (adjustedSchedule) => {
+    setConfirmedSchedule(adjustedSchedule);
+    setShowEditor(false);
+    setShowTimers(true);
+  };
+
+  // Handle editor cancel
+  const handleEditorCancel = () => {
+    setShowEditor(false);
   };
 
   // Handle timer completion
@@ -272,6 +285,15 @@ const Dashboard = () => {
           )}
         </div>
       </div>
+
+      {/* Schedule Editor Modal */}
+      {showEditor && (
+        <ScheduleEditor 
+          schedule={recommendations.recommended_schedule}
+          onSave={handleEditorSave}
+          onCancel={handleEditorCancel}
+        />
+      )}
     </div>
   );
 };
