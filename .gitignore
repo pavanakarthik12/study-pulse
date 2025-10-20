@@ -1,0 +1,8 @@
+# Ignore environment files
+.env
+*.env
+.env.*
+# Optional: ignore sensitive credentials or model files
+*.pkl
+*.json
+__pycache__/
