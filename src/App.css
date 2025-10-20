@@ -346,13 +346,12 @@
 
 /* Dashboard */
 .dashboard-container {
-  max-width: 1100px;
-  margin: 50px auto;
-  padding: 40px;
-  background-color: white;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  animation: fadeIn 0.5s ease-in-out;
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .dashboard-container h2 {
@@ -370,7 +369,8 @@
 .dashboard-content {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 30px;
+  gap: 2rem;
+  margin-top: 2rem;
 }
 
 @media (min-width: 768px) {
@@ -379,77 +379,133 @@
   }
 }
 
+.error-message {
+  background-color: #ffe0e0;
+  color: #d32f2f;
+  padding: 1rem;
+  border-radius: 5px;
+  margin-bottom: 1rem;
+  border-left: 4px solid #d32f2f;
+}
+
+/* Study Preferences Form */
+.preferences-form {
+  background-color: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.preferences-form h3 {
+  margin-bottom: 1.5rem;
+  color: #333;
+  border-bottom: 2px solid #6e8efb;
+  padding-bottom: 0.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.2rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #555;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.form-control:focus {
+  border-color: #6e8efb;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(110, 142, 251, 0.2);
+}
+
+.range-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  color: #777;
+  font-size: 0.85rem;
+}
+
+/* Stats Container */
 .stats-container {
-  background-color: #f9f9f9;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-  transition: transform 0.3s ease;
+  background-color: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
-.stats-container:hover {
-  transform: translateY(-5px);
-}
-
-.stats-container h3 {
-  margin-bottom: 20px;
-  color: #6e8efb;
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-/* Study Timer */
 .study-timer {
-  margin-bottom: 30px;
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 10px;
+  margin-top: 1.5rem;
+  text-align: center;
 }
 
 .timer-display {
   font-size: 3rem;
-  text-align: center;
-  margin: 20px 0;
-  font-family: monospace;
-}
-
-.subject-input {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 20px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 16px;
+  font-weight: bold;
+  margin: 1rem 0;
+  color: #6e8efb;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .timer-controls {
   display: flex;
   justify-content: center;
-  gap: 15px;
+  gap: 1rem;
 }
 
-.timer-controls button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
+.timer-btn {
+  padding: 0.5rem 1.5rem;
+  font-size: 1rem;
   transition: all 0.3s ease;
 }
 
-.start-btn {
-  background-color: #2ecc71;
-  color: white;
+.timer-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.pause-btn {
-  background-color: #f39c12;
-  color: white;
+/* Recommendation Card */
+.recommendation-card {
+  background-color: #f0f7ff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border-left: 4px solid #6e8efb;
 }
 
-.reset-btn {
-  background-color: #e74c3c;
-  color: white;
+.recommendation-details {
+  margin-top: 1rem;
+}
+
+.recommendation-details p {
+  margin-bottom: 0.75rem;
+}
+
+.break-times {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px dashed #ccc;
+}
+
+.break-times ul {
+  padding-left: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.break-times li {
+  margin-bottom: 0.5rem;
+  color: #555;
 }
 
 .loading {
@@ -458,5 +514,5 @@
   align-items: center;
   height: 100vh;
   font-size: 1.5rem;
-  color: #333;
+  color: #6e8efb;
 }

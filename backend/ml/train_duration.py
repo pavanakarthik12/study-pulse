@@ -9,7 +9,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils import generate_dummy_data
 
 # Generate dummy data for training
-_, _, X_duration, y_duration = generate_dummy_data(200)
+_, _, X_duration, y_duration, _ = generate_dummy_data(200)
 
 # Split data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(

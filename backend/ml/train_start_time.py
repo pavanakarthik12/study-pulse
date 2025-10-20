@@ -1,7 +1,7 @@
 import os
 import joblib
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
 import sys
 import os
@@ -9,15 +9,15 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils import generate_dummy_data
 
 # Generate dummy data for training
-X_start_time, y_start_time, _, _ = generate_dummy_data(200)
+X_start_time, y_start_time, _, _, _ = generate_dummy_data(200)
 
 # Split data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(
     X_start_time, y_start_time, test_size=0.2, random_state=42
 )
 
-# Train a Random Forest Classifier for start time prediction
-model = RandomForestClassifier(n_estimators=100, random_state=42)
+# Train a Decision Tree Classifier for start time prediction
+model = DecisionTreeClassifier(random_state=42)
 model.fit(X_train, y_train)
 
 # Evaluate the model
