@@ -7,6 +7,7 @@ import { useNavigate, Link } from 'react-router-dom';
 const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -26,9 +27,9 @@ const Signup = () => {
   };
 
   return (
-    <div className="auth-container">
+    <div className="signup-container">
       <h2>Sign Up</h2>
-      {error && <p className="error">{error}</p>}
+      {error && <div className="error">{error}</div>}
       <form onSubmit={handleSignup}>
         <div className="form-group">
           <label>Email</label>
@@ -46,13 +47,24 @@ const Signup = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            minLength="6"
           />
         </div>
-        <button type="submit" className="auth-button">Sign Up</button>
+        <div className="form-group">
+          <label>Confirm Password</label>
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            minLength="6"
+          />
+        </div>
+        <button type="submit" className="btn btn-primary">Sign Up</button>
       </form>
-      <p>
+      <div className="form-footer">
         Already have an account? <Link to="/login">Login</Link>
-      </p>
+      </div>
     </div>
   );
 };

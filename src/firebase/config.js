@@ -1,34 +1,37 @@
-// src/firebase/config.js 
-import { initializeApp } from "firebase/app"; 
-import { getAuth } from "firebase/auth"; 
- 
-// Firebase config with direct values
-const firebaseConfig = { 
-  apiKey: "AIzaSyDs2NBjyBKlhX1XFVwyP-95SldMEZRGufg", 
-  authDomain: "study-pulse-85ca1.firebaseapp.com", 
-  projectId: "study-pulse-85ca1", 
-  storageBucket: "study-pulse-85ca1.firebasestorage.app", 
-  messagingSenderId: "379117189383", 
-  appId: "1:379117189383:web:daed16f62b9b193c47eda2", 
-  measurementId: "G-YQ7NEWV6S6" 
-}; 
- 
-// Initialize Firebase 
-const app = initializeApp(firebaseConfig); 
-export const auth = getAuth(app); 
+import { initializeApp } from 'firebase/app';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 
-// Helper function to get Firebase token
-export const getFirebaseToken = async () => {
-  const user = auth.currentUser;
-  if (!user) {
-    return null;
-  }
-  try {
-    return await user.getIdToken(true);
-  } catch (error) {
-    console.error("Error getting Firebase token:", error);
-    return null;
+// Firebase configuration using environment variables
+const firebaseConfig = {
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Helper function to store Firebase token in localStorage
+export const setAuthToken = (user) => {
+  if (user) {
+    user.getIdToken().then(token => {
+      localStorage.setItem('authToken', token);
+    });
+  } else {
+    localStorage.removeItem('authToken');
   }
 };
 
-export default app;
+// Set up auth state listener to manage token
+onAuthStateChanged(auth, (user) => {
+  setAuthToken(user);
+});
+
+export { auth, db };
