@@ -6,3 +6,5 @@
 *.pkl
 *.json
 __pycache__/
+# .gitignore
+node_modules/

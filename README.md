@@ -1,126 +1,86 @@
-# Study Pulse Backend
+# Study Pulse
 
-A prototype backend for Study Pulse that tracks study sessions, integrates ML models for optimal study time prediction, and verifies Firebase ID tokens.
+Study Pulse is an AI-powered study session tracker that provides personalized recommendations for optimal study times based on your past study patterns.
 
 ## Features
 
-- User authentication via Firebase ID tokens
-- Study session tracking (start/end times, focus ratings)
-- ML-based predictions for optimal study start time and duration
-- SQLite database for data storage
-- RESTful API endpoints
+- **User Authentication**: Secure login and signup with Firebase
+- **Study Timer**: Track your study sessions with a simple timer
+- **AI Recommendations**: Get personalized recommendations for optimal study times
+- **Dashboard**: View your study statistics and recommendations
 
 ## Project Structure
 
 ```
 study-pulse/
-│
-├─ backend/
-│   ├─ app.py                 # Flask main app
-│   ├─ models/
-│   │   ├─ start_time_model.pkl
-│   │   └─ duration_model.pkl
-│   ├─ ml/
-│   │   ├─ train_start_time.py
-│   │   └─ train_duration.py
-│   ├─ utils.py               # Helper functions
-│   └─ requirements.txt
-├─ .env                       # Environment variables
-└─ README.md
+├── backend/           # Flask backend with ML models
+└── src/               # React frontend
+    ├── components/    # React components
+    ├── firebase/      # Firebase configuration
+    ├── App.jsx        # Main application component
+    └── index.js       # Entry point
 ```
 
 ## Setup Instructions
 
-1. Install dependencies:
+### Prerequisites
+
+- Node.js and npm
+- Firebase account
+- Python 3.7+ (for backend)
+
+### Frontend Setup
+
+1. Clone the repository
+2. Navigate to the project directory
+3. Install dependencies:
+   ```
+   npm install
+   ```
+4. Create a `.env` file in the root directory with your Firebase configuration:
+   ```
+   REACT_APP_FIREBASE_API_KEY=your-api-key
+   REACT_APP_FIREBASE_AUTH_DOMAIN=your-auth-domain
+   REACT_APP_FIREBASE_PROJECT_ID=your-project-id
+   REACT_APP_FIREBASE_STORAGE_BUCKET=your-storage-bucket
+   REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
+   REACT_APP_FIREBASE_APP_ID=your-app-id
+   REACT_APP_FIREBASE_MEASUREMENT_ID=your-measurement-id
+   REACT_APP_BACKEND_URL=http://localhost:5000
+   ```
+5. Start the development server:
+   ```
+   npm start
+   ```
+
+### Backend Setup
+
+1. Navigate to the backend directory:
    ```
    cd backend
+   ```
+2. Install Python dependencies:
+   ```
    pip install -r requirements.txt
    ```
-
-2. Configure your `.env` file with Firebase credentials:
+3. Start the Flask server:
    ```
-   FIREBASE_PROJECT_ID=your_project_id
-   FIREBASE_CLIENT_EMAIL=your_service_account_email
-   FIREBASE_PRIVATE_KEY=your_service_account_private_key
-   FLASK_SECRET_KEY=your_flask_secret_key
-   START_TIME_MODEL_PATH=./models/start_time_model.pkl
-   DURATION_MODEL_PATH=./models/duration_model.pkl
-   ```
-
-3. Train the ML models:
-   ```
-   cd backend/ml
-   python train_start_time.py
-   python train_duration.py
-   ```
-
-4. Run the Flask application:
-   ```
-   cd backend
    python app.py
    ```
 
-## API Endpoints
+## Connecting Frontend to Backend
 
-### Start a Study Session
-- **URL**: `/sessions/start`
-- **Method**: POST
-- **Auth**: Bearer token (Firebase ID token)
-- **Request Body**:
-  ```json
-  {
-    "subject": "Math",
-    "day_of_week": 1
-  }
-  ```
-- **Response**:
-  ```json
-  {
-    "message": "Session started successfully",
-    "session_id": 1
-  }
-  ```
+The frontend communicates with the backend through the following API endpoints:
 
-### End a Study Session
-- **URL**: `/sessions/end`
-- **Method**: POST
-- **Auth**: Bearer token (Firebase ID token)
-- **Request Body**:
-  ```json
-  {
-    "session_id": 1,
-    "focus_rating": 4
-  }
-  ```
-- **Response**:
-  ```json
-  {
-    "message": "Session ended successfully",
-    "duration_sec": 3600
-  }
-  ```
+- `POST /api/start-session`: Record the start of a study session
+- `POST /api/end-session`: Record the end of a study session
+- `GET /api/recommendation`: Get personalized study time recommendations
 
-### Get Personalized Schedule Predictions
-- **URL**: `/predict_schedule`
-- **Method**: POST
-- **Auth**: Bearer token (Firebase ID token)
-- **Request Body**:
-  ```json
-  {
-    "focus_rating": 4,
-    "day_of_week": 1
-  }
-  ```
-- **Response**:
-  ```json
-  {
-    "recommended_start_hour": 10,
-    "recommended_duration_minutes": 45
-  }
-  ```
+Authentication is handled through Firebase, and the Firebase ID token is sent in the Authorization header for all API requests.
 
-### Test ML Models
-- **URL**: `/test_ml`
-- **Method**: GET
-- **Auth**: None (for testing purposes)
-- **Response**: Sample predictions for dummy data
+## Future Enhancements
+
+- Subject-specific recommendations
+- Study streak tracking
+- Social features for study groups
+- Mobile app version
