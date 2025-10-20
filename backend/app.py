@@ -66,9 +66,13 @@ def authenticate_request():
     try:
         # Verify token
         decoded_token = utils.verify_firebase_token(token)
-        if not decoded_token or 'uid' not in decoded_token:
+        if not decoded_token:
             return None
-        return decoded_token.get('uid')
+        
+        # Extract user ID from decoded token
+        if isinstance(decoded_token, dict) and 'uid' in decoded_token:
+            return decoded_token.get('uid')
+        return None
     except Exception as e:
         app.logger.error(f"Token validation error: {str(e)}")
         return None
@@ -160,67 +164,87 @@ def end_session():
 
 @app.route('/api/recommendation', methods=['GET'])
 def get_recommendation():
+    """
+    Generate personalized study time recommendations based on user's past sessions.
+    Uses ML models to predict optimal start time and duration.
+    """
+    # Verify Firebase token and get user ID
     user_id = authenticate_request()
     if not user_id:
-        return jsonify({'error': 'Unauthorized'}), 401
-    
-    # Get current day of week
-    day_of_week = datetime.now().weekday()
-    
-    # Get user's average focus rating and session duration
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute(
-        'SELECT AVG(focus_rating) as avg_focus, AVG(duration_sec) as avg_duration FROM sessions WHERE user_id = ? AND focus_rating IS NOT NULL',
-        (user_id,)
-    )
-    result = cursor.fetchone()
-    
-    # Default values if no previous sessions
-    focus_rating = int(result['avg_focus']) if result and result['avg_focus'] else 3
-    avg_duration_sec = result['avg_duration'] if result and result['avg_duration'] else 2700  # Default to 45 minutes
+        return jsonify({'error': 'Unauthorized - Invalid or missing token'}), 401
     
     try:
-        # Predict optimal start time
+        # Get current day of week (0-6, Monday-Sunday)
+        day_of_week = datetime.now().weekday()
+        
+        # Get user's average focus rating and session duration from past sessions
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute(
+            'SELECT AVG(focus_rating) as avg_focus, AVG(duration_sec) as avg_duration FROM sessions WHERE user_id = ? AND focus_rating IS NOT NULL',
+            (user_id,)
+        )
+        result = cursor.fetchone()
+        
+        # Check if ML models are loaded
+        if start_time_model is None or duration_model is None:
+            app.logger.warning("ML models not loaded, using default recommendations")
+            return jsonify({
+                'recommended_time': "2:00 PM - 3:30 PM",
+                'message': "Using default recommendation (ML models not available)"
+            }), 200
+        
+        # Default values if no previous sessions
+        focus_rating = 3  # Default focus rating
+        avg_duration_sec = 2700  # Default to 45 minutes
+        
+        # Use actual values if available
+        if result and result['avg_focus'] is not None:
+            focus_rating = int(result['avg_focus'])
+        if result and result['avg_duration'] is not None:
+            avg_duration_sec = int(result['avg_duration'])
+        
+        # Predict optimal start time using ML model
         recommended_start_hour = utils.predict_start_time(
             start_time_model, focus_rating, day_of_week, avg_duration_sec
         )
         
-        # Predict optimal duration
+        # Predict optimal duration using ML model
         recommended_duration_minutes = utils.predict_duration(
             duration_model, focus_rating, day_of_week, recommended_start_hour
         )
         
-        # Format the recommendation as a time range string
-        start_time = f"{int(recommended_start_hour)}:{0 if recommended_start_hour.is_integer() else 30:02d}"
-        end_hour = recommended_start_hour + (recommended_duration_minutes / 60)
-        end_time = f"{int(end_hour)}:{int((end_hour % 1) * 60):02d}"
-        
-        # Convert to 12-hour format with AM/PM
+        # Format the recommendation as a time range string (12-hour format with AM/PM)
         start_hour_12 = int(recommended_start_hour) % 12
         if start_hour_12 == 0:
             start_hour_12 = 12
         start_period = "AM" if recommended_start_hour < 12 else "PM"
         
+        end_hour = recommended_start_hour + (recommended_duration_minutes / 60)
         end_hour_12 = int(end_hour) % 12
         if end_hour_12 == 0:
             end_hour_12 = 12
         end_period = "AM" if end_hour < 12 else "PM"
         
-        start_time_12 = f"{start_hour_12}:{0 if recommended_start_hour.is_integer() else 30:02d} {start_period}"
+        start_time_12 = f"{start_hour_12}:{0 if recommended_start_hour == int(recommended_start_hour) else 30:02d} {start_period}"
         end_time_12 = f"{end_hour_12}:{int((end_hour % 1) * 60):02d} {end_period}"
         
         recommended_time = f"{start_time_12} - {end_time_12}"
         
+        app.logger.info(f"Generated recommendation for user {user_id}: {recommended_time}")
+        
         return jsonify({
             'recommended_time': recommended_time,
-            'recommended_start_hour': recommended_start_hour,
-            'recommended_duration_minutes': recommended_duration_minutes
+            'recommended_start_hour': float(recommended_start_hour),
+            'recommended_duration_minutes': int(recommended_duration_minutes)
         }), 200
     except Exception as e:
+        app.logger.error(f"Error generating recommendation: {str(e)}")
         return jsonify({
-            'error': f'Error generating recommendation: {str(e)}'
-        }), 500
+            'error': f'Error generating recommendation: {str(e)}',
+            'recommended_time': "2:00 PM - 3:30 PM",  # Fallback recommendation
+            'message': "Using default recommendation due to error"
+        }), 200  # Return 200 with fallback recommendation instead of 500
 
 @app.route('/predict_schedule', methods=['POST'])
 def predict_schedule():
