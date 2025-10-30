@@ -6,6 +6,7 @@ import { getStudyRecommendations } from '../services/api';
 import RecommendationCard from './RecommendationCard';
 import SequentialTimers from './SequentialTimers';
 import ScheduleEditor from './ScheduleEditor';
+import MusicPlayer from './MusicPlayer';
 
 const Dashboard = () => {
   const [user, loading] = useAuthState(auth);
@@ -115,8 +116,6 @@ const Dashboard = () => {
     setConfirmedSchedule(recommendations.recommended_schedule);
     setShowTimers(true);
   };
-
-  // Handle schedule adjustment
   const handleAdjustSchedule = () => {
     setShowTimers(false);
     setShowEditor(true);
@@ -277,11 +276,14 @@ const Dashboard = () => {
           )}
           
           {showTimers && confirmedSchedule.length > 0 && (
-            <SequentialTimers 
-              schedule={confirmedSchedule}
-              onComplete={handleTimersComplete}
-              onCancel={handleTimersCancel}
-            />
+            <>
+              <SequentialTimers 
+                schedule={confirmedSchedule}
+                onComplete={handleTimersComplete}
+                onCancel={handleTimersCancel}
+              />
+              <MusicPlayer isActive={showTimers} />
+            </>
           )}
         </div>
       </div>

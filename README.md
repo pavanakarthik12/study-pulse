@@ -11,6 +11,16 @@
 
 ## ✨ Features
 
+### 🎵 YouTube Music Player
+- **Simple Integration**: Paste any YouTube link to play study music
+- **Auto-Save**: Remembers your last played song
+- **Independent Controls**: Music and timers operate separately
+- **Clean UI**: Minimal, beautiful design
+- **Timer-Activated**: Appears only when study session starts
+- **Full YouTube Controls**: Play, pause, volume, quality, and more
+- **No Login Required**: Works instantly for all users
+- **Flexible**: Play any YouTube video - music, lectures, podcasts
+
 ### 🤖 ML-Powered Schedule Predictions
 - Personalized study schedules based on your preferences
 - Learns from past study sessions
@@ -119,27 +129,37 @@ python app.py
 - Create an account or login with existing credentials
 - Authenticated users see personalized dashboard
 
-### 2. Set Study Preferences
+### 2. Connect YouTube Music (Optional)
+- When you start a study session, the YouTube Music Player appears
+- Paste any YouTube link (e.g., lo-fi music, study beats)
+- Click "Play" to start the music
+- Your last played link is saved for next time
+- Control playback independently from the timer
+
+### 3. Set Study Preferences
 - **Subjects**: Select multiple subjects (hold Ctrl/Cmd)
 - **Duration**: Preferred study session length (15-180 mins)
 - **Time Range**: Available time window (start - end)
 - **Focus Level**: Current attention level (1-10 scale)
 
-### 3. Generate Study Plan
+### 4. Generate Study Plan
 - Click **"Get Study Plan"**
 - ML models predict optimal schedule
 - See recommended subjects, times, breaks, confidence
 
-### 4. Adjust Schedule (Optional)
+### 5. Adjust Schedule (Optional)
 - Click **"Adjust Schedule"**
 - Edit subject names, start times, durations
 - Add/remove subjects as needed
 - Modify break lengths
 - Click **"Save & Start Sessions"**
 
-### 5. Study Sessions
+### 6. Study Sessions
 - Click **"Confirm & Start Timers"**
+- YouTube Music Player appears below the timer
+- Paste a YouTube link to play study music
 - Timer shows **only current subject's time**
+- Control music playback independently
 - Receive real-time notifications
 - Take breaks between subjects
 - Complete all sessions for confetti celebration! 🎉
@@ -157,6 +177,7 @@ src/
 │   ├── ScheduleEditor.jsx         # Schedule adjustment modal
 │   ├── NotificationSidebar.jsx    # Real-time notifications
 │   ├── RecommendationCard.jsx     # ML predictions display
+│   ├── MusicPlayer.jsx            # YouTube music player
 │   └── *.css                      # Component styles
 ├── firebase/
 │   └── config.js                  # Firebase configuration
@@ -462,6 +483,7 @@ For issues or questions:
 
 ## 🎓 Features Summary
 
+✅ **Spotify Integration** - OAuth music playback with full controls  
 ✅ **ML-Powered Predictions** - Personalized study schedules  
 ✅ **Schedule Adjustment** - Edit before starting  
 ✅ **Sequential Timers** - Shows only current subject time  
