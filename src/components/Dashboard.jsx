@@ -169,6 +169,11 @@ const Dashboard = () => {
       {error && <div className="error-message">{error}</div>}
       
       <div className="dashboard-content">
+        {/* Spotify Music Player - Always visible for authenticated users */}
+        <div className="music-section">
+          <MusicPlayer />
+        </div>
+
         <div className="preferences-form">
           <h3>Study Preferences</h3>
           <form onSubmit={handleSubmit}>
@@ -276,14 +281,11 @@ const Dashboard = () => {
           )}
           
           {showTimers && confirmedSchedule.length > 0 && (
-            <>
-              <SequentialTimers 
-                schedule={confirmedSchedule}
-                onComplete={handleTimersComplete}
-                onCancel={handleTimersCancel}
-              />
-              <MusicPlayer isActive={showTimers} />
-            </>
+            <SequentialTimers 
+              schedule={confirmedSchedule}
+              onComplete={handleTimersComplete}
+              onCancel={handleTimersCancel}
+            />
           )}
         </div>
       </div>

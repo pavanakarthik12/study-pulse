@@ -379,6 +379,14 @@
   }
 }
 
+/* Music Section */
+.music-section {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
 .error-message {
   background-color: #ffe0e0;
   color: #d32f2f;
