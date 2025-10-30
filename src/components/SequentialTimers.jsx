@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import confetti from 'canvas-confetti';
 import NotificationSidebar from './NotificationSidebar';
-import './SequentialTimers.css';
 
 const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -187,37 +186,98 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
   
   if (!currentItem) {
     return (
-      <div className="sequential-timers empty">
+      <div style={{
+        textAlign: 'center',
+        padding: '40px',
+        color: '#666'
+      }}>
         <p>No subjects to study. Generate a study plan first!</p>
       </div>
     );
   }
   
   return (
-    <div className="sequential-timers-container">
-      <div className="sequential-timers">
-        <h3>Study Session Queue</h3>
+    <div style={{
+      display: 'flex',
+      gap: '24px',
+      alignItems: 'flex-start'
+    }}>
+      <div style={{
+        flex: '1',
+        background: 'white',
+        borderRadius: '12px',
+        padding: '24px',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+      }}>
+        <h3 style={{
+          marginTop: '0',
+          color: '#333',
+          fontSize: '1.5em',
+          marginBottom: '20px'
+        }}>Study Session Queue</h3>
         
         {/* Progress Overview */}
-        <div className="session-progress">
-          <div className="progress-text">
+        <div style={{
+          marginBottom: '24px'
+        }}>
+          <div style={{
+            fontSize: '0.9em',
+            color: '#666',
+            marginBottom: '8px',
+            fontWeight: '500'
+          }}>
             Subject {currentIndex + 1} of {subjectItems.length}
           </div>
-          <div className="progress-bar-container">
+          <div style={{
+            width: '100%',
+            height: '8px',
+            background: '#e0e0e0',
+            borderRadius: '4px',
+            overflow: 'hidden'
+          }}>
             <div 
-              className="progress-bar-fill" 
-              style={{ width: `${((currentIndex) / subjectItems.length) * 100}%` }}
+              style={{ 
+                height: '100%',
+                background: 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)',
+                transition: 'width 0.3s ease',
+                width: `${((currentIndex) / subjectItems.length) * 100}%`
+              }}
             ></div>
           </div>
         </div>
         
         {/* Break Timer */}
         {isBreakTime && (
-          <div className="break-timer">
-            <div className="break-icon-large">☕</div>
-            <h4>Break Time!</h4>
-            <p>Relax and recharge before your next session</p>
-            <div className="break-countdown">
+          <div style={{
+            background: 'linear-gradient(135deg, #ff9800 0%, #ff5722 100%)',
+            borderRadius: '12px',
+            padding: '40px',
+            textAlign: 'center',
+            color: 'white',
+            animation: 'pulse 2s infinite'
+          }}>
+            <div style={{
+              fontSize: '4em',
+              marginBottom: '16px'
+            }}>☕</div>
+            <h4 style={{
+              fontSize: '2em',
+              margin: '0 0 12px 0'
+            }}>Break Time!</h4>
+            <p style={{
+              fontSize: '1.1em',
+              margin: '0 0 24px 0',
+              opacity: '0.9'
+            }}>Relax and recharge before your next session</p>
+            <div style={{
+              fontSize: '3em',
+              fontWeight: 'bold',
+              fontFamily: "'Courier New', monospace",
+              background: 'rgba(255, 255, 255, 0.2)',
+              padding: '20px',
+              borderRadius: '12px',
+              display: 'inline-block'
+            }}>
               {Math.floor(breakDuration / 60)}:{(breakDuration % 60).toString().padStart(2, '0')}
             </div>
           </div>
@@ -225,67 +285,251 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
         
         {/* Current Subject Timer - Only shows CURRENT subject time */}
         {!isBreakTime && (
-          <div className={`current-timer ${isRunning ? 'running' : ''} ${isPaused ? 'paused' : ''}`}>
-            <div className="timer-header">
-              <h4>{currentItem.subject}</h4>
-              <span className="timer-schedule">
+          <div style={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            borderRadius: '12px',
+            padding: '28px',
+            color: 'white',
+            marginBottom: '24px',
+            transition: 'all 0.3s ease',
+            boxShadow: isRunning ? '0 0 20px rgba(102, 126, 234, 0.4)' : 'none',
+            opacity: isPaused ? '0.85' : '1'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '24px'
+            }}>
+              <h4 style={{
+                margin: '0',
+                fontSize: '1.8em',
+                fontWeight: '600'
+              }}>{currentItem.subject}</h4>
+              <span style={{
+                background: 'rgba(255, 255, 255, 0.2)',
+                padding: '6px 12px',
+                borderRadius: '16px',
+                fontSize: '0.9em'
+              }}>
                 {currentItem.start} - {currentItem.end}
               </span>
             </div>
             
-            <div className="timer-display">
-              <div className="time-circle">
-                <svg className="progress-ring" width="200" height="200">
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              margin: '32px 0'
+            }}>
+              <div style={{
+                position: 'relative',
+                width: '200px',
+                height: '200px'
+              }}>
+                <svg style={{
+                  transform: 'rotate(-90deg)'
+                }} width="200" height="200">
                   <circle
-                    className="progress-ring-bg"
+                    style={{
+                      fill: 'none',
+                      stroke: 'rgba(255, 255, 255, 0.2)',
+                      strokeWidth: '8'
+                    }}
                     cx="100"
                     cy="100"
                     r="90"
                   />
                   <circle
-                    className="progress-ring-progress"
+                    style={{
+                      fill: 'none',
+                      stroke: 'white',
+                      strokeWidth: '8',
+                      strokeLinecap: 'round',
+                      strokeDasharray: `${2 * Math.PI * 90}`,
+                      strokeDashoffset: `${2 * Math.PI * 90 * (1 - getProgress() / 100)}`,
+                      transition: 'stroke-dashoffset 0.5s ease'
+                    }}
                     cx="100"
                     cy="100"
                     r="90"
-                    style={{
-                      strokeDasharray: `${2 * Math.PI * 90}`,
-                      strokeDashoffset: `${2 * Math.PI * 90 * (1 - getProgress() / 100)}`
-                    }}
                   />
                 </svg>
-                <div className="time-text">{formatTime(timeRemaining)}</div>
+                <div style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  fontSize: '2.5em',
+                  fontWeight: 'bold',
+                  fontFamily: "'Courier New', monospace"
+                }}>
+                  {formatTime(timeRemaining)}
+                </div>
               </div>
-              <div className="current-subject-info">
-                <span className="subject-label">Current: {currentItem.subject}</span>
-                <span className="duration-label">Duration: {currentItem.duration} minutes</span>
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+                marginTop: '16px',
+                textAlign: 'center'
+              }}>
+                <span style={{
+                  fontSize: '1.2em',
+                  fontWeight: '600',
+                  color: 'white'
+                }}>Current: {currentItem.subject}</span>
+                <span style={{
+                  fontSize: '0.9em',
+                  color: 'rgba(255, 255, 255, 0.9)'
+                }}>Duration: {currentItem.duration} minutes</span>
               </div>
             </div>
             
-            <div className="timer-controls">
+            <div style={{
+              display: 'flex',
+              gap: '12px',
+              justifyContent: 'center',
+              flexWrap: 'wrap'
+            }}>
               {!isRunning ? (
-                <button className="btn btn-primary btn-large" onClick={startTimer}>
+                <button onClick={startTimer} style={{
+                  padding: '16px 48px',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '1.2em',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  background: 'white',
+                  color: '#667eea'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'translateY(-1px)';
+                  e.target.style.boxShadow = 'none';
+                }}
+                >
                   Start {currentItem.subject}
                 </button>
               ) : isPaused ? (
                 <>
-                  <button className="btn btn-success" onClick={resumeTimer}>
+                  <button onClick={resumeTimer} style={{
+                    padding: '12px 24px',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '1em',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    background: '#4CAF50',
+                    color: 'white'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.opacity = '0.9';
+                    e.target.style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.opacity = '1';
+                    e.target.style.transform = 'translateY(0)';
+                  }}
+                  >
                     Resume
                   </button>
-                  <button className="btn btn-warning" onClick={skipSubject}>
+                  <button onClick={skipSubject} style={{
+                    padding: '12px 24px',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '1em',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    background: '#ff9800',
+                    color: 'white'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.opacity = '0.9';
+                    e.target.style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.opacity = '1';
+                    e.target.style.transform = 'translateY(0)';
+                  }}
+                  >
                     Skip
                   </button>
                 </>
               ) : (
                 <>
-                  <button className="btn btn-warning" onClick={pauseTimer}>
+                  <button onClick={pauseTimer} style={{
+                    padding: '12px 24px',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '1em',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    background: '#ff9800',
+                    color: 'white'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.opacity = '0.9';
+                    e.target.style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.opacity = '1';
+                    e.target.style.transform = 'translateY(0)';
+                  }}
+                  >
                     Pause
                   </button>
-                  <button className="btn btn-secondary" onClick={skipSubject}>
+                  <button onClick={skipSubject} style={{
+                    padding: '12px 24px',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '1em',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    color: 'white',
+                    border: '2px solid white'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.opacity = '0.9';
+                    e.target.style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.opacity = '1';
+                    e.target.style.transform = 'translateY(0)';
+                  }}
+                  >
                     Skip
                   </button>
                 </>
               )}
-              <button className="btn btn-danger" onClick={cancelAll}>
+              <button onClick={cancelAll} style={{
+                padding: '12px 24px',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '1em',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                background: '#f44336',
+                color: 'white'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.opacity = '0.9';
+                e.target.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.opacity = '1';
+                e.target.style.transform = 'translateY(0)';
+              }}
+              >
                 Cancel All
               </button>
             </div>
@@ -294,9 +538,23 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
         
         {/* Upcoming Subjects Queue */}
         {subjectItems.length > 1 && (
-          <div className="upcoming-queue">
-            <h5>Upcoming</h5>
-            <div className="queue-list">
+          <div style={{
+            background: '#f9f9f9',
+            borderRadius: '8px',
+            padding: '16px',
+            marginBottom: '16px'
+          }}>
+            <h5 style={{
+              marginTop: '0',
+              color: '#666',
+              fontSize: '1em',
+              marginBottom: '12px'
+            }}>Upcoming</h5>
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px'
+            }}>
               {subjectItems.map((item, index) => {
                 if (index <= currentIndex) return null;
                 
@@ -307,16 +565,45 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
                 });
                 
                 return (
-                  <div key={index} className="queue-item">
+                  <div key={index} style={{
+                    background: 'white',
+                    borderRadius: '6px',
+                    padding: '12px',
+                    borderLeft: '4px solid #667eea'
+                  }}>
                     {breakBefore && (
-                      <div className="break-indicator">
+                      <div style={{
+                        fontSize: '0.85em',
+                        color: '#ff9800',
+                        marginBottom: '6px',
+                        fontWeight: '500'
+                      }}>
                         ☕ {breakBefore.break} min break
                       </div>
                     )}
-                    <div className="queue-subject">
-                      <span className="subject-name">{item.subject}</span>
-                      <span className="subject-duration">{item.duration} mins</span>
-                      <span className="subject-time">{item.start}</span>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      gap: '12px'
+                    }}>
+                      <span style={{
+                        fontWeight: '600',
+                        color: '#333',
+                        flex: '1'
+                      }}>{item.subject}</span>
+                      <span style={{
+                        background: '#e3f2fd',
+                        color: '#1976d2',
+                        padding: '4px 12px',
+                        borderRadius: '12px',
+                        fontSize: '0.85em',
+                        fontWeight: '500'
+                      }}>{item.duration} mins</span>
+                      <span style={{
+                        color: '#666',
+                        fontSize: '0.9em'
+                      }}>{item.start}</span>
                     </div>
                   </div>
                 );
@@ -327,11 +614,31 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
         
         {/* Completed Subjects */}
         {completedSubjects.length > 0 && (
-          <div className="completed-list">
-            <h5>Completed ✓</h5>
-            <div className="completed-items">
+          <div style={{
+            background: '#f1f8f4',
+            borderRadius: '8px',
+            padding: '16px'
+          }}>
+            <h5 style={{
+              marginTop: '0',
+              color: '#4CAF50',
+              fontSize: '1em',
+              marginBottom: '12px'
+            }}>Completed ✓</h5>
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '8px'
+            }}>
               {completedSubjects.map((subject, index) => (
-                <span key={index} className="completed-badge">
+                <span key={index} style={{
+                  background: '#4CAF50',
+                  color: 'white',
+                  padding: '6px 16px',
+                  borderRadius: '16px',
+                  fontSize: '0.9em',
+                  fontWeight: '500'
+                }}>
                   {subject}
                 </span>
               ))}

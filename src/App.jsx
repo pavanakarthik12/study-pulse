@@ -8,7 +8,6 @@ import Login from './components/Login';
 import Signup from './components/Signup';
 import Dashboard from './components/Dashboard';
 import Navigation from './components/Navigation';
-import './App.css';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -24,14 +23,31 @@ function App() {
   }, []);
 
   if (loading) {
-    return <div className="loading">Loading...</div>;
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        fontSize: '1.5rem',
+        color: '#6e8efb'
+      }}>
+        Loading...
+      </div>
+    );
   }
 
   return (
     <Router>
-      <div className="app">
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
         <Navigation user={user} />
-        <div className="content">
+        <div style={{
+          flex: '1'
+        }}>
           <Routes>
             <Route path="/" element={user ? <Navigate to="/dashboard" /> : <HeroSection />} />
             <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <Login />} />

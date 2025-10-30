@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import './NotificationSidebar.css';
 
 const NotificationSidebar = ({ currentSubject, timeRemaining, isBreak, schedule, currentIndex }) => {
   const [notifications, setNotifications] = useState([]);
@@ -102,29 +101,140 @@ const NotificationSidebar = ({ currentSubject, timeRemaining, isBreak, schedule,
 
   const nextSubject = getNextSubject();
 
+  // Get notification style based on type
+  const getNotificationStyle = (type, priority) => {
+    const baseStyle = {
+      display: 'flex',
+      gap: '12px',
+      padding: '12px',
+      borderRadius: '8px',
+      borderLeft: '4px solid',
+      animation: 'slideInRight 0.3s ease',
+      position: 'relative'
+    };
+
+    const typeStyles = {
+      start: {
+        background: '#e8f5e9',
+        borderColor: '#4CAF50'
+      },
+      progress: {
+        background: '#e3f2fd',
+        borderColor: '#2196F3'
+      },
+      warning: {
+        background: '#fff3e0',
+        borderColor: '#ff9800'
+      },
+      hydration: {
+        background: '#e1f5fe',
+        borderColor: '#03a9f4'
+      },
+      break: {
+        background: '#fff9c4',
+        borderColor: '#ffc107'
+      }
+    };
+
+    const priorityStyles = {
+      high: {
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
+      }
+    };
+
+    return {
+      ...baseStyle,
+      ...typeStyles[type],
+      ...(priority === 'high' ? priorityStyles.high : {})
+    };
+  };
+
   return (
-    <div className="notification-sidebar">
-      <div className="sidebar-header">
-        <h4>📢 Notifications</h4>
+    <div style={{
+      background: 'white',
+      borderRadius: '12px',
+      padding: '20px',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+      maxWidth: '320px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '20px'
+    }}>
+      <div style={{
+        borderBottom: '2px solid #e0e0e0',
+        paddingBottom: '12px'
+      }}>
+        <h4 style={{
+          margin: '0',
+          fontSize: '1.2em',
+          color: '#333'
+        }}>📢 Notifications</h4>
       </div>
 
-      <div className="notifications-list">
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '12px',
+        maxHeight: '400px',
+        overflowY: 'auto'
+      }}>
         {notifications.length === 0 && (
-          <div className="no-notifications">
-            <p>🔕 All quiet! Focus on your studies.</p>
+          <div style={{
+            textAlign: 'center',
+            padding: '20px',
+            color: '#999'
+          }}>
+            <p style={{
+              margin: '0',
+              fontSize: '0.95em'
+            }}>🔕 All quiet! Focus on your studies.</p>
           </div>
         )}
 
         {notifications.map((notif) => (
-          <div key={notif.id} className={`notification notification-${notif.type} priority-${notif.priority}`}>
-            <div className="notification-content">
-              <h5>{notif.title}</h5>
-              <p>{notif.message}</p>
+          <div key={notif.id} style={getNotificationStyle(notif.type, notif.priority)}>
+            <div style={{
+              flex: '1'
+            }}>
+              <h5 style={{
+                margin: '0 0 4px 0',
+                fontSize: '1em',
+                color: '#333'
+              }}>{notif.title}</h5>
+              <p style={{
+                margin: '0',
+                fontSize: '0.9em',
+                color: '#666',
+                lineHeight: '1.4'
+              }}>{notif.message}</p>
             </div>
             <button 
-              className="dismiss-btn-small"
               onClick={() => handleDismiss(notif.id)}
               title="Dismiss"
+              style={{
+                background: 'none',
+                border: 'none',
+                fontSize: '1.5em',
+                color: '#999',
+                cursor: 'pointer',
+                padding: '0',
+                width: '24px',
+                height: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '50%',
+                transition: 'all 0.2s ease',
+                alignSelf: 'flex-start'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'rgba(0, 0, 0, 0.1)';
+                e.target.style.color = '#333';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'none';
+                e.target.style.color = '#999';
+              }}
             >
               ×
             </button>
@@ -133,39 +243,131 @@ const NotificationSidebar = ({ currentSubject, timeRemaining, isBreak, schedule,
       </div>
 
       {/* Study Tips */}
-      <div className="study-tips">
-        <h5>💡 Study Tips</h5>
-        <ul>
-          <li>Minimize distractions</li>
-          <li>Take notes actively</li>
-          <li>Review regularly</li>
+      <div style={{
+        background: '#f3e5f5',
+        padding: '16px',
+        borderRadius: '8px'
+      }}>
+        <h5 style={{
+          margin: '0 0 12px 0',
+          color: '#7b1fa2',
+          fontSize: '1em'
+        }}>💡 Study Tips</h5>
+        <ul style={{
+          margin: '0',
+          paddingLeft: '20px'
+        }}>
+          <li style={{
+            marginBottom: '6px',
+            color: '#666',
+            fontSize: '0.9em'
+          }}>Minimize distractions</li>
+          <li style={{
+            marginBottom: '6px',
+            color: '#666',
+            fontSize: '0.9em'
+          }}>Take notes actively</li>
+          <li style={{
+            color: '#666',
+            fontSize: '0.9em'
+          }}>Review regularly</li>
         </ul>
       </div>
 
       {/* Next Up */}
       {nextSubject && (
-        <div className="next-up">
-          <h5>⏭️ Coming Next</h5>
-          <div className="next-subject-card">
-            <span className="next-subject-name">{nextSubject.subject}</span>
-            <span className="next-subject-time">{nextSubject.start}</span>
-            <span className="next-subject-duration">{nextSubject.duration} mins</span>
+        <div style={{
+          background: '#e8eaf6',
+          padding: '16px',
+          borderRadius: '8px'
+        }}>
+          <h5 style={{
+            margin: '0 0 12px 0',
+            color: '#3f51b5',
+            fontSize: '1em'
+          }}>⏭️ Coming Next</h5>
+          <div style={{
+            background: 'white',
+            padding: '12px',
+            borderRadius: '6px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '6px'
+          }}>
+            <span style={{
+              fontWeight: '600',
+              color: '#333',
+              fontSize: '1em'
+            }}>{nextSubject.subject}</span>
+            <span style={{
+              color: '#666',
+              fontSize: '0.9em'
+            }}>{nextSubject.start}</span>
+            <span style={{
+              background: '#e3f2fd',
+              color: '#1976d2',
+              padding: '4px 12px',
+              borderRadius: '12px',
+              fontSize: '0.85em',
+              alignSelf: 'flex-start',
+              fontWeight: '500'
+            }}>{nextSubject.duration} mins</span>
           </div>
         </div>
       )}
 
       {/* Progress Summary */}
       {currentSubject && schedule && (
-        <div className="progress-summary">
-          <h5>📊 Progress</h5>
-          <div className="progress-stats">
-            <div className="stat">
-              <span className="stat-label">Current:</span>
-              <span className="stat-value">{currentIndex + 1}/{schedule.filter(s => s.subject).length}</span>
+        <div style={{
+          background: '#fce4ec',
+          padding: '16px',
+          borderRadius: '8px'
+        }}>
+          <h5 style={{
+            margin: '0 0 12px 0',
+            color: '#c2185b',
+            fontSize: '1em'
+          }}>📊 Progress</h5>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '8px',
+              background: 'white',
+              borderRadius: '6px'
+            }}>
+              <span style={{
+                color: '#666',
+                fontSize: '0.9em'
+              }}>Current:</span>
+              <span style={{
+                fontWeight: '600',
+                color: '#333',
+                fontSize: '1em'
+              }}>{currentIndex + 1}/{schedule.filter(s => s.subject).length}</span>
             </div>
-            <div className="stat">
-              <span className="stat-label">Remaining:</span>
-              <span className="stat-value">{Math.floor(timeRemaining / 60)}m {timeRemaining % 60}s</span>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '8px',
+              background: 'white',
+              borderRadius: '6px'
+            }}>
+              <span style={{
+                color: '#666',
+                fontSize: '0.9em'
+              }}>Remaining:</span>
+              <span style={{
+                fontWeight: '600',
+                color: '#333',
+                fontSize: '1em'
+              }}>{Math.floor(timeRemaining / 60)}m {timeRemaining % 60}s</span>
             </div>
           </div>
         </div>

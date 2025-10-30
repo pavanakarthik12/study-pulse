@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import './MusicPlayer.css';
 
 // Curated calm focus playlists
 const CALM_PLAYLISTS = [
@@ -395,18 +394,74 @@ const MusicPlayer = () => {
   };
 
   return (
-    <div className="music-player-container">
-      <div className="music-player-card">
-        <h3 className="player-title">🎵 Calm Focus Music</h3>
+    <div style={{
+      margin: '20px auto',
+      maxWidth: '450px',
+      width: '100%'
+    }}>
+      <div style={{
+        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.95) 100%)',
+        backdropFilter: 'blur(20px)',
+        borderRadius: '20px',
+        padding: '24px',
+        border: '1px solid rgba(229, 231, 235, 0.8)',
+        boxShadow: '0 10px 40px rgba(0, 0, 0, 0.08)'
+      }}>
+        <h3 style={{
+          margin: '0 0 20px 0',
+          fontSize: '20px',
+          fontWeight: '700',
+          background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+          textAlign: 'center'
+        }}>🎵 Calm Focus Music</h3>
         
         {/* Curated Playlists */}
-        <div className="playlists-section">
-          <div className="playlist-buttons">
+        <div style={{ marginBottom: '20px' }}>
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '8px'
+          }}>
             {CALM_PLAYLISTS.map((playlist) => (
               <button
                 key={playlist.id}
                 onClick={() => handlePlaylistSelect(playlist)}
-                className={`playlist-btn ${currentPlaylist?.id === playlist.id ? 'active' : ''}`}
+                style={{
+                  flex: '1',
+                  minWidth: 'calc(50% - 4px)',
+                  padding: '12px 16px',
+                  background: currentPlaylist?.id === playlist.id 
+                    ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' 
+                    : 'linear-gradient(135deg, #f3f4f6, #e5e7eb)',
+                  border: '2px solid transparent',
+                  borderRadius: '12px',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  color: currentPlaylist?.id === playlist.id ? 'white' : '#374151',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow: currentPlaylist?.id === playlist.id 
+                    ? '0 4px 16px rgba(99, 102, 241, 0.3)' 
+                    : 'none',
+                  transform: currentPlaylist?.id === playlist.id ? 'translateY(-2px)' : 'none'
+                }}
+                onMouseEnter={(e) => {
+                  if (currentPlaylist?.id !== playlist.id) {
+                    e.target.style.background = 'linear-gradient(135deg, #e5e7eb, #d1d5db)';
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (currentPlaylist?.id !== playlist.id) {
+                    e.target.style.background = 'linear-gradient(135deg, #f3f4f6, #e5e7eb)';
+                    e.target.style.transform = 'none';
+                    e.target.style.boxShadow = 'none';
+                  }
+                }}
               >
                 {playlist.name}
               </button>
@@ -419,119 +474,596 @@ const MusicPlayer = () => {
           <>
             <div id="youtube-player" style={{ display: 'none' }}></div>
             
-            <div className="current-track">
-              <div className="track-name">{getCurrentTrack()?.title || 'Loading...'}</div>
-              <div className="track-playlist">{currentPlaylist.name}</div>
+            <div style={{
+              background: 'linear-gradient(135deg, #faf5ff, #f3e8ff)',
+              borderRadius: '14px',
+              padding: '16px',
+              marginBottom: '16px',
+              textAlign: 'center',
+              border: '1px solid #e9d5ff',
+              animation: 'fadeIn 0.5s ease-in'
+            }}>
+              <div style={{
+                fontSize: '15px',
+                fontWeight: '600',
+                color: '#4c1d95',
+                marginBottom: '4px'
+              }}>{getCurrentTrack()?.title || 'Loading...'}</div>
+              <div style={{
+                fontSize: '12px',
+                color: '#7c3aed',
+                opacity: '0.8'
+              }}>{currentPlaylist.name}</div>
             </div>
 
             {/* Seek Bar */}
-            <div className="seek-bar-section">
-              <span className="time-display">{formatTime(currentTime)}</span>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              marginBottom: '16px'
+            }}>
+              <span style={{
+                fontSize: '11px',
+                color: '#6b7280',
+                fontWeight: '600',
+                minWidth: '38px',
+                textAlign: 'center'
+              }}>{formatTime(currentTime)}</span>
               <input
                 type="range"
                 min="0"
                 max={duration || 0}
                 value={currentTime}
                 onChange={handleSeek}
-                className="seek-bar"
+                style={{
+                  flex: '1',
+                  height: '6px',
+                  borderRadius: '3px',
+                  background: '#e5e7eb',
+                  outline: 'none',
+                  appearance: 'none',
+                  cursor: 'pointer'
+                }}
               />
-              <span className="time-display">{formatTime(duration)}</span>
+              <span style={{
+                fontSize: '11px',
+                color: '#6b7280',
+                fontWeight: '600',
+                minWidth: '38px',
+                textAlign: 'center'
+              }}>{formatTime(duration)}</span>
             </div>
 
             {/* Playback Controls */}
-            <div className="controls-section">
-              <button onClick={handleSkipBackward} className="control-btn-icon" title="-10s">⏪</button>
-              <button onClick={handlePrevious} className="control-btn-icon" title="Previous">⏮️</button>
-              <button onClick={handlePlayPause} className="control-btn-main" title={isPlaying ? "Pause" : "Play"}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '10px',
+              marginBottom: '16px'
+            }}>
+              <button onClick={handleSkipBackward} title="-10s" style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '50%',
+                background: '#f3f4f6',
+                color: '#6366f1',
+                border: '2px solid #e5e7eb',
+                fontSize: '16px',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = '#e5e7eb';
+                e.target.style.borderColor = '#6366f1';
+                e.target.style.transform = 'scale(1.05)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = '#f3f4f6';
+                e.target.style.borderColor = '#e5e7eb';
+                e.target.style.transform = 'scale(1)';
+              }}
+              >
+                ⏪
+              </button>
+              <button onClick={handlePrevious} title="Previous" style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '50%',
+                background: '#f3f4f6',
+                color: '#6366f1',
+                border: '2px solid #e5e7eb',
+                fontSize: '16px',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = '#e5e7eb';
+                e.target.style.borderColor = '#6366f1';
+                e.target.style.transform = 'scale(1.05)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = '#f3f4f6';
+                e.target.style.borderColor = '#e5e7eb';
+                e.target.style.transform = 'scale(1)';
+              }}
+              >
+                ⏮️
+              </button>
+              <button onClick={handlePlayPause} title={isPlaying ? "Pause" : "Play"} style={{
+                width: '54px',
+                height: '54px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                color: 'white',
+                border: 'none',
+                fontSize: '22px',
+                cursor: 'pointer',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                boxShadow: '0 4px 14px rgba(99, 102, 241, 0.35)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'scale(1.08)';
+                e.target.style.boxShadow = '0 6px 20px rgba(99, 102, 241, 0.45)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'scale(1)';
+                e.target.style.boxShadow = '0 4px 14px rgba(99, 102, 241, 0.35)';
+              }}
+              >
                 {isPlaying ? '⏸️' : '▶️'}
               </button>
-              <button onClick={handleNext} className="control-btn-icon" title="Next">⏭️</button>
-              <button onClick={handleSkipForward} className="control-btn-icon" title="+10s">⏩</button>
+              <button onClick={handleNext} title="Next" style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '50%',
+                background: '#f3f4f6',
+                color: '#6366f1',
+                border: '2px solid #e5e7eb',
+                fontSize: '16px',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = '#e5e7eb';
+                e.target.style.borderColor = '#6366f1';
+                e.target.style.transform = 'scale(1.05)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = '#f3f4f6';
+                e.target.style.borderColor = '#e5e7eb';
+                e.target.style.transform = 'scale(1)';
+              }}
+              >
+                ⏭️
+              </button>
+              <button onClick={handleSkipForward} title="+10s" style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '50%',
+                background: '#f3f4f6',
+                color: '#6366f1',
+                border: '2px solid #e5e7eb',
+                fontSize: '16px',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = '#e5e7eb';
+                e.target.style.borderColor = '#6366f1';
+                e.target.style.transform = 'scale(1.05)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = '#f3f4f6';
+                e.target.style.borderColor = '#e5e7eb';
+                e.target.style.transform = 'scale(1)';
+              }}
+              >
+                ⏩
+              </button>
             </div>
 
             {/* Volume */}
-            <div className="volume-section">
-              <span className="volume-icon">🔊</span>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '10px 14px',
+              background: 'rgba(243, 244, 246, 0.6)',
+              borderRadius: '10px',
+              marginBottom: '20px'
+            }}>
+              <span style={{ fontSize: '16px' }}>🔊</span>
               <input
                 type="range"
                 min="0"
                 max="100"
                 value={volume}
                 onChange={handleVolumeChange}
-                className="volume-slider"
+                style={{
+                  flex: '1',
+                  height: '4px',
+                  borderRadius: '2px',
+                  background: '#e5e7eb',
+                  outline: 'none',
+                  appearance: 'none',
+                  cursor: 'pointer'
+                }}
               />
-              <span className="volume-value">{volume}%</span>
+              <span style={{
+                fontSize: '11px',
+                color: '#6b7280',
+                fontWeight: '600',
+                minWidth: '35px',
+                textAlign: 'right'
+              }}>{volume}%</span>
             </div>
           </>
         )}
 
         {/* User Playlists Section */}
-        <div className="user-playlists-section">
-          <div className="section-header">
-            <h4>📁 Your Music</h4>
-            <button onClick={() => setShowCreatePlaylist(!showCreatePlaylist)} className="create-btn">
+        <div style={{
+          borderTop: '1px solid #e5e7eb',
+          paddingTop: '20px'
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '12px'
+          }}>
+            <h4 style={{
+              margin: '0',
+              fontSize: '16px',
+              fontWeight: '700',
+              color: '#374151'
+            }}>📁 Your Music</h4>
+            <button onClick={() => setShowCreatePlaylist(!showCreatePlaylist)} style={{
+              padding: '6px 14px',
+              background: 'linear-gradient(135deg, #10b981, #059669)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '12px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = 'none';
+            }}
+            >
               + New Playlist
             </button>
           </div>
 
           {showCreatePlaylist && (
-            <div className="create-playlist-form">
+            <div style={{
+              background: '#f9fafb',
+              padding: '12px',
+              borderRadius: '10px',
+              marginBottom: '12px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px'
+            }}>
               <input
                 type="text"
                 placeholder="Playlist name"
                 value={newPlaylistName}
                 onChange={(e) => setNewPlaylistName(e.target.value)}
-                className="input-field"
+                style={{
+                  padding: '10px 12px',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  outline: 'none',
+                  transition: 'border-color 0.3s ease'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#6366f1';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#e5e7eb';
+                }}
               />
               <input
                 type="text"
                 placeholder="First YouTube URL"
                 value={newSongUrl}
                 onChange={(e) => setNewSongUrl(e.target.value)}
-                className="input-field"
+                style={{
+                  padding: '10px 12px',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  outline: 'none',
+                  transition: 'border-color 0.3s ease'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#6366f1';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#e5e7eb';
+                }}
               />
-              <button onClick={handleCreatePlaylist} className="save-btn">Create</button>
+              <button onClick={handleCreatePlaylist} style={{
+                padding: '8px 16px',
+                background: '#6366f1',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = '#4f46e5';
+                e.target.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = '#6366f1';
+                e.target.style.transform = 'translateY(0)';
+              }}
+              >
+                Create
+              </button>
             </div>
           )}
 
           {userPlaylists.map((playlist, idx) => (
-            <div key={playlist.id} className="user-playlist-item">
-              <div className="playlist-header">
+            <div key={playlist.id} style={{ marginBottom: '12px' }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
                 <button
                   onClick={() => handleUserPlaylistSelect(idx)}
-                  className={`user-playlist-btn ${selectedUserPlaylist === idx ? 'active' : ''}`}
+                  style={{
+                    flex: '1',
+                    padding: '10px 14px',
+                    background: selectedUserPlaylist === idx 
+                      ? 'linear-gradient(135deg, #10b981, #059669)' 
+                      : '#f3f4f6',
+                    border: '2px solid transparent',
+                    borderRadius: '10px',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    color: selectedUserPlaylist === idx ? 'white' : '#374151',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.3s ease',
+                    borderColor: selectedUserPlaylist === idx ? '#10b981' : 'transparent'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedUserPlaylist !== idx) {
+                      e.target.style.background = '#e5e7eb';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedUserPlaylist !== idx) {
+                      e.target.style.background = '#f3f4f6';
+                    }
+                  }}
                 >
                   {playlist.name} ({playlist.videos.length})
                 </button>
                 {selectedUserPlaylist === idx && (
-                  <button onClick={() => setShowAddSong(!showAddSong)} className="add-song-btn">
+                  <button onClick={() => setShowAddSong(!showAddSong)} style={{
+                    padding: '8px 12px',
+                    background: '#e5e7eb',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    color: '#374151',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = '#d1d5db';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = '#e5e7eb';
+                  }}
+                  >
                     + Add Song
                   </button>
                 )}
               </div>
 
               {selectedUserPlaylist === idx && showAddSong && (
-                <div className="add-song-form">
+                <div style={{
+                  background: '#f9fafb',
+                  padding: '12px',
+                  borderRadius: '10px',
+                  marginBottom: '12px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px'
+                }}>
                   <input
                     type="text"
                     placeholder="YouTube URL"
                     value={newSongUrl}
                     onChange={(e) => setNewSongUrl(e.target.value)}
-                    className="input-field"
+                    style={{
+                      padding: '10px 12px',
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                      outline: 'none',
+                      transition: 'border-color 0.3s ease'
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = '#6366f1';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = '#e5e7eb';
+                    }}
                   />
-                  <button onClick={handleAddSongToPlaylist} className="save-btn">Add</button>
+                  <button onClick={handleAddSongToPlaylist} style={{
+                    padding: '8px 16px',
+                    background: '#6366f1',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = '#4f46e5';
+                    e.target.style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = '#6366f1';
+                    e.target.style.transform = 'translateY(0)';
+                  }}
+                  >
+                    Add
+                  </button>
                 </div>
               )}
 
               {selectedUserPlaylist === idx && (
-                <div className="playlist-songs">
+                <div style={{
+                  marginTop: '10px',
+                  background: '#f9fafb',
+                  borderRadius: '8px',
+                  padding: '8px'
+                }}>
                   {playlist.videos.map((song, songIdx) => (
-                    <div key={songIdx} className="song-item">
-                      <span className="song-title">{song.title}</span>
-                      <div className="song-actions">
-                        <button onClick={() => handleMoveSong(songIdx, 'up')} disabled={songIdx === 0} className="move-btn">↑</button>
-                        <button onClick={() => handleMoveSong(songIdx, 'down')} disabled={songIdx === playlist.videos.length - 1} className="move-btn">↓</button>
-                        <button onClick={() => handleDeleteSong(songIdx)} className="delete-btn">🗑️</button>
+                    <div key={songIdx} style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '8px 10px',
+                      background: 'white',
+                      borderRadius: '6px',
+                      marginBottom: '6px',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.boxShadow = 'none';
+                    }}
+                    >
+                      <span style={{
+                        fontSize: '12px',
+                        color: '#374151',
+                        fontWeight: '500'
+                      }}>{song.title}</span>
+                      <div style={{
+                        display: 'flex',
+                        gap: '6px'
+                      }}>
+                        <button onClick={() => handleMoveSong(songIdx, 'up')} disabled={songIdx === 0} style={{
+                          width: '26px',
+                          height: '26px',
+                          borderRadius: '6px',
+                          border: 'none',
+                          fontSize: '12px',
+                          cursor: songIdx === 0 ? 'not-allowed' : 'pointer',
+                          transition: 'all 0.2s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          background: '#e5e7eb',
+                          color: '#374151',
+                          opacity: songIdx === 0 ? '0.3' : '1'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (songIdx !== 0) {
+                            e.target.style.background = '#d1d5db';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (songIdx !== 0) {
+                            e.target.style.background = '#e5e7eb';
+                          }
+                        }}
+                        >
+                          ↑
+                        </button>
+                        <button onClick={() => handleMoveSong(songIdx, 'down')} disabled={songIdx === playlist.videos.length - 1} style={{
+                          width: '26px',
+                          height: '26px',
+                          borderRadius: '6px',
+                          border: 'none',
+                          fontSize: '12px',
+                          cursor: songIdx === playlist.videos.length - 1 ? 'not-allowed' : 'pointer',
+                          transition: 'all 0.2s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          background: '#e5e7eb',
+                          color: '#374151',
+                          opacity: songIdx === playlist.videos.length - 1 ? '0.3' : '1'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (songIdx !== playlist.videos.length - 1) {
+                            e.target.style.background = '#d1d5db';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (songIdx !== playlist.videos.length - 1) {
+                            e.target.style.background = '#e5e7eb';
+                          }
+                        }}
+                        >
+                          ↓
+                        </button>
+                        <button onClick={() => handleDeleteSong(songIdx)} style={{
+                          width: '26px',
+                          height: '26px',
+                          borderRadius: '6px',
+                          border: 'none',
+                          fontSize: '12px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          background: '#fee2e2',
+                          color: '#ef4444'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.background = '#fecaca';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.background = '#fee2e2';
+                        }}
+                        >
+                          🗑️
+                        </button>
                       </div>
                     </div>
                   ))}
