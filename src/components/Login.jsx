@@ -1,12 +1,191 @@
-import React, { useState, useId, useEffect } from 'react';
+import React, { useState, useId, useEffect, memo, useRef } from 'react';
 import { auth } from '../firebase/config';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate, Link } from 'react-router-dom';
-import { motion, useAnimation } from 'framer-motion';
+import { motion, useAnimation, useInView, useMotionTemplate, useMotionValue } from 'framer-motion';
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
+import { Eye, EyeOff } from 'lucide-react';
 
-// Sparkles Component
+// ==================== Ripple Component ====================
+const Ripple = memo(function Ripple({
+  mainCircleSize = 210,
+  mainCircleOpacity = 0.24,
+  numCircles = 11,
+  className = '',
+}) {
+  return (
+    <section
+      className={`absolute inset-0 flex items-center justify-center ${className}`}
+      style={{
+        maskImage: 'linear-gradient(to bottom, black, transparent)',
+        WebkitMaskImage: 'linear-gradient(to bottom, black, transparent)'
+      }}
+    >
+      {Array.from({ length: numCircles }, (_, i) => {
+        const size = mainCircleSize + i * 70;
+        const opacity = mainCircleOpacity - i * 0.03;
+        const animationDelay = `${i * 0.06}s`;
+        const borderStyle = i === numCircles - 1 ? 'dashed' : 'solid';
+
+        return (
+          <span
+            key={i}
+            className='absolute rounded-full border'
+            style={{
+              width: `${size}px`,
+              height: `${size}px`,
+              opacity: opacity,
+              animationDelay: animationDelay,
+              borderStyle: borderStyle,
+              borderWidth: '1px',
+              borderColor: 'rgba(139, 92, 246, 0.2)',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              animation: 'ripple 2s ease infinite',
+              background: 'rgba(139, 92, 246, 0.05)'
+            }}
+          />
+        );
+      })}
+    </section>
+  );
+});
+
+// ==================== BoxReveal Component ====================
+const BoxReveal = memo(function BoxReveal({
+  children,
+  width = 'fit-content',
+  boxColor = '#8b5cf6',
+  duration = 0.5,
+  className = '',
+}) {
+  const mainControls = useAnimation();
+  const slideControls = useAnimation();
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true });
+
+  useEffect(() => {
+    if (isInView) {
+      slideControls.start('visible');
+      mainControls.start('visible');
+    } else {
+      slideControls.start('hidden');
+      mainControls.start('hidden');
+    }
+  }, [isInView, mainControls, slideControls]);
+
+  return (
+    <section
+      ref={ref}
+      style={{
+        position: 'relative',
+        width,
+        overflow: 'hidden',
+      }}
+      className={className}
+    >
+      <motion.div
+        variants={{
+          hidden: { opacity: 0, y: 75 },
+          visible: { opacity: 1, y: 0 },
+        }}
+        initial='hidden'
+        animate={mainControls}
+        transition={{ duration, delay: 0.25 }}
+      >
+        {children}
+      </motion.div>
+      <motion.div
+        variants={{ hidden: { left: 0 }, visible: { left: '100%' } }}
+        initial='hidden'
+        animate={slideControls}
+        transition={{ duration, ease: 'easeIn' }}
+        style={{
+          position: 'absolute',
+          top: 4,
+          bottom: 4,
+          left: 0,
+          right: 0,
+          zIndex: 20,
+          background: boxColor,
+          borderRadius: 4,
+        }}
+      />
+    </section>
+  );
+});
+
+// ==================== Enhanced Input Component ====================
+const EnhancedInput = memo(function EnhancedInput({ 
+  className = '', 
+  type = 'text', 
+  ...props 
+}) {
+  const radius = 120;
+  const [visible, setVisible] = useState(false);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  function handleMouseMove({ currentTarget, clientX, clientY }) {
+    const { left, top } = currentTarget.getBoundingClientRect();
+    mouseX.set(clientX - left);
+    mouseY.set(clientY - top);
+  }
+
+  return (
+    <motion.div
+      style={{
+        background: useMotionTemplate`
+          radial-gradient(
+            ${visible ? radius + 'px' : '0px'} circle at ${mouseX}px ${mouseY}px,
+            rgba(139, 92, 246, 0.5),
+            transparent 80%
+          )
+        `,
+        borderRadius: '12px',
+        padding: '2px',
+      }}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setVisible(true)}
+      onMouseLeave={() => setVisible(false)}
+    >
+      <input
+        type={type}
+        style={{
+          width: '100%',
+          height: '48px',
+          padding: '12px 16px',
+          fontSize: '14px',
+          background: 'rgba(255, 255, 255, 0.03)',
+          backdropFilter: 'blur(30px)',
+          WebkitBackdropFilter: 'blur(30px)',
+          border: '1px solid rgba(255, 255, 255, 0.18)',
+          borderRadius: '12px',
+          color: 'white',
+          outline: 'none',
+          transition: 'all 0.3s ease',
+          boxShadow: 'inset 0 2px 8px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.1)'
+        }}
+        onFocus={(e) => {
+          e.target.style.background = 'rgba(255, 255, 255, 0.08)';
+          e.target.style.border = '1px solid rgba(139, 92, 246, 0.5)';
+          e.target.style.boxShadow = 'inset 0 2px 8px rgba(0, 0, 0, 0.2), 0 0 20px rgba(139, 92, 246, 0.3)';
+        }}
+        onBlur={(e) => {
+          e.target.style.background = 'rgba(255, 255, 255, 0.03)';
+          e.target.style.border = '1px solid rgba(255, 255, 255, 0.18)';
+          e.target.style.boxShadow = 'inset 0 2px 8px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.1)';
+        }}
+        className={className}
+        {...props}
+      />
+    </motion.div>
+  );
+});
+
+// ==================== Sparkles Component ====================
 const SparklesCore = () => {
   const [init, setInit] = useState(false);
   const controls = useAnimation();
@@ -24,9 +203,7 @@ const SparklesCore = () => {
     if (container) {
       controls.start({
         opacity: 1,
-        transition: {
-          duration: 1,
-        },
+        transition: { duration: 1 },
       });
     }
   };
@@ -54,83 +231,40 @@ const SparklesCore = () => {
           }}
           particlesLoaded={particlesLoaded}
           options={{
-            background: {
-              color: {
-                value: "transparent",
-              },
-            },
-            fullScreen: {
-              enable: false,
-              zIndex: 1,
-            },
+            background: { color: { value: "transparent" } },
+            fullScreen: { enable: false, zIndex: 1 },
             fpsLimit: 120,
             interactivity: {
               events: {
-                onClick: {
-                  enable: true,
-                  mode: "push",
-                },
-                onHover: {
-                  enable: false,
-                  mode: "repulse",
-                },
+                onClick: { enable: true, mode: "push" },
+                onHover: { enable: false, mode: "repulse" },
                 resize: true,
               },
               modes: {
-                push: {
-                  quantity: 4,
-                },
-                repulse: {
-                  distance: 200,
-                  duration: 0.4,
-                },
+                push: { quantity: 4 },
+                repulse: { distance: 200, duration: 0.4 },
               },
             },
             particles: {
-              color: {
-                value: ["#8b5cf6", "#ec4899", "#06b6d4"],
-              },
+              color: { value: ["#8b5cf6", "#ec4899", "#06b6d4"] },
               move: {
                 direction: "none",
                 enable: true,
-                outModes: {
-                  default: "out",
-                },
+                outModes: { default: "out" },
                 random: false,
-                speed: {
-                  min: 0.1,
-                  max: 0.5,
-                },
+                speed: { min: 0.1, max: 0.5 },
                 straight: false,
               },
               number: {
-                density: {
-                  enable: true,
-                  width: 400,
-                  height: 400,
-                },
+                density: { enable: true, width: 400, height: 400 },
                 value: 80,
               },
               opacity: {
-                value: {
-                  min: 0.1,
-                  max: 0.5,
-                },
-                animation: {
-                  enable: true,
-                  speed: 1,
-                  sync: false,
-                },
+                value: { min: 0.1, max: 0.5 },
+                animation: { enable: true, speed: 1, sync: false },
               },
-              shape: {
-                type: "circle",
-              },
-              size: {
-                value: {
-                  min: 0.5,
-                  max: 2,
-                },
-              },
+              shape: { type: "circle" },
+              size: { value: { min: 0.5, max: 2 } },
             },
             detectRetina: true,
           }}
@@ -140,10 +274,17 @@ const SparklesCore = () => {
   );
 };
 
+// ==================== Main Login Component ====================
 const keyframeAnimations = `
+  @import url('https://fonts.googleapis.com/css2?family=Momo+Trust+Display&family=Outfit:wght@100..900&family=Playwrite+AU+TAS:wght@100..400&display=swap');
+  
   @keyframes pulseGlow {
     0%, 100% { opacity: 0.4; transform: scale(1); }
     50% { opacity: 0.7; transform: scale(1.02); }
+  }
+  @keyframes ripple {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(0.9); }
   }
 `;
 
@@ -151,6 +292,8 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
 
   const validateEmail = (email) => {
@@ -183,365 +326,458 @@ const Login = () => {
       position: 'relative',
       minHeight: '100vh',
       display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
       overflow: 'hidden',
       background: '#0a0a0f',
-      paddingTop: '80px'
+      fontFamily: "'Outfit', sans-serif"
     }}>
-      {/* Inject keyframe animations */}
       <style>{keyframeAnimations}</style>
       
-      {/* Sparkles Effect Layer */}
-      <SparklesCore />
-      
-      {/* Dark gradient background with glow */}
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        background: `radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
-                     radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.12) 0%, transparent 50%),
-                     radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.1) 0%, transparent 60%)`,
-        filter: 'blur(60px)',
-        animation: 'pulseGlow 8s ease-in-out infinite'
-      }} />
-      
-      {/* Additional background elements */}
-      <div style={{
-        position: 'absolute',
-        top: '25%',
-        right: '25%',
-        width: '384px',
-        height: '384px',
-        background: 'rgba(139, 92, 246, 0.08)',
-        borderRadius: '50%',
-        filter: 'blur(60px)'
-      }} />
-      
-      <div style={{
-        position: 'absolute',
-        bottom: '30%',
-        left: '25%',
-        width: '320px',
-        height: '320px',
-        background: 'rgba(6, 182, 212, 0.08)',
-        borderRadius: '50%',
-        filter: 'blur(60px)'
-      }} />
-
-      {/* Ambient floating orbs */}
-      <motion.div 
-        style={{
-          position: 'absolute',
-          top: '10%',
-          left: '5%',
-          width: '300px',
-          height: '300px',
-          background: 'radial-gradient(circle, rgba(139, 92, 246, 0.3), transparent)',
-          borderRadius: '50%',
-          filter: 'blur(80px)',
-          pointerEvents: 'none',
-          zIndex: 1
-        }}
-        animate={{
-          y: [0, -20, 0],
-          opacity: [0.3, 0.6, 0.3],
-        }}
-        transition={{
-          duration: 5,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      />
-      
-      <motion.div 
-        style={{
-          position: 'absolute',
-          bottom: '15%',
-          right: '8%',
-          width: '250px',
-          height: '250px',
-          background: 'radial-gradient(circle, rgba(236, 72, 153, 0.25), transparent)',
-          borderRadius: '50%',
-          filter: 'blur(80px)',
-          pointerEvents: 'none',
-          zIndex: 1
-        }}
-        animate={{
-          y: [0, 15, 0],
-          opacity: [0.2, 0.5, 0.2],
-        }}
-        transition={{
-          duration: 6,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: 1,
-        }}
-      />
-
-      {/* Centered glass card */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        style={{
-          position: 'relative',
-          zIndex: 10,
-          width: '100%',
-          maxWidth: '400px',
-          borderRadius: '24px',
-          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(18, 18, 18, 0.6) 100%)',
-          backdropFilter: 'blur(20px)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(139, 92, 246, 0.2)',
-          padding: '2rem',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          border: '1px solid rgba(139, 92, 246, 0.2)'
-        }}
-      >
-        {/* Logo */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '48px',
-          height: '48px',
-          borderRadius: '50%',
-          background: 'rgba(255, 255, 255, 0.2)',
-          marginBottom: '1.5rem',
-          boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
-        }}>
-          <span style={{ fontSize: '1.5rem' }}>✨</span>
-        </div>
-        
-        {/* Title */}
-        <h2 style={{
-          fontSize: '1.5rem',
-          fontWeight: 600,
-          color: 'white',
-          marginBottom: '1.5rem',
-          textAlign: 'center',
-          background: 'linear-gradient(135deg, #a78bfa 0%, #c084fc 50%, #f472b6 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text'
-        }}>
-          Welcome Back
-        </h2>
-        
-        {/* Form */}
-        <form onSubmit={handleSubmit} style={{ width: '100%' }}>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '1rem',
-            width: '100%'
-          }}>
-            <input
-              placeholder="Email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              style={{
-                width: '100%',
-                padding: '0.75rem 1.25rem',
-                borderRadius: '12px',
-                background: 'rgba(255, 255, 255, 0.1)',
-                color: 'white',
-                border: '1px solid rgba(139, 92, 246, 0.3)',
-                fontSize: '0.875rem',
-                outline: 'none',
-                transition: 'all 0.2s'
-              }}
-              onFocus={(e) => {
-                e.target.style.background = 'rgba(255, 255, 255, 0.15)';
-                e.target.style.borderColor = 'rgba(139, 92, 246, 0.5)';
-              }}
-              onBlur={(e) => {
-                e.target.style.background = 'rgba(255, 255, 255, 0.1)';
-                e.target.style.borderColor = 'rgba(139, 92, 246, 0.3)';
-              }}
-            />
-            
-            <input
-              placeholder="Password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              style={{
-                width: '100%',
-                padding: '0.75rem 1.25rem',
-                borderRadius: '12px',
-                background: 'rgba(255, 255, 255, 0.1)',
-                color: 'white',
-                border: '1px solid rgba(139, 92, 246, 0.3)',
-                fontSize: '0.875rem',
-                outline: 'none',
-                transition: 'all 0.2s'
-              }}
-              onFocus={(e) => {
-                e.target.style.background = 'rgba(255, 255, 255, 0.15)';
-                e.target.style.borderColor = 'rgba(139, 92, 246, 0.5)';
-              }}
-              onBlur={(e) => {
-                e.target.style.background = 'rgba(255, 255, 255, 0.1)';
-                e.target.style.borderColor = 'rgba(139, 92, 246, 0.3)';
-              }}
-            />
-            
-            {error && (
-              <div style={{
-                fontSize: '0.875rem',
-                color: '#f87171',
-                textAlign: 'left'
-              }}>
-                {error}
-              </div>
-            )}
-          </div>
-          
-          <hr style={{
-            margin: '1.5rem 0',
-            opacity: 0.1,
-            border: 'none',
-            borderTop: '1px solid rgba(255, 255, 255, 0.2)'
-          }} />
-          
-          <div>
-            <motion.button
-              type="submit"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              style={{
-                width: '100%',
-                background: 'rgba(139, 92, 246, 0.8)',
-                color: 'white',
-                fontWeight: 600,
-                padding: '0.75rem 1.25rem',
-                borderRadius: '9999px',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '0.875rem',
-                marginBottom: '0.75rem',
-                boxShadow: '0 4px 12px rgba(139, 92, 246, 0.4)',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(139, 92, 246, 1)';
-                e.currentTarget.style.boxShadow = '0 6px 16px rgba(139, 92, 246, 0.5)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(139, 92, 246, 0.8)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(139, 92, 246, 0.4)';
-              }}
-            >
-              Sign in
-            </motion.button>
-            
-            <div style={{
-              width: '100%',
-              textAlign: 'center',
-              marginTop: '0.5rem'
-            }}>
-              <span style={{
-                fontSize: '0.75rem',
-                color: '#9ca3af'
-              }}>
-                Don't have an account?{' '}
-                <Link
-                  to="/signup"
-                  style={{
-                    textDecoration: 'underline',
-                    color: 'rgba(255, 255, 255, 0.8)',
-                    transition: 'color 0.2s'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = 'white'}
-                  onMouseLeave={(e) => e.target.style.color = 'rgba(255, 255, 255, 0.8)'}
-                >
-                  Sign Up
-                </Link>
-              </span>
-            </div>
-          </div>
-        </form>
-      </motion.div>
-      
-      {/* User count and avatars */}
+      {/* Left Side - Decorative */}
       <div style={{
         position: 'relative',
-        zIndex: 10,
-        marginTop: '3rem',
+        width: '50%',
         display: 'flex',
         flexDirection: 'column',
+        justifyContent: 'center',
         alignItems: 'center',
-        textAlign: 'center',
-        position: 'absolute',
-        bottom: '2rem'
-      }}>
-        <p style={{
-          color: '#9ca3af',
-          fontSize: '0.875rem',
-          marginBottom: '0.5rem'
-        }}>
-          Join <span style={{ fontWeight: 500, color: 'white' }}>thousands</span> of
-          students already studying smarter.
-        </p>
-        <div style={{ display: 'flex', gap: '-8px' }}>
-          <img
-            src="https://randomuser.me/api/portraits/men/32.jpg"
-            alt="user"
+        padding: '2rem'
+      }}
+      className="max-lg:hidden">
+        <SparklesCore />
+        <Ripple mainCircleSize={100} />
+        
+        {/* Gradient backgrounds */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: `radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+                       radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.12) 0%, transparent 50%)`,
+          filter: 'blur(60px)',
+          animation: 'pulseGlow 8s ease-in-out infinite'
+        }} />
+
+        {/* Floating orbs */}
+        <motion.div 
+          style={{
+            position: 'absolute',
+            top: '15%',
+            left: '10%',
+            width: '300px',
+            height: '300px',
+            background: 'radial-gradient(circle, rgba(139, 92, 246, 0.3), transparent)',
+            borderRadius: '50%',
+            filter: 'blur(80px)',
+            pointerEvents: 'none',
+            zIndex: 1
+          }}
+          animate={{
+            y: [0, -20, 0],
+            opacity: [0.3, 0.6, 0.3],
+          }}
+          transition={{
+            duration: 5,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+
+        {/* Main tagline */}
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          style={{
+            position: 'relative',
+            zIndex: 10,
+            textAlign: 'center',
+            maxWidth: '600px'
+          }}
+        >
+          <h1 
             style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              border: '2px solid #0a0a0f',
-              objectFit: 'cover',
-              marginLeft: '-8px'
+              fontSize: '4rem',
+              fontWeight: 700,
+              background: 'linear-gradient(to bottom, white, rgba(255, 255, 255, 0.6))',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              marginBottom: '1rem',
+              lineHeight: 1.2,
+              cursor: 'pointer',
+              position: 'relative',
+              display: 'inline-block',
+              fontFamily: "'Outfit', sans-serif"
             }}
-          />
-          <img
-            src="https://randomuser.me/api/portraits/women/44.jpg"
-            alt="user"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
+            <span style={{
+              position: 'relative',
+              display: 'inline-block',
+              textShadow: isHovered ? '0 0 30px rgba(139, 92, 246, 0.8), 0 0 60px rgba(139, 92, 246, 0.6)' : 'none',
+              transition: 'text-shadow 0.3s ease'
+            }}>
+              Study in Flow.
+              <span style={{
+                position: 'absolute',
+                bottom: '-8px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                height: '3px',
+                width: isHovered ? '100%' : '0%',
+                background: 'linear-gradient(to right, #8b5cf6, #ec4899, #06b6d4)',
+                boxShadow: isHovered ? '0 0 20px rgba(139, 92, 246, 0.8)' : 'none',
+                transition: 'width 0.4s ease, box-shadow 0.3s ease',
+                borderRadius: '2px'
+              }} />
+            </span>
+          </h1>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
             style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              border: '2px solid #0a0a0f',
-              objectFit: 'cover',
-              marginLeft: '-8px'
+              fontSize: '1.25rem',
+              color: 'rgba(255, 255, 255, 0.6)',
+              fontWeight: 300
             }}
-          />
-          <img
-            src="https://randomuser.me/api/portraits/men/54.jpg"
-            alt="user"
+          >
+            Learn smarter, not harder with AI-powered study tools
+          </motion.p>
+        </motion.div>
+      </div>
+
+      {/* Right Side - Form */}
+      <div style={{
+        position: 'relative',
+        width: '50%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '2rem',
+        background: 'rgba(10, 10, 15, 0.8)'
+      }}
+      className="max-lg:w-full">
+        {/* Glass card container */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          style={{
+            position: 'relative',
+            zIndex: 10,
+            width: '100%',
+            maxWidth: '480px',
+            borderRadius: '24px',
+            background: 'rgba(255, 255, 255, 0.06)',
+            backdropFilter: 'blur(40px)',
+            WebkitBackdropFilter: 'blur(40px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.2), inset 0 -1px 1px rgba(0, 0, 0, 0.2)',
+            padding: '3rem 2.5rem',
+            border: '1px solid rgba(255, 255, 255, 0.18)'
+          }}
+        >
+          {/* Logo */}
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.5, type: 'spring' }}
             style={{
-              width: '32px',
-              height: '32px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '64px',
+              height: '64px',
               borderRadius: '50%',
-              border: '2px solid #0a0a0f',
-              objectFit: 'cover',
-              marginLeft: '-8px'
+              background: 'rgba(139, 92, 246, 0.2)',
+              margin: '0 auto 2rem',
+              boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)'
             }}
-          />
-          <img
-            src="https://randomuser.me/api/portraits/women/68.jpg"
-            alt="user"
+          >
+            <span style={{ fontSize: '2rem' }}>✨</span>
+          </motion.div>
+          
+          {/* Title */}
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
             style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              border: '2px solid #0a0a0f',
-              objectFit: 'cover',
-              marginLeft: '-8px'
+              fontSize: '2rem',
+              fontWeight: 700,
+              color: 'white',
+              marginBottom: '0.5rem',
+              textAlign: 'center',
+              background: 'linear-gradient(135deg, #a78bfa 0%, #c084fc 50%, #f472b6 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
             }}
-          />
-        </div>
+          >
+            Welcome Back
+          </motion.h2>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.7 }}
+            style={{
+              textAlign: 'center',
+              color: 'rgba(255, 255, 255, 0.6)',
+              marginBottom: '2rem',
+              fontSize: '0.875rem'
+            }}
+          >
+            Sign in to your account to continue
+          </motion.p>
+          
+          {/* Form */}
+          <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.8 }}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1.5rem',
+                width: '100%'
+              }}
+            >
+              {/* Email Field */}
+              <div>
+                <label style={{
+                  display: 'block',
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  marginBottom: '0.5rem'
+                }}>
+                  Email <span style={{ color: '#ef4444' }}>*</span>
+                </label>
+                
+                <EnhancedInput
+                  placeholder="Enter your email address"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+
+              {/* Password Field */}
+              <div>
+                <label style={{
+                  display: 'block',
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  marginBottom: '0.5rem'
+                }}>
+                  Password <span style={{ color: '#ef4444' }}>*</span>
+                </label>
+                
+                <div style={{ position: 'relative' }}>
+                  <EnhancedInput
+                    placeholder="Enter your password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: 'absolute',
+                      right: '16px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      color: 'rgba(255, 255, 255, 0.6)',
+                      padding: '4px',
+                      transition: 'color 0.2s',
+                      zIndex: 10
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = 'rgba(139, 92, 246, 1)'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)'}
+                  >
+                    {showPassword ? (
+                      <Eye style={{ width: '20px', height: '20px' }} />
+                    ) : (
+                      <EyeOff style={{ width: '20px', height: '20px' }} />
+                    )}
+                  </button>
+                </div>
+              </div>
+              
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  style={{
+                    fontSize: '0.875rem',
+                    color: '#fca5a5',
+                    textAlign: 'left',
+                    padding: '0.75rem',
+                    background: 'rgba(239, 68, 68, 0.1)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    borderRadius: '8px',
+                    backdropFilter: 'blur(10px)',
+                    WebkitBackdropFilter: 'blur(10px)'
+                  }}
+                >
+                  {error}
+                </motion.div>
+              )}
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.9 }}
+              style={{ marginTop: '2rem' }}
+            >
+              <motion.button
+                type="submit"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                style={{
+                  width: '100%',
+                  background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(168, 85, 247, 0.9))',
+                  color: 'white',
+                  fontWeight: 600,
+                  padding: '0.875rem 1.5rem',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  cursor: 'pointer',
+                  fontSize: '0.9375rem',
+                  boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2)',
+                  transition: 'all 0.3s ease',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = '0 6px 30px rgba(139, 92, 246, 0.6), 0 0 40px rgba(139, 92, 246, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = '0 4px 20px rgba(139, 92, 246, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2)';
+                }}
+              >
+                Sign in →
+              </motion.button>
+              
+              <div style={{
+                width: '100%',
+                textAlign: 'center',
+                marginTop: '1.5rem'
+              }}>
+                <span style={{
+                  fontSize: '0.875rem',
+                  color: '#9ca3af'
+                }}>
+                  Don't have an account?{' '}
+                  <Link
+                    to="/signup"
+                    style={{
+                      color: '#a78bfa',
+                      textDecoration: 'none',
+                      fontWeight: 500,
+                      transition: 'color 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.target.style.color = '#c084fc'}
+                    onMouseLeave={(e) => e.target.style.color = '#a78bfa'}
+                  >
+                    Sign Up
+                  </Link>
+                </span>
+              </div>
+            </motion.div>
+          </form>
+        </motion.div>
+        
+        {/* Bottom user avatars */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 1.0 }}
+          style={{
+            marginTop: '2rem',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            textAlign: 'center'
+          }}
+        >
+          <p style={{
+            color: '#9ca3af',
+            fontSize: '0.875rem',
+            marginBottom: '0.75rem'
+          }}>
+            Join <span style={{ fontWeight: 600, color: 'white' }}>thousands</span> of students studying smarter
+          </p>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <img
+              src="https://randomuser.me/api/portraits/men/32.jpg"
+              alt="user"
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                border: '2px solid #0a0a0f',
+                objectFit: 'cover',
+                marginLeft: '-8px'
+              }}
+            />
+            <img
+              src="https://randomuser.me/api/portraits/women/44.jpg"
+              alt="user"
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                border: '2px solid #0a0a0f',
+                objectFit: 'cover',
+                marginLeft: '-8px'
+              }}
+            />
+            <img
+              src="https://randomuser.me/api/portraits/men/54.jpg"
+              alt="user"
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                border: '2px solid #0a0a0f',
+                objectFit: 'cover',
+                marginLeft: '-8px'
+              }}
+            />
+            <img
+              src="https://randomuser.me/api/portraits/women/68.jpg"
+              alt="user"
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                border: '2px solid #0a0a0f',
+                objectFit: 'cover',
+                marginLeft: '-8px'
+              }}
+            />
+          </div>
+        </motion.div>
       </div>
     </div>
   );
