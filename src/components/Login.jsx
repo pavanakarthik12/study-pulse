@@ -155,14 +155,14 @@ const EnhancedInput = memo(function EnhancedInput({
         type={type}
         style={{
           width: '100%',
-          height: '44px',
-          padding: '12px 16px',
-          fontSize: '15px',
+          height: '42px',
+          padding: '10px 14px',
+          fontSize: '14px',
           background: 'rgba(255, 255, 255, 0.03)',
           backdropFilter: 'blur(30px)',
           WebkitBackdropFilter: 'blur(30px)',
           border: '1px solid rgba(255, 255, 255, 0.18)',
-          borderRadius: '12px',
+          borderRadius: '10px',
           color: 'white',
           outline: 'none',
           transition: 'all 0.3s ease',
@@ -385,7 +385,10 @@ const Login = () => {
         />
 
         {/* Main tagline */}
-        <div 
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
           style={{
             position: 'relative',
             zIndex: 10,
@@ -416,7 +419,30 @@ const Login = () => {
                 transition: 'text-shadow 0.3s ease'
               }}
             >
-              Study in Flow.
+              <motion.span
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0 }}
+                style={{ display: 'inline-block' }}
+              >
+                Study{' '}
+              </motion.span>
+              <motion.span
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.15 }}
+                style={{ display: 'inline-block' }}
+              >
+                in{' '}
+              </motion.span>
+              <motion.span
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                style={{ display: 'inline-block' }}
+              >
+                Flow.
+              </motion.span>
               <motion.span 
                 initial={{ width: 0 }}
                 animate={{ 
@@ -424,7 +450,7 @@ const Login = () => {
                 }}
                 transition={{ 
                   duration: 1,
-                  delay: 0.3,
+                  delay: 0.8,
                   ease: "easeOut"
                 }}
                 style={{
@@ -440,7 +466,10 @@ const Login = () => {
               />
             </span>
           </h1>
-          <p 
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
             style={{
               fontSize: '1.25rem',
               color: 'rgba(255, 255, 255, 0.7)',
@@ -448,8 +477,8 @@ const Login = () => {
             }}
           >
             Learn smarter, not harder with AI-powered study tools
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
       </div>
 
       {/* Right Side - Form */}
@@ -467,9 +496,9 @@ const Login = () => {
       className="max-lg:w-full">
         {/* Glass card container */}
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
           style={{
             position: 'relative',
             zIndex: 10,
@@ -486,9 +515,9 @@ const Login = () => {
         >
           {/* Logo */}
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.4, delay: 0.2, type: 'spring' }}
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.4, type: 'spring' }}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -509,9 +538,9 @@ const Login = () => {
           
           {/* Title */}
           <motion.h2
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.4, delay: 0.3 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
             style={{
               fontSize: '2.25rem',
               fontWeight: 700,
@@ -528,9 +557,9 @@ const Login = () => {
           </motion.h2>
 
           <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.4, delay: 0.4 }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
             style={{
               textAlign: 'center',
               color: 'rgba(255, 255, 255, 0.6)',
@@ -543,11 +572,14 @@ const Login = () => {
           
           {/* Form */}
           <form onSubmit={handleSubmit} style={{ width: '100%' }}>
-            <div
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.7 }}
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '1.25rem',
+                gap: '1.1rem',
                 width: '100%'
               }}
             >
@@ -555,10 +587,10 @@ const Login = () => {
               <div>
                 <label style={{
                   display: 'block',
-                  fontSize: '0.9375rem',
+                  fontSize: '0.875rem',
                   fontWeight: 500,
                   color: 'rgba(255, 255, 255, 0.9)',
-                  marginBottom: '0.5rem'
+                  marginBottom: '0.4rem'
                 }}>
                   Email <span style={{ color: '#ef4444' }}>*</span>
                 </label>
@@ -621,7 +653,10 @@ const Login = () => {
               </div>
               
               {error && (
-                <div
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3 }}
                   style={{
                     fontSize: '0.875rem',
                     color: '#fca5a5',
@@ -635,11 +670,14 @@ const Login = () => {
                   }}
                 >
                   {error}
-                </div>
+                </motion.div>
               )}
-            </div>
+            </motion.div>
             
-            <div
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.8 }}
               style={{ marginTop: '1.75rem' }}
             >
               <motion.button
@@ -698,12 +736,15 @@ const Login = () => {
                   </Link>
                 </span>
               </div>
-            </div>
+            </motion.div>
           </form>
         </motion.div>
         
         {/* Bottom user avatars */}
-        <div
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.9 }}
           style={{
             marginTop: '2rem',
             display: 'flex',
@@ -769,7 +810,7 @@ const Login = () => {
               }}
             />
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
