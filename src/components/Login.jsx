@@ -144,8 +144,8 @@ const EnhancedInput = memo(function EnhancedInput({
             transparent 80%
           )
         `,
-        borderRadius: '12px',
-        padding: '2px',
+        borderRadius: '10px',
+        padding: '1.5px',
       }}
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setVisible(true)}
@@ -154,10 +154,11 @@ const EnhancedInput = memo(function EnhancedInput({
       <input
         type={type}
         style={{
-          width: '100%',
-          height: '42px',
-          padding: '10px 14px',
-          fontSize: '14px',
+          width: '95%',
+          height: '38px',
+          padding: '8px 12px',
+          fontSize: '15px',
+          fontFamily: "'Outfit', sans-serif",
           background: 'rgba(255, 255, 255, 0.03)',
           backdropFilter: 'blur(30px)',
           WebkitBackdropFilter: 'blur(30px)',
@@ -503,13 +504,13 @@ const Login = () => {
             position: 'relative',
             zIndex: 10,
             width: '100%',
-            maxWidth: '420px',
+            maxWidth: '400px',
             borderRadius: '24px',
             background: 'rgba(255, 255, 255, 0.06)',
             backdropFilter: 'blur(40px)',
             WebkitBackdropFilter: 'blur(40px)',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.2), inset 0 -1px 1px rgba(0, 0, 0, 0.2)',
-            padding: '2.5rem 2rem',
+            padding: '2.25rem 2.5rem',
             border: '1px solid rgba(255, 255, 255, 0.18)'
           }}
         >
@@ -522,11 +523,11 @@ const Login = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '56px',
-              height: '56px',
+              width: '52px',
+              height: '52px',
               borderRadius: '50%',
               background: 'rgba(139, 92, 246, 0.2)',
-              margin: '0 auto 1.5rem',
+              margin: '0 auto 1.25rem',
               boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2)',
               backdropFilter: 'blur(20px)',
               WebkitBackdropFilter: 'blur(20px)',
@@ -542,10 +543,10 @@ const Login = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
             style={{
-              fontSize: '2.25rem',
+              fontSize: '2rem',
               fontWeight: 700,
               color: 'white',
-              marginBottom: '0.5rem',
+              marginBottom: '0.4rem',
               textAlign: 'center',
               background: 'linear-gradient(135deg, #a78bfa 0%, #c084fc 50%, #f472b6 100%)',
               WebkitBackgroundClip: 'text',
@@ -560,10 +561,10 @@ const Login = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
-            style={{
+                          style={{
               textAlign: 'center',
               color: 'rgba(255, 255, 255, 0.6)',
-              marginBottom: '1.75rem',
+              marginBottom: '1.5rem',
               fontSize: '0.9375rem'
             }}
           >
@@ -579,7 +580,7 @@ const Login = () => {
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '1.1rem',
+                gap: '1rem',
                 width: '100%'
               }}
             >
@@ -587,10 +588,10 @@ const Login = () => {
               <div>
                 <label style={{
                   display: 'block',
-                  fontSize: '0.875rem',
+                  fontSize: '0.9375rem',
                   fontWeight: 500,
                   color: 'rgba(255, 255, 255, 0.9)',
-                  marginBottom: '0.4rem'
+                  marginBottom: '0.375rem'
                 }}>
                   Email <span style={{ color: '#ef4444' }}>*</span>
                 </label>
@@ -608,10 +609,10 @@ const Login = () => {
               <div>
                 <label style={{
                   display: 'block',
-                  fontSize: '0.875rem',
+                  fontSize: '0.9375rem',
                   fontWeight: 500,
                   color: 'rgba(255, 255, 255, 0.9)',
-                  marginBottom: '0.5rem'
+                  marginBottom: '0.375rem'
                 }}>
                   Password <span style={{ color: '#ef4444' }}>*</span>
                 </label>
@@ -678,7 +679,7 @@ const Login = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.8 }}
-              style={{ marginTop: '1.75rem' }}
+              style={{ marginTop: '1.5rem' }}
             >
               <motion.button
                 type="submit"
@@ -689,11 +690,11 @@ const Login = () => {
                   background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(168, 85, 247, 0.9))',
                   color: 'white',
                   fontWeight: 600,
-                  padding: '0.875rem 1.5rem',
-                  borderRadius: '12px',
+                  padding: '0.75rem 1.25rem',
+                  borderRadius: '10px',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                   cursor: 'pointer',
-                  fontSize: '0.9375rem',
+                  fontSize: '1rem',
                   boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2)',
                   transition: 'all 0.3s ease',
                   position: 'relative',
@@ -717,7 +718,7 @@ const Login = () => {
                 marginTop: '1.5rem'
               }}>
                 <span style={{
-                  fontSize: '0.875rem',
+                  fontSize: '0.9375rem',
                   color: '#9ca3af'
                 }}>
                   Don't have an account?{' '}
