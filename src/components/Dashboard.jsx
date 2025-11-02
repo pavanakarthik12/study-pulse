@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useId, memo } from 'react';
 import { auth } from '../firebase/config';
 import { useNavigate } from 'react-router-dom';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -7,6 +7,174 @@ import RecommendationCard from './RecommendationCard';
 import SequentialTimers from './SequentialTimers';
 import ScheduleEditor from './ScheduleEditor';
 import MusicPlayer from './MusicPlayer';
+import { motion, useAnimation } from 'framer-motion';
+import Particles, { initParticlesEngine } from "@tsparticles/react";
+import { loadSlim } from "@tsparticles/slim";
+import { LogOut, Brain, Clock, Target } from 'lucide-react';
+
+// ==================== Ripple Component ====================
+const Ripple = memo(function Ripple({
+  mainCircleSize = 210,
+  mainCircleOpacity = 0.24,
+  numCircles = 11,
+  className = '',
+}) {
+  return (
+    <section
+      className={`absolute inset-0 flex items-center justify-center ${className}`}
+      style={{
+        maskImage: 'linear-gradient(to bottom, black, transparent)',
+        WebkitMaskImage: 'linear-gradient(to bottom, black, transparent)'
+      }}
+    >
+      {Array.from({ length: numCircles }, (_, i) => {
+        const size = mainCircleSize + i * 70;
+        const opacity = mainCircleOpacity - i * 0.03;
+        const animationDelay = `${i * 0.06}s`;
+        const borderStyle = i === numCircles - 1 ? 'dashed' : 'solid';
+
+        return (
+          <span
+            key={i}
+            className='absolute rounded-full border'
+            style={{
+              width: `${size}px`,
+              height: `${size}px`,
+              opacity: opacity,
+              animationDelay: animationDelay,
+              borderStyle: borderStyle,
+              borderWidth: '1px',
+              borderColor: 'rgba(139, 92, 246, 0.2)',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              animation: 'ripple 2s ease infinite',
+              background: 'rgba(139, 92, 246, 0.05)'
+            }}
+          />
+        );
+      })}
+    </section>
+  );
+});
+
+// ==================== Sparkles Component ====================
+const SparklesCore = () => {
+  const [init, setInit] = useState(false);
+  const controls = useAnimation();
+  const generatedId = useId();
+
+  useEffect(() => {
+    initParticlesEngine(async (engine) => {
+      await loadSlim(engine);
+    }).then(() => {
+      setInit(true);
+    });
+  }, []);
+
+  const particlesLoaded = async (container) => {
+    if (container) {
+      controls.start({
+        opacity: 1,
+        transition: { duration: 1 },
+      });
+    }
+  };
+
+  return (
+    <motion.div 
+      animate={controls} 
+      style={{
+        position: 'absolute',
+        width: '100%',
+        height: '100%',
+        top: 0,
+        left: 0,
+        opacity: 0,
+        zIndex: 1
+      }}
+    >
+      {init && (
+        <Particles
+          id={generatedId}
+          style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%'
+          }}
+          particlesLoaded={particlesLoaded}
+          options={{
+            background: { color: { value: "transparent" } },
+            fullScreen: { enable: false, zIndex: 1 },
+            fpsLimit: 120,
+            interactivity: {
+              events: {
+                onClick: { enable: true, mode: "push" },
+                onHover: { enable: false, mode: "repulse" },
+                resize: true,
+              },
+              modes: {
+                push: { quantity: 4 },
+                repulse: { distance: 200, duration: 0.4 },
+              },
+            },
+            particles: {
+              color: { value: ["#8b5cf6", "#ec4899", "#06b6d4"] },
+              move: {
+                direction: "none",
+                enable: true,
+                outModes: { default: "out" },
+                random: false,
+                speed: { min: 0.1, max: 0.5 },
+                straight: false,
+              },
+              number: {
+                density: { enable: true, width: 400, height: 400 },
+                value: 80,
+              },
+              opacity: {
+                value: { min: 0.1, max: 0.5 },
+                animation: { enable: true, speed: 1, sync: false },
+              },
+              shape: { type: "circle" },
+              size: { value: { min: 0.5, max: 2 } },
+            },
+            detectRetina: true,
+          }}
+        />
+      )}
+    </motion.div>
+  );
+};
+
+// ==================== Main Dashboard Component ====================
+const keyframeAnimations = `
+  @import url('https://fonts.googleapis.com/css2?family=Momo+Trust+Display&family=Outfit:wght@100..900&family=Playwrite+AU+TAS:wght@100..400&display=swap');
+  
+  @keyframes pulseGlow {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.02); }
+  }
+  @keyframes ripple {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(0.9); }
+  }
+  
+  @media (max-width: 1200px) {
+    .dashboard-grid {
+      grid-template-columns: 1fr 1fr !important;
+    }
+    .dashboard-grid > div:last-child {
+      grid-column: 1 / -1;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .dashboard-grid {
+      grid-template-columns: 1fr !important;
+    }
+  }
+`;
 
 const Dashboard = () => {
   const [user, loading] = useAuthState(auth);
@@ -159,135 +327,612 @@ const Dashboard = () => {
   }, []);
 
   if (loading) {
-    return <div className="loading">Loading...</div>;
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#0a0a0f',
+        color: 'white',
+        fontFamily: "'Outfit', sans-serif"
+      }}>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          Loading...
+        </motion.div>
+      </div>
+    );
   }
 
   return (
-    <div className="dashboard-container">
-      <h2>Study Dashboard</h2>
+    <div style={{
+      position: 'relative',
+      minHeight: '100vh',
+      background: '#0a0a0f',
+      fontFamily: "'Outfit', sans-serif",
+      overflow: 'hidden',
+      paddingTop: '80px'
+    }}>
+      <style>{keyframeAnimations}</style>
       
-      {error && <div className="error-message">{error}</div>}
-      
-      <div className="dashboard-content">
-        {/* Spotify Music Player - Always visible for authenticated users */}
-        <div className="music-section">
-          <MusicPlayer />
-        </div>
+      {/* Background Effects */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0 }}>
+        <SparklesCore />
+        <Ripple mainCircleSize={100} />
+        
+        {/* Gradient backgrounds */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: `radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+                       radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.12) 0%, transparent 50%)`,
+          filter: 'blur(60px)',
+          animation: 'pulseGlow 8s ease-in-out infinite'
+        }} />
 
-        <div className="preferences-form">
-          <h3>Study Preferences</h3>
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="subjects">Subjects / Topics (hold Ctrl to select multiple)</label>
-              <select 
-                id="subjects" 
-                name="subjects" 
-                value={preferences.subjects} 
-                onChange={handleInputChange}
-                className="form-control"
-                multiple
-                size="5"
+        {/* Floating orbs */}
+        <motion.div 
+          style={{
+            position: 'absolute',
+            top: '15%',
+            right: '10%',
+            width: '300px',
+            height: '300px',
+            background: 'radial-gradient(circle, rgba(236, 72, 153, 0.25), transparent)',
+            borderRadius: '50%',
+            filter: 'blur(80px)',
+            pointerEvents: 'none'
+          }}
+          animate={{
+            y: [0, 30, 0],
+            x: [0, -20, 0],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      </div>
+
+      {/* Main Content */}
+      <div style={{
+        position: 'relative',
+        zIndex: 10,
+        minHeight: 'calc(100vh - 80px)',
+        padding: '2rem 1.5rem',
+        maxWidth: '1400px',
+        margin: '0 auto'
+      }}>
+        {/* Error Message */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{
+              padding: '1rem',
+              marginBottom: '1.5rem',
+              background: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              borderRadius: '12px',
+              color: '#fca5a5',
+              fontSize: '0.875rem',
+              textAlign: 'center'
+            }}
+          >
+            {error}
+          </motion.div>
+        )}
+
+        {/* Welcome Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          style={{
+            marginBottom: '2rem',
+            textAlign: 'center'
+          }}
+        >
+          <h1 style={{
+            fontSize: '2.5rem',
+            fontWeight: 700,
+            color: 'white',
+            margin: 0,
+            marginBottom: '0.5rem',
+            background: 'linear-gradient(135deg, #a78bfa, #c084fc, #f472b6)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            textShadow: '0 0 40px rgba(139, 92, 246, 0.3)'
+          }}>
+            Welcome back! 👋
+          </h1>
+          <p style={{
+            color: 'rgba(255, 255, 255, 0.6)',
+            margin: 0,
+            fontSize: '1rem'
+          }}>
+            Let's create your perfect study schedule
+          </p>
+        </motion.div>
+
+        {/* Music Player Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          style={{
+            marginBottom: '2rem',
+            padding: '1.5rem',
+            background: 'rgba(255, 255, 255, 0.03)',
+            backdropFilter: 'blur(30px)',
+            WebkitBackdropFilter: 'blur(30px)',
+            borderRadius: '20px',
+            border: '1px solid rgba(255, 255, 255, 0.18)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
+          }}
+        >
+          <MusicPlayer />
+        </motion.div>
+
+        {/* Main Content - Three Column Layout */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '380px 1fr 380px',
+          gap: '1.5rem',
+          marginBottom: '2rem',
+          alignItems: 'start'
+        }}
+        className="dashboard-grid">
+          {/* Left Column - Study Preferences Card */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            style={{
+              padding: '1.75rem',
+              background: 'rgba(255, 255, 255, 0.03)',
+              backdropFilter: 'blur(30px)',
+              WebkitBackdropFilter: 'blur(30px)',
+              borderRadius: '20px',
+              border: '1px solid rgba(255, 255, 255, 0.18)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+              position: 'sticky',
+              top: '100px'
+            }}
+          >
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              marginBottom: '1.25rem'
+            }}>
+              <div style={{
+                padding: '0.5rem',
+                background: 'rgba(139, 92, 246, 0.2)',
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <Brain size={20} color="#a78bfa" />
+              </div>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: 600,
+                color: 'white',
+                margin: 0
+              }}>
+                Preferences
+              </h3>
+            </div>
+            
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {/* Subjects */}
+              <div>
+                <label style={{
+                  display: 'block',
+                  fontSize: '0.8125rem',
+                  fontWeight: 500,
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  marginBottom: '0.5rem'
+                }}>
+                  Subjects
+                </label>
+                <select 
+                  name="subjects" 
+                  value={preferences.subjects} 
+                  onChange={handleInputChange}
+                  multiple
+                  size="4"
+                  style={{
+                    width: '100%',
+                    padding: '0.625rem',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.18)',
+                    borderRadius: '10px',
+                    color: 'white',
+                    fontSize: '0.8125rem',
+                    fontFamily: "'Outfit', sans-serif",
+                    outline: 'none'
+                  }}
+                >
+                  {availableSubjects.map(subject => (
+                    <option key={subject} value={subject} style={{ padding: '0.375rem' }}>{subject}</option>
+                  ))}
+                </select>
+                <small style={{
+                  display: 'block',
+                  marginTop: '0.25rem',
+                  fontSize: '0.6875rem',
+                  color: 'rgba(255, 255, 255, 0.5)'
+                }}>
+                  Hold Ctrl to select multiple
+                </small>
+              </div>
+
+              {/* Preferred Duration */}
+              <div>
+                <label style={{
+                  display: 'block',
+                  fontSize: '0.8125rem',
+                  fontWeight: 500,
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  marginBottom: '0.5rem'
+                }}>
+                  <Clock size={12} style={{ display: 'inline', marginRight: '0.375rem' }} />
+                  Duration (min)
+                </label>
+                <input 
+                  type="number" 
+                  name="preferredDuration" 
+                  value={preferences.preferredDuration} 
+                  onChange={handleInputChange}
+                  min="15"
+                  max="180"
+                  style={{
+                    width: '100%',
+                    padding: '0.625rem',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.18)',
+                    borderRadius: '10px',
+                    color: 'white',
+                    fontSize: '0.8125rem',
+                    fontFamily: "'Outfit', sans-serif",
+                    outline: 'none'
+                  }}
+                />
+              </div>
+
+              {/* Time Range */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '0.8125rem',
+                    fontWeight: 500,
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    marginBottom: '0.5rem'
+                  }}>
+                    Start
+                  </label>
+                  <input 
+                    type="time" 
+                    name="availableTimeStart" 
+                    value={preferences.availableTimeStart} 
+                    onChange={handleInputChange}
+                    style={{
+                      width: '100%',
+                      padding: '0.625rem',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.18)',
+                      borderRadius: '10px',
+                      color: 'white',
+                      fontSize: '0.8125rem',
+                      fontFamily: "'Outfit', sans-serif",
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+                
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '0.8125rem',
+                    fontWeight: 500,
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    marginBottom: '0.5rem'
+                  }}>
+                    End
+                  </label>
+                  <input 
+                    type="time" 
+                    name="availableTimeEnd" 
+                    value={preferences.availableTimeEnd} 
+                    onChange={handleInputChange}
+                    style={{
+                      width: '100%',
+                      padding: '0.625rem',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.18)',
+                      borderRadius: '10px',
+                      color: 'white',
+                      fontSize: '0.8125rem',
+                      fontFamily: "'Outfit', sans-serif",
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Focus Level */}
+              <div>
+                <label style={{
+                  display: 'block',
+                  fontSize: '0.8125rem',
+                  fontWeight: 500,
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  marginBottom: '0.5rem'
+                }}>
+                  <Target size={12} style={{ display: 'inline', marginRight: '0.375rem' }} />
+                  Focus: {preferences.focusLevel}/10
+                </label>
+                <input 
+                  type="range" 
+                  name="focusLevel" 
+                  value={preferences.focusLevel} 
+                  onChange={handleInputChange}
+                  min="1"
+                  max="10"
+                  style={{
+                    width: '100%',
+                    accentColor: '#8b5cf6'
+                  }}
+                />
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  fontSize: '0.6875rem',
+                  color: 'rgba(255, 255, 255, 0.5)',
+                  marginTop: '0.25rem'
+                }}>
+                  <span>Low</span>
+                  <span>High</span>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <motion.button
+                type="submit"
+                disabled={isLoading}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  marginTop: '0.5rem',
+                  background: isLoading ? 'rgba(139, 92, 246, 0.5)' : 'linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(168, 85, 247, 0.9))',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '12px',
+                  color: 'white',
+                  fontSize: '0.9375rem',
+                  fontWeight: 600,
+                  cursor: isLoading ? 'not-allowed' : 'pointer',
+                  boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4)',
+                  transition: 'all 0.3s ease'
+                }}
               >
-                {availableSubjects.map(subject => (
-                  <option key={subject} value={subject}>{subject}</option>
-                ))}
-              </select>
-              <small className="form-text text-muted">Hold Ctrl (or Cmd on Mac) to select multiple subjects</small>
-            </div>
+                {isLoading ? 'Generating...' : '✨ Generate Plan'}
+              </motion.button>
+            </form>
+          </motion.div>
+
+          {/* Center Column - Recommendations */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            style={{
+              padding: '1.75rem',
+              background: 'rgba(255, 255, 255, 0.03)',
+              backdropFilter: 'blur(30px)',
+              WebkitBackdropFilter: 'blur(30px)',
+              borderRadius: '20px',
+              border: '1px solid rgba(255, 255, 255, 0.18)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+              minHeight: '500px'
+            }}
+          >
+            <RecommendationCard recommendations={recommendations} isLoading={isLoading} />
             
-            <div className="form-group">
-              <label htmlFor="preferredDuration">Preferred Study Duration (minutes)</label>
-              <input 
-                type="number" 
-                id="preferredDuration" 
-                name="preferredDuration" 
-                value={preferences.preferredDuration} 
-                onChange={handleInputChange}
-                min="15"
-                max="180"
-                className="form-control"
-              />
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="availableTimeStart">Available Time Range - Start</label>
-              <input 
-                type="time" 
-                id="availableTimeStart" 
-                name="availableTimeStart" 
-                value={preferences.availableTimeStart} 
-                onChange={handleInputChange}
-                className="form-control"
-              />
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="availableTimeEnd">Available Time Range - End</label>
-              <input 
-                type="time" 
-                id="availableTimeEnd" 
-                name="availableTimeEnd" 
-                value={preferences.availableTimeEnd} 
-                onChange={handleInputChange}
-                className="form-control"
-              />
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="focusLevel">Focus/Attention Level (1-10)</label>
-              <input 
-                type="range" 
-                id="focusLevel" 
-                name="focusLevel" 
-                value={preferences.focusLevel} 
-                onChange={handleInputChange}
-                min="1"
-                max="10"
-                className="form-control"
-              />
-              <div className="range-labels">
-                <span>Low</span>
-                <span>Medium</span>
-                <span>High</span>
+            {!showTimers && recommendations.recommended_schedule.length > 0 && (
+              <div style={{
+                display: 'flex',
+                gap: '0.75rem',
+                marginTop: '1.5rem'
+              }}>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleConfirmSchedule}
+                  style={{
+                    flex: 1,
+                    padding: '0.875rem',
+                    background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.9), rgba(16, 185, 129, 0.9))',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '12px',
+                    color: 'white',
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 20px rgba(34, 197, 94, 0.4)',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  ✓ Start Timers
+                </motion.button>
+                
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleAdjustSchedule}
+                  style={{
+                    padding: '0.875rem 1.25rem',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '12px',
+                    color: 'white',
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  Adjust
+                </motion.button>
+              </div>
+            )}
+          </motion.div>
+
+          {/* Right Column - Quick Stats / Info */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            style={{
+              position: 'sticky',
+              top: '100px'
+            }}
+          >
+            {/* Stats Card */}
+            <div style={{
+              padding: '1.75rem',
+              background: 'rgba(255, 255, 255, 0.03)',
+              backdropFilter: 'blur(30px)',
+              WebkitBackdropFilter: 'blur(30px)',
+              borderRadius: '20px',
+              border: '1px solid rgba(255, 255, 255, 0.18)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+              marginBottom: '1.5rem'
+            }}>
+              <h4 style={{
+                fontSize: '1rem',
+                fontWeight: 600,
+                color: 'white',
+                margin: '0 0 1rem 0'
+              }}>
+                Today's Progress
+              </h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{
+                  padding: '1rem',
+                  background: 'rgba(139, 92, 246, 0.1)',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(139, 92, 246, 0.2)'
+                }}>
+                  <div style={{
+                    fontSize: '0.75rem',
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    marginBottom: '0.25rem'
+                  }}>
+                    Sessions Completed
+                  </div>
+                  <div style={{
+                    fontSize: '1.75rem',
+                    fontWeight: 700,
+                    color: '#a78bfa'
+                  }}>
+                    0
+                  </div>
+                </div>
+                
+                <div style={{
+                  padding: '1rem',
+                  background: 'rgba(236, 72, 153, 0.1)',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(236, 72, 153, 0.2)'
+                }}>
+                  <div style={{
+                    fontSize: '0.75rem',
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    marginBottom: '0.25rem'
+                  }}>
+                    Time Studied
+                  </div>
+                  <div style={{
+                    fontSize: '1.75rem',
+                    fontWeight: 700,
+                    color: '#f472b6'
+                  }}>
+                    0 min
+                  </div>
+                </div>
               </div>
             </div>
-            
-            <div className="form-group">
-              <button type="submit" className="btn btn-primary submit-btn" disabled={isLoading}>
-                {isLoading ? 'Generating...' : 'Get Study Plan'}
-              </button>
+
+            {/* Tips Card */}
+            <div style={{
+              padding: '1.75rem',
+              background: 'rgba(255, 255, 255, 0.03)',
+              backdropFilter: 'blur(30px)',
+              WebkitBackdropFilter: 'blur(30px)',
+              borderRadius: '20px',
+              border: '1px solid rgba(255, 255, 255, 0.18)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
+            }}>
+              <h4 style={{
+                fontSize: '1rem',
+                fontWeight: 600,
+                color: 'white',
+                margin: '0 0 1rem 0'
+              }}>
+                💡 Study Tip
+              </h4>
+              <p style={{
+                fontSize: '0.8125rem',
+                color: 'rgba(255, 255, 255, 0.7)',
+                lineHeight: '1.6',
+                margin: 0
+              }}>
+                Take regular breaks every 45-50 minutes to maintain focus and retention. Your brain needs rest to consolidate information!
+              </p>
             </div>
-          </form>
+          </motion.div>
         </div>
-        
-        <div className="recommendations-section">
-          <RecommendationCard recommendations={recommendations} isLoading={isLoading} />
-          
-          {!showTimers && recommendations.recommended_schedule.length > 0 && (
-            <div className="schedule-actions">
-              <button 
-                className="btn btn-success btn-large" 
-                onClick={handleConfirmSchedule}
-              >
-                ✓ Confirm & Start Timers
-              </button>
-              <button 
-                className="btn btn-secondary" 
-                onClick={handleAdjustSchedule}
-              >
-                Adjust Schedule
-              </button>
-            </div>
-          )}
-          
-          {showTimers && confirmedSchedule.length > 0 && (
+
+        {/* Sequential Timers Section - Full Width */}
+        {showTimers && confirmedSchedule.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            style={{
+              padding: '2rem',
+              background: 'rgba(255, 255, 255, 0.03)',
+              backdropFilter: 'blur(30px)',
+              WebkitBackdropFilter: 'blur(30px)',
+              borderRadius: '20px',
+              border: '1px solid rgba(255, 255, 255, 0.18)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
+            }}
+          >
             <SequentialTimers 
               schedule={confirmedSchedule}
               onComplete={handleTimersComplete}
               onCancel={handleTimersCancel}
             />
-          )}
-        </div>
+          </motion.div>
+        )}
       </div>
 
       {/* Schedule Editor Modal */}
