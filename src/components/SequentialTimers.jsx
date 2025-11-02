@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import confetti from 'canvas-confetti';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Play, Pause, SkipForward, X, Coffee, Clock, Target, CheckCircle, Zap, TrendingUp } from 'lucide-react';
 import NotificationSidebar from './NotificationSidebar';
 
 const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
@@ -186,35 +188,265 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
   
   if (!currentItem) {
     return (
-      <div style={{
-        textAlign: 'center',
-        padding: '40px',
-        color: '#666'
-      }}>
-        <p>No subjects to study. Generate a study plan first!</p>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        style={{
+          textAlign: 'center',
+          padding: '60px 40px',
+          background: 'rgba(255, 255, 255, 0.03)',
+          backdropFilter: 'blur(30px)',
+          borderRadius: '24px',
+          border: '1px solid rgba(255, 255, 255, 0.18)',
+          color: 'rgba(255, 255, 255, 0.7)'
+        }}
+      >
+        <Clock size={64} color="#8b5cf6" style={{ marginBottom: '1rem' }} />
+        <p style={{ fontSize: '1.25rem', margin: 0 }}>No subjects to study. Generate a study plan first!</p>
+      </motion.div>
     );
   }
   
   return (
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+        
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-20px);
+          }
+        }
+        
+        @keyframes pulse-glow {
+          0%, 100% {
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.4), 0 0 40px rgba(139, 92, 246, 0.2);
+          }
+          50% {
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.6), 0 0 60px rgba(139, 92, 246, 0.3);
+          }
+        }
+        
+        @keyframes shimmer {
+          0% {
+            background-position: -1000px 0;
+          }
+          100% {
+            background-position: 1000px 0;
+          }
+        }
+        
+        @keyframes scale-pulse {
+          0%, 100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.05);
+          }
+        }
+        
+        .timer-scrollbar::-webkit-scrollbar {
+          width: 8px;
+        }
+        
+        .timer-scrollbar::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 10px;
+        }
+        
+        .timer-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(139, 92, 246, 0.5);
+          border-radius: 10px;
+        }
+        
+        .timer-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(139, 92, 246, 0.7);
+        }
+      `}</style>
+      
     <div style={{
       display: 'flex',
       gap: '24px',
-      alignItems: 'flex-start'
+      alignItems: 'flex-start',
+      fontFamily: "'Outfit', sans-serif"
     }}>
       <div style={{
-        flex: '1',
-        background: 'white',
-        borderRadius: '12px',
-        padding: '24px',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+        flex: '1'
       }}>
-        <h3 style={{
-          marginTop: '0',
-          color: '#333',
-          fontSize: '1.5em',
-          marginBottom: '20px'
-        }}>Study Session Queue</h3>
+        {/* Hero Header with Stats */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          style={{
+            background: 'rgba(255, 255, 255, 0.03)',
+            backdropFilter: 'blur(30px)',
+            borderRadius: '24px',
+            border: '1px solid rgba(139, 92, 246, 0.3)',
+            padding: '2rem',
+            marginBottom: '1.5rem',
+            position: 'relative',
+            overflow: 'hidden'
+          }}
+        >
+          {/* Ambient Background */}
+          <div style={{
+            position: 'absolute',
+            top: '-50%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '80%',
+            height: '100%',
+            background: 'radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%)',
+            filter: 'blur(60px)',
+            pointerEvents: 'none'
+          }} />
+          
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '1.5rem'
+            }}>
+              <div>
+                <h3 style={{
+                  margin: 0,
+                  fontSize: '2rem',
+                  fontWeight: 700,
+                  background: 'linear-gradient(135deg, #a78bfa, #c084fc, #f472b6)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  marginBottom: '0.5rem'
+                }}>Focus Session</h3>
+                <p style={{
+                  margin: 0,
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  fontSize: '1rem'
+                }}>Stay focused, stay productive</p>
+              </div>
+              
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                style={{
+                  padding: '1rem',
+                  background: 'rgba(139, 92, 246, 0.2)',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <Zap size={32} color="#a78bfa" />
+              </motion.div>
+            </div>
+            
+            {/* Progress Stats */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '1rem'
+            }}>
+              <div style={{
+                background: 'rgba(139, 92, 246, 0.1)',
+                border: '1px solid rgba(139, 92, 246, 0.3)',
+                borderRadius: '16px',
+                padding: '1rem',
+                textAlign: 'center'
+              }}>
+                <Target size={20} color="#a78bfa" style={{ marginBottom: '0.5rem' }} />
+                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'white' }}>
+                  {currentIndex + 1}/{subjectItems.length}
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)', marginTop: '0.25rem' }}>
+                  Current Session
+                </div>
+              </div>
+              
+              <div style={{
+                background: 'rgba(34, 197, 94, 0.1)',
+                border: '1px solid rgba(34, 197, 94, 0.3)',
+                borderRadius: '16px',
+                padding: '1rem',
+                textAlign: 'center'
+              }}>
+                <CheckCircle size={20} color="#22c55e" style={{ marginBottom: '0.5rem' }} />
+                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'white' }}>
+                  {completedSubjects.length}
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)', marginTop: '0.25rem' }}>
+                  Completed
+                </div>
+              </div>
+              
+              <div style={{
+                background: 'rgba(244, 114, 182, 0.1)',
+                border: '1px solid rgba(244, 114, 182, 0.3)',
+                borderRadius: '16px',
+                padding: '1rem',
+                textAlign: 'center'
+              }}>
+                <TrendingUp size={20} color="#f472b6" style={{ marginBottom: '0.5rem' }} />
+                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'white' }}>
+                  {Math.round(((currentIndex) / subjectItems.length) * 100)}%
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)', marginTop: '0.25rem' }}>
+                  Progress
+                </div>
+              </div>
+            </div>
+            
+            {/* Overall Progress Bar */}
+            <div style={{ marginTop: '1.5rem' }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginBottom: '0.5rem',
+                fontSize: '0.875rem',
+                color: 'rgba(255, 255, 255, 0.7)'
+              }}>
+                <span>Overall Progress</span>
+                <span>{currentIndex} of {subjectItems.length} sessions</span>
+              </div>
+              <div style={{
+                width: '100%',
+                height: '12px',
+                background: 'rgba(255, 255, 255, 0.1)',
+                borderRadius: '6px',
+                overflow: 'hidden',
+                position: 'relative'
+              }}>
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${((currentIndex) / subjectItems.length) * 100}%` }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                  style={{
+                    height: '100%',
+                    background: 'linear-gradient(90deg, #8b5cf6, #a78bfa, #c084fc)',
+                    borderRadius: '6px',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                    animation: 'shimmer 2s infinite'
+                  }} />
+                </motion.div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
         
         {/* Progress Overview */}
         <div style={{
@@ -247,313 +479,542 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
         </div>
         
         {/* Break Timer */}
-        {isBreakTime && (
-          <div style={{
-            background: 'linear-gradient(135deg, #ff9800 0%, #ff5722 100%)',
-            borderRadius: '12px',
-            padding: '40px',
-            textAlign: 'center',
-            color: 'white',
-            animation: 'pulse 2s infinite'
-          }}>
-            <div style={{
-              fontSize: '4em',
-              marginBottom: '16px'
-            }}>☕</div>
-            <h4 style={{
-              fontSize: '2em',
-              margin: '0 0 12px 0'
-            }}>Break Time!</h4>
-            <p style={{
-              fontSize: '1.1em',
-              margin: '0 0 24px 0',
-              opacity: '0.9'
-            }}>Relax and recharge before your next session</p>
-            <div style={{
-              fontSize: '3em',
-              fontWeight: 'bold',
-              fontFamily: "'Courier New', monospace",
-              background: 'rgba(255, 255, 255, 0.2)',
-              padding: '20px',
-              borderRadius: '12px',
-              display: 'inline-block'
-            }}>
-              {Math.floor(breakDuration / 60)}:{(breakDuration % 60).toString().padStart(2, '0')}
-            </div>
-          </div>
-        )}
-        
-        {/* Current Subject Timer - Only shows CURRENT subject time */}
-        {!isBreakTime && (
-          <div style={{
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            borderRadius: '12px',
-            padding: '28px',
-            color: 'white',
-            marginBottom: '24px',
-            transition: 'all 0.3s ease',
-            boxShadow: isRunning ? '0 0 20px rgba(102, 126, 234, 0.4)' : 'none',
-            opacity: isPaused ? '0.85' : '1'
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '24px'
-            }}>
-              <h4 style={{
-                margin: '0',
-                fontSize: '1.8em',
-                fontWeight: '600'
-              }}>{currentItem.subject}</h4>
-              <span style={{
-                background: 'rgba(255, 255, 255, 0.2)',
-                padding: '6px 12px',
-                borderRadius: '16px',
-                fontSize: '0.9em'
-              }}>
-                {currentItem.start} - {currentItem.end}
-              </span>
-            </div>
-            
-            <div style={{
-              display: 'flex',
-              justifyContent: 'center',
-              margin: '32px 0'
-            }}>
-              <div style={{
-                position: 'relative',
+        <AnimatePresence>
+          {isBreakTime && (
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ type: "spring", bounce: 0.4 }}
+            style={{
+              background: 'linear-gradient(135deg, rgba(251, 146, 60, 0.2), rgba(249, 115, 22, 0.2))',
+              backdropFilter: 'blur(30px)',
+              borderRadius: '24px',
+              border: '1px solid rgba(251, 146, 60, 0.4)',
+              padding: '3rem',
+              textAlign: 'center',
+              marginBottom: '1.5rem',
+              position: 'relative',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Floating Animation Background */}
+            <motion.div
+              animate={{ y: [0, -20, 0] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
                 width: '200px',
-                height: '200px'
+                height: '200px',
+                background: 'radial-gradient(circle, rgba(251, 146, 60, 0.3) 0%, transparent 70%)',
+                filter: 'blur(40px)',
+                pointerEvents: 'none'
+              }}
+            />
+            
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <motion.div
+                animate={{ 
+                  scale: [1, 1.2, 1],
+                  rotate: [0, 10, -10, 0]
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+                style={{
+                  fontSize: '5rem',
+                  marginBottom: '1.5rem',
+                  display: 'inline-block'
+                }}
+              >
+                <Coffee size={80} color="#fb923c" />
+              </motion.div>
+              
+              <h4 style={{
+                fontSize: '2.5rem',
+                margin: '0 0 1rem 0',
+                fontWeight: 700,
+                background: 'linear-gradient(135deg, #fb923c, #f97316)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}>Break Time!</h4>
+              
+              <p style={{
+                fontSize: '1.125rem',
+                margin: '0 0 2rem 0',
+                color: 'rgba(255, 255, 255, 0.8)'
+              }}>Relax and recharge before your next session</p>
+              
+              <motion.div
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+                style={{
+                  fontSize: '4rem',
+                  fontWeight: 700,
+                  fontFamily: "'Courier New', monospace",
+                  background: 'rgba(251, 146, 60, 0.2)',
+                  backdropFilter: 'blur(10px)',
+                  padding: '1.5rem 3rem',
+                  borderRadius: '20px',
+                  display: 'inline-block',
+                  color: 'white',
+                  border: '2px solid rgba(251, 146, 60, 0.4)',
+                  boxShadow: '0 8px 32px rgba(251, 146, 60, 0.3)'
+                }}
+              >
+                {Math.floor(breakDuration / 60)}:{(breakDuration % 60).toString().padStart(2, '0')}
+              </motion.div>
+              
+              <div style={{
+                marginTop: '2rem',
+                fontSize: '0.875rem',
+                color: 'rgba(255, 255, 255, 0.6)'
               }}>
-                <svg style={{
-                  transform: 'rotate(-90deg)'
-                }} width="200" height="200">
-                  <circle
-                    style={{
-                      fill: 'none',
-                      stroke: 'rgba(255, 255, 255, 0.2)',
-                      strokeWidth: '8'
-                    }}
-                    cx="100"
-                    cy="100"
-                    r="90"
-                  />
-                  <circle
-                    style={{
-                      fill: 'none',
-                      stroke: 'white',
-                      strokeWidth: '8',
-                      strokeLinecap: 'round',
-                      strokeDasharray: `${2 * Math.PI * 90}`,
-                      strokeDashoffset: `${2 * Math.PI * 90 * (1 - getProgress() / 100)}`,
-                      transition: 'stroke-dashoffset 0.5s ease'
-                    }}
-                    cx="100"
-                    cy="100"
-                    r="90"
-                  />
-                </svg>
-                <div style={{
+                💡 Take a walk, stretch, or grab a snack
+              </div>
+            </div>
+          </motion.div>
+        )}
+        </AnimatePresence>
+        
+        {/* Current Subject Timer - Impressive Design */}
+        <AnimatePresence>
+          {!isBreakTime && (
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: "spring", duration: 0.6 }}
+              style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                backdropFilter: 'blur(30px)',
+                borderRadius: '24px',
+                border: '1px solid rgba(139, 92, 246, 0.3)',
+                padding: '2.5rem',
+                marginBottom: '1.5rem',
+                position: 'relative',
+                overflow: 'hidden',
+                animation: isRunning && !isPaused ? 'pulse-glow 3s infinite' : 'none',
+                opacity: isPaused ? 0.7 : 1,
+                transition: 'opacity 0.3s ease'
+              }}
+            >
+              {/* Dynamic Background Glow */}
+              <motion.div
+                animate={{
+                  scale: isRunning ? [1, 1.2, 1] : 1,
+                  opacity: isRunning ? [0.3, 0.5, 0.3] : 0.2
+                }}
+                transition={{ duration: 4, repeat: Infinity }}
+                style={{
                   position: 'absolute',
                   top: '50%',
                   left: '50%',
                   transform: 'translate(-50%, -50%)',
-                  fontSize: '2.5em',
-                  fontWeight: 'bold',
-                  fontFamily: "'Courier New', monospace"
+                  width: '400px',
+                  height: '400px',
+                  background: 'radial-gradient(circle, rgba(139, 92, 246, 0.4) 0%, transparent 70%)',
+                  filter: 'blur(80px)',
+                  pointerEvents: 'none'
+                }}
+              />
+              
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                {/* Header */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '2rem'
                 }}>
-                  {formatTime(timeRemaining)}
+                  <div>
+                    <motion.h4
+                      animate={{ scale: isRunning && !isPaused ? [1, 1.02, 1] : 1 }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      style={{
+                        margin: 0,
+                        fontSize: '2.25rem',
+                        fontWeight: 700,
+                        background: 'linear-gradient(135deg, #a78bfa, #c084fc, #f472b6)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text'
+                      }}
+                    >
+                      {currentItem.subject}
+                    </motion.h4>
+                    <p style={{
+                      margin: '0.5rem 0 0 0',
+                      color: 'rgba(255, 255, 255, 0.6)',
+                      fontSize: '1rem'
+                    }}>
+                      {isRunning ? (isPaused ? '⏸️ Paused' : '🎯 In Progress') : '⏱️ Ready to start'}
+                    </p>
+                  </div>
+                  
+                  <div style={{
+                    background: 'rgba(139, 92, 246, 0.2)',
+                    border: '1px solid rgba(139, 92, 246, 0.4)',
+                    padding: '0.75rem 1.25rem',
+                    borderRadius: '16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    color: '#c4b5fd',
+                    fontSize: '0.9375rem',
+                    fontWeight: 500
+                  }}>
+                    <Clock size={16} />
+                    {currentItem.start} - {currentItem.end}
+                  </div>
+                </div>
+                
+                {/* Circular Timer Display */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  margin: '2rem 0'
+                }}>
+                  <motion.div
+                    animate={{ rotate: isRunning && !isPaused ? 360 : 0 }}
+                    transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+                    style={{
+                      position: 'relative',
+                      width: '280px',
+                      height: '280px'
+                    }}
+                  >
+                    {/* Outer Glow Ring */}
+                    <div style={{
+                      position: 'absolute',
+                      inset: '-10px',
+                      borderRadius: '50%',
+                      background: 'conic-gradient(from 0deg, rgba(139, 92, 246, 0.3), rgba(244, 114, 182, 0.3), rgba(139, 92, 246, 0.3))',
+                      filter: 'blur(20px)',
+                      opacity: isRunning && !isPaused ? 0.8 : 0.3,
+                      transition: 'opacity 0.5s ease'
+                    }} />
+                    
+                    <svg style={{
+                      transform: 'rotate(-90deg)',
+                      filter: 'drop-shadow(0 0 20px rgba(139, 92, 246, 0.5))'
+                    }} width="280" height="280">
+                      {/* Background Circle */}
+                      <circle
+                        style={{
+                          fill: 'none',
+                          stroke: 'rgba(255, 255, 255, 0.1)',
+                          strokeWidth: '12'
+                        }}
+                        cx="140"
+                        cy="140"
+                        r="120"
+                      />
+                      {/* Progress Circle */}
+                      <motion.circle
+                        initial={{ strokeDashoffset: 2 * Math.PI * 120 }}
+                        animate={{
+                          strokeDashoffset: 2 * Math.PI * 120 * (1 - getProgress() / 100)
+                        }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                        style={{
+                          fill: 'none',
+                          stroke: 'url(#gradient)',
+                          strokeWidth: '12',
+                          strokeLinecap: 'round',
+                          strokeDasharray: `${2 * Math.PI * 120}`
+                        }}
+                        cx="140"
+                        cy="140"
+                        r="120"
+                      />
+                      <defs>
+                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" style={{ stopColor: '#8b5cf6', stopOpacity: 1 }} />
+                          <stop offset="50%" style={{ stopColor: '#a78bfa', stopOpacity: 1 }} />
+                          <stop offset="100%" style={{ stopColor: '#f472b6', stopOpacity: 1 }} />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                    
+                    {/* Center Time Display */}
+                    <div style={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      textAlign: 'center'
+                    }}>
+                      <motion.div
+                        animate={{ scale: isRunning && !isPaused && timeRemaining <= 60 ? [1, 1.1, 1] : 1 }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                        style={{
+                          fontSize: '3.5rem',
+                          fontWeight: 700,
+                          fontFamily: "'Courier New', monospace",
+                          background: 'linear-gradient(135deg, #ffffff, #c4b5fd)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          backgroundClip: 'text',
+                          lineHeight: 1,
+                          marginBottom: '0.5rem'
+                        }}
+                      >
+                        {formatTime(timeRemaining)}
+                      </motion.div>
+                      <div style={{
+                        fontSize: '0.875rem',
+                        color: 'rgba(255, 255, 255, 0.6)',
+                        fontWeight: 500
+                      }}>
+                        {Math.round(getProgress())}% Complete
+                      </div>
+                    </div>
+                  </motion.div>
+                  
+                  {/* Duration Info */}
+                  <div style={{
+                    marginTop: '2rem',
+                    display: 'flex',
+                    gap: '2rem',
+                    justifyContent: 'center'
+                  }}>
+                    <div style={{
+                      textAlign: 'center'
+                    }}>
+                      <div style={{
+                        fontSize: '0.75rem',
+                        color: 'rgba(255, 255, 255, 0.5)',
+                        marginBottom: '0.25rem',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em'
+                      }}>
+                        Duration
+                      </div>
+                      <div style={{
+                        fontSize: '1.25rem',
+                        fontWeight: 600,
+                        color: 'white'
+                      }}>
+                        {currentItem.duration} min
+                      </div>
+                    </div>
+                    
+                    <div style={{
+                      width: '1px',
+                      background: 'rgba(255, 255, 255, 0.1)'
+                    }} />
+                    
+                    <div style={{
+                      textAlign: 'center'
+                    }}>
+                      <div style={{
+                        fontSize: '0.75rem',
+                        color: 'rgba(255, 255, 255, 0.5)',
+                        marginBottom: '0.25rem',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em'
+                      }}>
+                        Remaining
+                      </div>
+                      <div style={{
+                        fontSize: '1.25rem',
+                        fontWeight: 600,
+                        color: '#a78bfa'
+                      }}>
+                        {Math.ceil(timeRemaining / 60)} min
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Control Buttons */}
+                <div style={{
+                  display: 'flex',
+                  gap: '1rem',
+                  justifyContent: 'center',
+                  flexWrap: 'wrap'
+                }}>
+                  {!isRunning ? (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={startTimer}
+                      style={{
+                        padding: '1rem 3rem',
+                        border: 'none',
+                        borderRadius: '16px',
+                        fontSize: '1.125rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(168, 85, 247, 0.9))',
+                        color: 'white',
+                        boxShadow: '0 8px 32px rgba(139, 92, 246, 0.4)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
+                      <Play size={24} fill="white" />
+                      Start Session
+                    </motion.button>
+                  ) : isPaused ? (
+                    <>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={resumeTimer}
+                        style={{
+                          padding: '0.875rem 2rem',
+                          border: 'none',
+                          borderRadius: '14px',
+                          fontSize: '1rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.9), rgba(16, 185, 129, 0.9))',
+                          color: 'white',
+                          boxShadow: '0 6px 24px rgba(34, 197, 94, 0.4)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem'
+                        }}
+                      >
+                        <Play size={20} fill="white" />
+                        Resume
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={skipSubject}
+                        style={{
+                          padding: '0.875rem 2rem',
+                          border: '1px solid rgba(251, 146, 60, 0.5)',
+                          borderRadius: '14px',
+                          fontSize: '1rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          background: 'rgba(251, 146, 60, 0.2)',
+                          color: '#fdba74',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem'
+                        }}
+                      >
+                        <SkipForward size={20} />
+                        Skip
+                      </motion.button>
+                    </>
+                  ) : (
+                    <>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={pauseTimer}
+                        style={{
+                          padding: '0.875rem 2rem',
+                          border: '1px solid rgba(251, 146, 60, 0.5)',
+                          borderRadius: '14px',
+                          fontSize: '1rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          background: 'rgba(251, 146, 60, 0.2)',
+                          color: '#fdba74',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem'
+                        }}
+                      >
+                        <Pause size={20} />
+                        Pause
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={skipSubject}
+                        style={{
+                          padding: '0.875rem 2rem',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          borderRadius: '14px',
+                          fontSize: '1rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          background: 'rgba(255, 255, 255, 0.05)',
+                          color: 'white',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem'
+                        }}
+                      >
+                        <SkipForward size={20} />
+                        Skip
+                      </motion.button>
+                    </>
+                  )}
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={cancelAll}
+                    style={{
+                      padding: '0.875rem 2rem',
+                      border: '1px solid rgba(239, 68, 68, 0.5)',
+                      borderRadius: '14px',
+                      fontSize: '1rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      background: 'rgba(239, 68, 68, 0.2)',
+                      color: '#fca5a5',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem'
+                    }}
+                  >
+                    <X size={20} />
+                    Cancel All
+                  </motion.button>
                 </div>
               </div>
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '8px',
-                marginTop: '16px',
-                textAlign: 'center'
-              }}>
-                <span style={{
-                  fontSize: '1.2em',
-                  fontWeight: '600',
-                  color: 'white'
-                }}>Current: {currentItem.subject}</span>
-                <span style={{
-                  fontSize: '0.9em',
-                  color: 'rgba(255, 255, 255, 0.9)'
-                }}>Duration: {currentItem.duration} minutes</span>
-              </div>
-            </div>
-            
-            <div style={{
-              display: 'flex',
-              gap: '12px',
-              justifyContent: 'center',
-              flexWrap: 'wrap'
-            }}>
-              {!isRunning ? (
-                <button onClick={startTimer} style={{
-                  padding: '16px 48px',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '1.2em',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  background: 'white',
-                  color: '#667eea'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.transform = 'translateY(-1px)';
-                  e.target.style.boxShadow = 'none';
-                }}
-                >
-                  Start {currentItem.subject}
-                </button>
-              ) : isPaused ? (
-                <>
-                  <button onClick={resumeTimer} style={{
-                    padding: '12px 24px',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '1em',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    background: '#4CAF50',
-                    color: 'white'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.opacity = '0.9';
-                    e.target.style.transform = 'translateY(-1px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.opacity = '1';
-                    e.target.style.transform = 'translateY(0)';
-                  }}
-                  >
-                    Resume
-                  </button>
-                  <button onClick={skipSubject} style={{
-                    padding: '12px 24px',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '1em',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    background: '#ff9800',
-                    color: 'white'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.opacity = '0.9';
-                    e.target.style.transform = 'translateY(-1px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.opacity = '1';
-                    e.target.style.transform = 'translateY(0)';
-                  }}
-                  >
-                    Skip
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button onClick={pauseTimer} style={{
-                    padding: '12px 24px',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '1em',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    background: '#ff9800',
-                    color: 'white'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.opacity = '0.9';
-                    e.target.style.transform = 'translateY(-1px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.opacity = '1';
-                    e.target.style.transform = 'translateY(0)';
-                  }}
-                  >
-                    Pause
-                  </button>
-                  <button onClick={skipSubject} style={{
-                    padding: '12px 24px',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '1em',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    background: 'rgba(255, 255, 255, 0.2)',
-                    color: 'white',
-                    border: '2px solid white'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.opacity = '0.9';
-                    e.target.style.transform = 'translateY(-1px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.opacity = '1';
-                    e.target.style.transform = 'translateY(0)';
-                  }}
-                  >
-                    Skip
-                  </button>
-                </>
-              )}
-              <button onClick={cancelAll} style={{
-                padding: '12px 24px',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '1em',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                background: '#f44336',
-                color: 'white'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.opacity = '0.9';
-                e.target.style.transform = 'translateY(-1px)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.opacity = '1';
-                e.target.style.transform = 'translateY(0)';
-              }}
-              >
-                Cancel All
-              </button>
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
         
         {/* Upcoming Subjects Queue */}
         {subjectItems.length > 1 && (
-          <div style={{
-            background: '#f9f9f9',
-            borderRadius: '8px',
-            padding: '16px',
-            marginBottom: '16px'
-          }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            style={{
+              background: 'rgba(255, 255, 255, 0.03)',
+              backdropFilter: 'blur(30px)',
+              borderRadius: '20px',
+              border: '1px solid rgba(255, 255, 255, 0.18)',
+              padding: '1.5rem',
+              marginBottom: '1.5rem'
+            }}
+          >
             <h5 style={{
-              marginTop: '0',
-              color: '#666',
-              fontSize: '1em',
-              marginBottom: '12px'
-            }}>Upcoming</h5>
-            <div style={{
+              margin: '0 0 1rem 0',
+              color: 'rgba(255, 255, 255, 0.9)',
+              fontSize: '1.125rem',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              <Clock size={20} color="#a78bfa" />
+              Upcoming Sessions
+            </h5>
+            <div className="timer-scrollbar" style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '8px'
+              gap: '0.75rem',
+              maxHeight: '400px',
+              overflowY: 'auto',
+              paddingRight: '0.5rem'
             }}>
               {subjectItems.map((item, index) => {
                 if (index <= currentIndex) return null;
@@ -565,85 +1026,167 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
                 });
                 
                 return (
-                  <div key={index} style={{
-                    background: 'white',
-                    borderRadius: '6px',
-                    padding: '12px',
-                    borderLeft: '4px solid #667eea'
-                  }}>
-                    {breakBefore && (
-                      <div style={{
-                        fontSize: '0.85em',
-                        color: '#ff9800',
-                        marginBottom: '6px',
-                        fontWeight: '500'
-                      }}>
-                        ☕ {breakBefore.break} min break
-                      </div>
-                    )}
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: (index - currentIndex) * 0.1 }}
+                    whileHover={{ x: 5, transition: { duration: 0.2 } }}
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      backdropFilter: 'blur(10px)',
+                      borderRadius: '14px',
+                      padding: '1rem',
+                      borderLeft: '4px solid rgba(139, 92, 246, 0.6)',
+                      transition: 'all 0.2s ease',
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    {/* Subtle Gradient Overlay */}
                     <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      gap: '12px'
-                    }}>
-                      <span style={{
-                        fontWeight: '600',
-                        color: '#333',
-                        flex: '1'
-                      }}>{item.subject}</span>
-                      <span style={{
-                        background: '#e3f2fd',
-                        color: '#1976d2',
-                        padding: '4px 12px',
-                        borderRadius: '12px',
-                        fontSize: '0.85em',
-                        fontWeight: '500'
-                      }}>{item.duration} mins</span>
-                      <span style={{
-                        color: '#666',
-                        fontSize: '0.9em'
-                      }}>{item.start}</span>
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(90deg, rgba(139, 92, 246, 0.05) 0%, transparent 100%)',
+                      pointerEvents: 'none'
+                    }} />
+                    
+                    <div style={{ position: 'relative', zIndex: 1 }}>
+                      {breakBefore && (
+                        <div style={{
+                          fontSize: '0.8125rem',
+                          color: '#fb923c',
+                          marginBottom: '0.5rem',
+                          fontWeight: 500,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.375rem'
+                        }}>
+                          <Coffee size={14} />
+                          {breakBefore.break} min break before this
+                        </div>
+                      )}
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        gap: '1rem',
+                        flexWrap: 'wrap'
+                      }}>
+                        <div style={{ flex: 1, minWidth: '150px' }}>
+                          <div style={{
+                            fontWeight: 600,
+                            color: 'white',
+                            fontSize: '1rem',
+                            marginBottom: '0.25rem'
+                          }}>
+                            {item.subject}
+                          </div>
+                          <div style={{
+                            fontSize: '0.8125rem',
+                            color: 'rgba(255, 255, 255, 0.5)'
+                          }}>
+                            Session {index + 1} of {subjectItems.length}
+                          </div>
+                        </div>
+                        <div style={{
+                          display: 'flex',
+                          gap: '0.75rem',
+                          alignItems: 'center'
+                        }}>
+                          <div style={{
+                            background: 'rgba(139, 92, 246, 0.2)',
+                            border: '1px solid rgba(139, 92, 246, 0.4)',
+                            color: '#c4b5fd',
+                            padding: '0.375rem 0.875rem',
+                            borderRadius: '10px',
+                            fontSize: '0.8125rem',
+                            fontWeight: 600,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.375rem'
+                          }}>
+                            <Clock size={12} />
+                            {item.duration} min
+                          </div>
+                          <div style={{
+                            color: 'rgba(255, 255, 255, 0.6)',
+                            fontSize: '0.875rem',
+                            fontWeight: 500
+                          }}>
+                            {item.start}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
-          </div>
+          </motion.div>
         )}
         
         {/* Completed Subjects */}
         {completedSubjects.length > 0 && (
-          <div style={{
-            background: '#f1f8f4',
-            borderRadius: '8px',
-            padding: '16px'
-          }}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            style={{
+              background: 'rgba(34, 197, 94, 0.1)',
+              backdropFilter: 'blur(30px)',
+              borderRadius: '20px',
+              border: '1px solid rgba(34, 197, 94, 0.3)',
+              padding: '1.5rem'
+            }}
+          >
             <h5 style={{
-              marginTop: '0',
-              color: '#4CAF50',
-              fontSize: '1em',
-              marginBottom: '12px'
-            }}>Completed ✓</h5>
+              margin: '0 0 1rem 0',
+              color: '#22c55e',
+              fontSize: '1.125rem',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              <CheckCircle size={20} />
+              Completed Sessions
+            </h5>
             <div style={{
               display: 'flex',
               flexWrap: 'wrap',
-              gap: '8px'
+              gap: '0.75rem'
             }}>
               {completedSubjects.map((subject, index) => (
-                <span key={index} style={{
-                  background: '#4CAF50',
-                  color: 'white',
-                  padding: '6px 16px',
-                  borderRadius: '16px',
-                  fontSize: '0.9em',
-                  fontWeight: '500'
-                }}>
+                <motion.span
+                  key={index}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", delay: index * 0.1 }}
+                  whileHover={{ scale: 1.05 }}
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.9), rgba(16, 185, 129, 0.9))',
+                    color: 'white',
+                    padding: '0.625rem 1.25rem',
+                    borderRadius: '14px',
+                    fontSize: '0.9375rem',
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    boxShadow: '0 4px 12px rgba(34, 197, 94, 0.3)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)'
+                  }}
+                >
+                  <CheckCircle size={16} />
                   {subject}
-                </span>
+                </motion.span>
               ))}
             </div>
-          </div>
+          </motion.div>
         )}
       </div>
       
@@ -656,6 +1199,7 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
         currentIndex={currentIndex}
       />
     </div>
+    </>
   );
 };
 
