@@ -108,6 +108,8 @@ export const getStudyRecommendations = async (preferences) => {
   // Format data to match backend expectations
   const requestData = {
     subjects: preferences.subjects || ['Math'],
+    durations: preferences.durations || [preferences.preferredDuration || 45],
+    breaks: preferences.breaks || [0],
     focus_level: preferences.focus_level || preferences.focusLevel / 10 || 0.8,
     available_time: preferences.available_time || `${preferences.availableTimeStart || '09:00'} - ${preferences.availableTimeEnd || '18:00'}`,
     preferred_duration: preferences.preferred_duration || preferences.preferredDuration || 45,

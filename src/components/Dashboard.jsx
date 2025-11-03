@@ -258,9 +258,17 @@ const Dashboard = () => {
     setIsLoading(true);
     
     try {
-      // Format the data for the enhanced ML model
+      // Format the data for the enhanced ML model with queue information
       const requestData = {
-        subjects: preferences.subjects,
+        subjects: subjectQueue.length > 0 
+          ? subjectQueue.map(item => item.subject) 
+          : preferences.subjects,
+        durations: subjectQueue.length > 0
+          ? subjectQueue.map(item => item.duration)
+          : [preferences.preferredDuration],
+        breaks: subjectQueue.length > 0
+          ? subjectQueue.map(item => item.hasBreak ? item.breakDuration : 0)
+          : [0],
         available_time: `${preferences.availableTimeStart} - ${preferences.availableTimeEnd}`,
         focus_level: preferences.focusLevel / 10, // Convert 1-10 scale to 0-1
         past_sessions: preferences.pastSessions
@@ -281,7 +289,7 @@ const Dashboard = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [preferences, user]); // Dependencies for useCallback
+  }, [preferences, user, subjectQueue]); // Dependencies for useCallback
 
   // Remove automatic fetch on preferences change to prevent infinite loops
   // We'll only fetch recommendations when the Submit button is clicked
@@ -638,6 +646,10 @@ const Dashboard = () => {
             isLoading={isLoading}
             handleSubmit={handleSubmit}
             onNavigate={() => navigate('/')}
+            recommendations={recommendations}
+            showTimers={showTimers}
+            handleConfirmSchedule={handleConfirmSchedule}
+            handleAdjustSchedule={handleAdjustSchedule}
           />
 
           {/* Spacer for fixed sidebar - Dynamic based on sidebar state */}
