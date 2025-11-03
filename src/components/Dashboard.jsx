@@ -160,9 +160,29 @@ const keyframeAnimations = `
     50% { transform: translate(-50%, -50%) scale(0.9); }
   }
   
+  @media (max-width: 1400px) {
+    .fixed-sidebar {
+      width: 300px !important;
+      left: 1rem !important;
+    }
+    .dashboard-grid {
+      grid-template-columns: 300px 1fr 320px !important;
+    }
+  }
+  
   @media (max-width: 1200px) {
+    .fixed-sidebar {
+      position: relative !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: auto !important;
+      margin-bottom: 1.5rem;
+    }
     .dashboard-grid {
       grid-template-columns: 1fr 1fr !important;
+    }
+    .dashboard-grid > div:first-child {
+      grid-column: 1 / -1;
     }
     .dashboard-grid > div:last-child {
       grid-column: 1 / -1;
@@ -493,58 +513,229 @@ const Dashboard = () => {
           alignItems: 'start'
         }}
         className="dashboard-grid">
-          {/* Left Column - Study Preferences Card */}
+          {/* Left Column - Fixed Sidebar */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             style={{
-              padding: '1.75rem',
+              position: 'fixed',
+              left: '1.5rem',
+              top: '100px',
+              width: '340px',
+              height: 'calc(100vh - 120px)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1.25rem',
+              overflowY: 'auto',
+              overflowX: 'hidden',
+              paddingRight: '0.5rem'
+            }}
+            className="fixed-sidebar"
+          >
+            <style>{`
+              .fixed-sidebar::-webkit-scrollbar {
+                width: 5px;
+              }
+              
+              .fixed-sidebar::-webkit-scrollbar-track {
+                background: transparent;
+              }
+              
+              .fixed-sidebar::-webkit-scrollbar-thumb {
+                background: rgba(139, 92, 246, 0.4);
+                border-radius: 10px;
+              }
+              
+              .fixed-sidebar::-webkit-scrollbar-thumb:hover {
+                background: rgba(139, 92, 246, 0.6);
+              }
+            `}</style>
+
+            {/* Greeting Card */}
+            <div style={{
+              padding: '1.25rem 1.5rem',
               background: 'rgba(255, 255, 255, 0.03)',
               backdropFilter: 'blur(30px)',
               WebkitBackdropFilter: 'blur(30px)',
-              borderRadius: '20px',
-              border: '1px solid rgba(255, 255, 255, 0.18)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-              position: 'sticky',
-              top: '100px'
-            }}
-          >
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              marginBottom: '1.25rem'
+              borderRadius: '18px',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)'
             }}>
-              <div style={{
-                padding: '0.5rem',
-                background: 'rgba(139, 92, 246, 0.2)',
-                borderRadius: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <Brain size={20} color="#a78bfa" />
-              </div>
               <h3 style={{
                 fontSize: '1.25rem',
-                fontWeight: 600,
+                fontWeight: 700,
                 color: 'white',
-                margin: 0
+                margin: '0 0 0.375rem 0',
+                background: 'linear-gradient(135deg, #a78bfa, #c084fc, #f472b6)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
               }}>
-                Preferences
+                Hello, {user?.email?.split('@')[0] || 'Student'}! 👋
               </h3>
+              <p style={{
+                color: 'rgba(255, 255, 255, 0.5)',
+                margin: 0,
+                fontSize: '0.8125rem',
+                lineHeight: '1.3'
+              }}>
+                {new Date().toLocaleDateString('en-US', { 
+                  weekday: 'short', 
+                  month: 'short', 
+                  day: 'numeric' 
+                })}
+              </p>
             </div>
+
+            {/* Today's Target Card */}
+            <div style={{
+              padding: '1.25rem',
+              background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(168, 85, 247, 0.04))',
+              backdropFilter: 'blur(30px)',
+              WebkitBackdropFilter: 'blur(30px)',
+              borderRadius: '18px',
+              border: '1px solid rgba(139, 92, 246, 0.25)',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              {/* Glow Effect */}
+              <div style={{
+                position: 'absolute',
+                top: '-50%',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: '120%',
+                height: '100%',
+                background: 'radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%)',
+                filter: 'blur(40px)',
+                pointerEvents: 'none'
+              }} />
+              
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.625rem',
+                  marginBottom: '0.875rem'
+                }}>
+                  <div style={{
+                    padding: '0.4rem',
+                    background: 'rgba(139, 92, 246, 0.25)',
+                    borderRadius: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <Target size={16} color="#a78bfa" />
+                  </div>
+                  <h4 style={{
+                    fontSize: '1rem',
+                    fontWeight: 600,
+                    color: 'white',
+                    margin: 0
+                  }}>
+                    Today's Target
+                  </h4>
+                </div>
+                
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '0.875rem 1rem',
+                  background: 'rgba(139, 92, 246, 0.12)',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(139, 92, 246, 0.25)'
+                }}>
+                  <div>
+                    <div style={{
+                      fontSize: '0.6875rem',
+                      color: 'rgba(255, 255, 255, 0.5)',
+                      marginBottom: '0.25rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em'
+                    }}>
+                      Study Hours
+                    </div>
+                    <div style={{
+                      fontSize: '1.75rem',
+                      fontWeight: 700,
+                      color: 'white',
+                      lineHeight: 1
+                    }}>
+                      {Math.floor((preferences.subjects.length * preferences.preferredDuration) / 60)}h {((preferences.subjects.length * preferences.preferredDuration) % 60)}m
+                    </div>
+                  </div>
+                  <div style={{
+                    padding: '0.625rem',
+                    background: 'rgba(139, 92, 246, 0.2)',
+                    borderRadius: '10px'
+                  }}>
+                    <Clock size={28} color="#a78bfa" />
+                  </div>
+                </div>
+                
+                <div style={{
+                  marginTop: '0.625rem',
+                  fontSize: '0.75rem',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.375rem'
+                }}>
+                  <span style={{ color: '#22c55e', fontSize: '0.625rem' }}>●</span>
+                  {preferences.subjects.length} subject{preferences.subjects.length !== 1 ? 's' : ''} planned
+                </div>
+              </div>
+            </div>
+
+            {/* Study Preferences Form Card */}
+            <div style={{
+              padding: '1.25rem 1.5rem',
+              background: 'rgba(255, 255, 255, 0.03)',
+              backdropFilter: 'blur(30px)',
+              WebkitBackdropFilter: 'blur(30px)',
+              borderRadius: '18px',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.625rem',
+                marginBottom: '1rem'
+              }}>
+                <div style={{
+                  padding: '0.4rem',
+                  background: 'rgba(139, 92, 246, 0.2)',
+                  borderRadius: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Brain size={16} color="#a78bfa" />
+                </div>
+                <h3 style={{
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  color: 'white',
+                  margin: 0
+                }}>
+                  Preferences
+                </h3>
+              </div>
             
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
               {/* Subjects */}
               <div>
                 <label style={{
                   display: 'block',
-                  fontSize: '0.8125rem',
+                  fontSize: '0.75rem',
                   fontWeight: 500,
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  marginBottom: '0.5rem'
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  marginBottom: '0.375rem'
                 }}>
                   Subjects
                 </label>
@@ -553,30 +744,30 @@ const Dashboard = () => {
                   value={preferences.subjects} 
                   onChange={handleInputChange}
                   multiple
-                  size="4"
+                  size="3"
                   style={{
                     width: '100%',
-                    padding: '0.625rem',
+                    padding: '0.5rem',
                     background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.18)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
                     borderRadius: '10px',
                     color: 'white',
-                    fontSize: '0.8125rem',
+                    fontSize: '0.75rem',
                     fontFamily: "'Outfit', sans-serif",
                     outline: 'none'
                   }}
                 >
                   {availableSubjects.map(subject => (
-                    <option key={subject} value={subject} style={{ padding: '0.375rem' }}>{subject}</option>
+                    <option key={subject} value={subject} style={{ padding: '0.25rem' }}>{subject}</option>
                   ))}
                 </select>
                 <small style={{
                   display: 'block',
                   marginTop: '0.25rem',
-                  fontSize: '0.6875rem',
-                  color: 'rgba(255, 255, 255, 0.5)'
+                  fontSize: '0.625rem',
+                  color: 'rgba(255, 255, 255, 0.4)'
                 }}>
-                  Hold Ctrl to select multiple
+                  Hold Ctrl for multiple
                 </small>
               </div>
 
@@ -584,12 +775,12 @@ const Dashboard = () => {
               <div>
                 <label style={{
                   display: 'block',
-                  fontSize: '0.8125rem',
+                  fontSize: '0.75rem',
                   fontWeight: 500,
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  marginBottom: '0.5rem'
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  marginBottom: '0.375rem'
                 }}>
-                  <Clock size={12} style={{ display: 'inline', marginRight: '0.375rem' }} />
+                  <Clock size={11} style={{ display: 'inline', marginRight: '0.25rem' }} />
                   Duration (min)
                 </label>
                 <input 
@@ -601,12 +792,12 @@ const Dashboard = () => {
                   max="180"
                   style={{
                     width: '100%',
-                    padding: '0.625rem',
+                    padding: '0.5rem',
                     background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.18)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
                     borderRadius: '10px',
                     color: 'white',
-                    fontSize: '0.8125rem',
+                    fontSize: '0.75rem',
                     fontFamily: "'Outfit', sans-serif",
                     outline: 'none'
                   }}
@@ -614,14 +805,14 @@ const Dashboard = () => {
               </div>
 
               {/* Time Range */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.625rem' }}>
                 <div>
                   <label style={{
                     display: 'block',
-                    fontSize: '0.8125rem',
+                    fontSize: '0.75rem',
                     fontWeight: 500,
-                    color: 'rgba(255, 255, 255, 0.9)',
-                    marginBottom: '0.5rem'
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    marginBottom: '0.375rem'
                   }}>
                     Start
                   </label>
@@ -632,12 +823,12 @@ const Dashboard = () => {
                     onChange={handleInputChange}
                     style={{
                       width: '100%',
-                      padding: '0.625rem',
+                      padding: '0.5rem',
                       background: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.18)',
+                      border: '1px solid rgba(255, 255, 255, 0.15)',
                       borderRadius: '10px',
                       color: 'white',
-                      fontSize: '0.8125rem',
+                      fontSize: '0.75rem',
                       fontFamily: "'Outfit', sans-serif",
                       outline: 'none'
                     }}
@@ -647,10 +838,10 @@ const Dashboard = () => {
                 <div>
                   <label style={{
                     display: 'block',
-                    fontSize: '0.8125rem',
+                    fontSize: '0.75rem',
                     fontWeight: 500,
-                    color: 'rgba(255, 255, 255, 0.9)',
-                    marginBottom: '0.5rem'
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    marginBottom: '0.375rem'
                   }}>
                     End
                   </label>
@@ -661,12 +852,12 @@ const Dashboard = () => {
                     onChange={handleInputChange}
                     style={{
                       width: '100%',
-                      padding: '0.625rem',
+                      padding: '0.5rem',
                       background: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.18)',
+                      border: '1px solid rgba(255, 255, 255, 0.15)',
                       borderRadius: '10px',
                       color: 'white',
-                      fontSize: '0.8125rem',
+                      fontSize: '0.75rem',
                       fontFamily: "'Outfit', sans-serif",
                       outline: 'none'
                     }}
@@ -678,12 +869,12 @@ const Dashboard = () => {
               <div>
                 <label style={{
                   display: 'block',
-                  fontSize: '0.8125rem',
+                  fontSize: '0.75rem',
                   fontWeight: 500,
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  marginBottom: '0.5rem'
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  marginBottom: '0.375rem'
                 }}>
-                  <Target size={12} style={{ display: 'inline', marginRight: '0.375rem' }} />
+                  <Target size={11} style={{ display: 'inline', marginRight: '0.25rem' }} />
                   Focus: {preferences.focusLevel}/10
                 </label>
                 <input 
@@ -695,14 +886,15 @@ const Dashboard = () => {
                   max="10"
                   style={{
                     width: '100%',
+                    height: '4px',
                     accentColor: '#8b5cf6'
                   }}
                 />
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
-                  fontSize: '0.6875rem',
-                  color: 'rgba(255, 255, 255, 0.5)',
+                  fontSize: '0.625rem',
+                  color: 'rgba(255, 255, 255, 0.4)',
                   marginTop: '0.25rem'
                 }}>
                   <span>Low</span>
@@ -718,23 +910,167 @@ const Dashboard = () => {
                 whileTap={{ scale: 0.98 }}
                 style={{
                   width: '100%',
-                  padding: '0.75rem',
-                  marginTop: '0.5rem',
+                  padding: '0.625rem',
+                  marginTop: '0.375rem',
                   background: isLoading ? 'rgba(139, 92, 246, 0.5)' : 'linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(168, 85, 247, 0.9))',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
-                  borderRadius: '12px',
+                  borderRadius: '10px',
                   color: 'white',
-                  fontSize: '0.9375rem',
+                  fontSize: '0.875rem',
                   fontWeight: 600,
                   cursor: isLoading ? 'not-allowed' : 'pointer',
-                  boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4)',
+                  boxShadow: '0 4px 16px rgba(139, 92, 246, 0.4)',
                   transition: 'all 0.3s ease'
                 }}
               >
                 {isLoading ? 'Generating...' : '✨ Generate Plan'}
               </motion.button>
             </form>
+            </div>
+
+            {/* Past Sessions Recap Card */}
+            <div style={{
+              padding: '1.25rem',
+              background: 'rgba(255, 255, 255, 0.03)',
+              backdropFilter: 'blur(30px)',
+              WebkitBackdropFilter: 'blur(30px)',
+              borderRadius: '18px',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.625rem',
+                marginBottom: '0.875rem'
+              }}>
+                <div style={{
+                  padding: '0.4rem',
+                  background: 'rgba(244, 114, 182, 0.2)',
+                  borderRadius: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Clock size={16} color="#f472b6" />
+                </div>
+                <h4 style={{
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  color: 'white',
+                  margin: 0
+                }}>
+                  Recent Activity
+                </h4>
+              </div>
+              
+              {preferences.pastSessions && preferences.pastSessions.length > 0 ? (
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.5rem'
+                }}>
+                  {preferences.pastSessions.slice(0, 2).map((session, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        padding: '0.75rem',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        borderRadius: '10px',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                      }}
+                    >
+                      <div>
+                        <div style={{
+                          fontSize: '0.8125rem',
+                          fontWeight: 600,
+                          color: 'white',
+                          marginBottom: '0.125rem'
+                        }}>
+                          {session.subject || 'Study Session'}
+                        </div>
+                        <div style={{
+                          fontSize: '0.6875rem',
+                          color: 'rgba(255, 255, 255, 0.45)'
+                        }}>
+                          {session.duration || '45'} min
+                        </div>
+                      </div>
+                      <div style={{
+                        padding: '0.25rem 0.625rem',
+                        background: 'rgba(34, 197, 94, 0.15)',
+                        border: '1px solid rgba(34, 197, 94, 0.25)',
+                        borderRadius: '6px',
+                        fontSize: '0.6875rem',
+                        color: '#22c55e',
+                        fontWeight: 600
+                      }}>
+                        ✓
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{
+                  padding: '1.5rem 0.75rem',
+                  textAlign: 'center'
+                }}>
+                  <div style={{
+                    fontSize: '2rem',
+                    marginBottom: '0.375rem',
+                    opacity: 0.4
+                  }}>
+                    📚
+                  </div>
+                  <p style={{
+                    fontSize: '0.75rem',
+                    color: 'rgba(255, 255, 255, 0.45)',
+                    margin: 0,
+                    lineHeight: '1.3'
+                  }}>
+                    No sessions yet.<br />
+                    Start studying!
+                  </p>
+                </div>
+              )}
+              
+              {preferences.pastSessions && preferences.pastSessions.length > 2 && (
+                <div style={{
+                  marginTop: '0.625rem',
+                  textAlign: 'center'
+                }}>
+                  <button style={{
+                    padding: '0.375rem 0.875rem',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '8px',
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    fontSize: '0.75rem',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = 'rgba(255, 255, 255, 0.08)';
+                    e.target.style.color = 'white';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = 'rgba(255, 255, 255, 0.05)';
+                    e.target.style.color = 'rgba(255, 255, 255, 0.6)';
+                  }}
+                  >
+                    +{preferences.pastSessions.length - 2} more
+                  </button>
+                </div>
+              )}
+            </div>
           </motion.div>
+
+          {/* Spacer for fixed sidebar */}
+          <div style={{ width: '340px' }} />
 
           {/* Center Column - Recommendations */}
           <motion.div
