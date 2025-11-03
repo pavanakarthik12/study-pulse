@@ -358,13 +358,27 @@ const Dashboard = () => {
   };
 
   // Handle schedule confirmation
-  const handleConfirmSchedule = () => {
-    if (recommendations.recommended_schedule.length === 0) {
+  const handleConfirmSchedule = (scheduleData) => {
+    console.log('📋 Confirming schedule:', scheduleData);
+    
+    // Handle both formats: direct schedule data or recommendations object
+    let schedule = [];
+    
+    if (scheduleData?.recommended_schedule) {
+      schedule = scheduleData.recommended_schedule;
+    } else if (Array.isArray(scheduleData)) {
+      schedule = scheduleData;
+    } else if (recommendations?.recommended_schedule) {
+      schedule = recommendations.recommended_schedule;
+    }
+    
+    if (schedule.length === 0) {
       setError('No schedule to confirm. Generate a study plan first.');
       return;
     }
     
-    setConfirmedSchedule(recommendations.recommended_schedule);
+    console.log('✅ Starting timers with schedule:', schedule);
+    setConfirmedSchedule(schedule);
     setShowTimers(true);
   };
   const handleAdjustSchedule = () => {

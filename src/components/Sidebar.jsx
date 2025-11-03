@@ -80,13 +80,35 @@ const Sidebar = ({
     setError(null);
 
     try {
-      const response = await getStudyRecommendations(subjectQueue);
+      // Format data for backend ML model
+      const requestData = {
+        subjects: subjectQueue.map(s => s.subject),
+        durations: subjectQueue.map(s => s.duration),
+        breaks: subjectQueue.map(() => 0), // Backend will auto-generate breaks
+        focus_level: 0.8, // Default focus level
+        available_time: '09:00 - 18:00', // Default time range
+        preferred_duration: 45,
+        past_sessions: []
+      };
+
+      console.log('📤 Sending schedule request:', requestData);
+      
+      const response = await getStudyRecommendations(requestData);
+      
+      console.log('📥 Received schedule response:', response);
+      
+      if (!response || !response.recommended_schedule) {
+        throw new Error('Invalid response format from backend');
+      }
+
       setInternalRecommendations(response);
       setScheduleGenerated(true);
-      setLoading(false);
+      setError(null);
+      
     } catch (err) {
-      console.error('Error generating schedule:', err);
-      setError('Failed to generate schedule. Please try again.');
+      console.error('❌ Error generating schedule:', err);
+      setError(err.message || 'Failed to generate schedule. Please ensure backend is running.');
+    } finally {
       setLoading(false);
     }
   };
@@ -94,6 +116,7 @@ const Sidebar = ({
   // Start session handler
   const handleStartSession = () => {
     if (internalRecommendations) {
+      console.log('🎬 Starting session with schedule:', internalRecommendations);
       handleConfirmSchedule(internalRecommendations);
     }
   };
@@ -631,7 +654,7 @@ const Sidebar = ({
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.75rem',
-                marginBottom: '1.25rem'
+                marginBottom: '1rem'
               }}>
                 <CheckCircle2 size={24} color="#22c55e" strokeWidth={2.5} />
                 <div>
@@ -648,9 +671,64 @@ const Sidebar = ({
                     color: 'rgba(255, 255, 255, 0.6)',
                     fontWeight: 500
                   }}>
-                    {activeRecommendations.recommended_schedule?.length || 0} sessions planned
+                    {activeRecommendations.recommended_schedule?.filter(s => s.subject).length || 0} subjects • {activeRecommendations.recommended_schedule?.filter(s => s.break).length || 0} breaks
                   </div>
                 </div>
+              </div>
+
+              {/* Schedule Preview */}
+              <div style={{
+                marginBottom: '1rem',
+                maxHeight: '200px',
+                overflowY: 'auto',
+                background: 'rgba(0, 0, 0, 0.2)',
+                borderRadius: '10px',
+                padding: '0.75rem'
+              }}>
+                {activeRecommendations.recommended_schedule?.map((item, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      padding: '0.625rem',
+                      marginBottom: index < activeRecommendations.recommended_schedule.length - 1 ? '0.5rem' : '0',
+                      background: item.subject 
+                        ? 'rgba(139, 92, 246, 0.1)' 
+                        : 'rgba(34, 197, 94, 0.1)',
+                      borderRadius: '8px',
+                      border: `1px solid ${item.subject ? 'rgba(139, 92, 246, 0.2)' : 'rgba(34, 197, 94, 0.2)'}`,
+                      fontSize: '0.8125rem'
+                    }}
+                  >
+                    {item.subject ? (
+                      <>
+                        <div style={{
+                          fontWeight: 700,
+                          color: '#e9d5ff',
+                          marginBottom: '0.25rem'
+                        }}>
+                          {item.subject}
+                        </div>
+                        <div style={{
+                          color: 'rgba(255, 255, 255, 0.6)',
+                          fontSize: '0.75rem',
+                          fontWeight: 500
+                        }}>
+                          {item.start} - {item.end} ({item.duration} min)
+                        </div>
+                      </>
+                    ) : (
+                      <div style={{
+                        fontWeight: 600,
+                        color: '#86efac',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
+                      }}>
+                        ☕ Break • {item.break} min
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
 
               {/* Start Session Button */}

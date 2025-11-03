@@ -11,69 +11,62 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
   const [isPaused, setIsPaused] = useState(false);
   const [completedSubjects, setCompletedSubjects] = useState([]);
   const [isBreakTime, setIsBreakTime] = useState(false);
-  const [breakDuration, setBreakDuration] = useState(0);
   
-  // Extract only subject items (not breaks)
+  console.log('🎬 SequentialTimers initialized with schedule:', schedule);
+  
+  // Get current item (handles both subjects and breaks)
+  const currentItem = schedule[currentIndex];
+  const isCurrentBreak = currentItem?.break !== undefined;
+  
+  // Calculate subject-only items for progress tracking
   const subjectItems = schedule.filter(item => item.subject);
-  const currentItem = subjectItems[currentIndex];
+  const currentSubjectIndex = subjectItems.findIndex(s => s.subject === currentItem?.subject);
   
   // Initialize timer with current item duration
   useEffect(() => {
     if (currentItem && !isRunning) {
-      // Convert minutes to seconds
-      setTimeRemaining(currentItem.duration * 60);
+      if (isCurrentBreak) {
+        console.log(`☕ Starting break: ${currentItem.break} minutes`);
+        setTimeRemaining(currentItem.break * 60);
+        setIsBreakTime(true);
+      } else if (currentItem.subject) {
+        console.log(`📚 Starting subject: ${currentItem.subject} (${currentItem.duration} min)`);
+        setTimeRemaining(currentItem.duration * 60);
+        setIsBreakTime(false);
+      }
     }
-  }, [currentItem, isRunning]);
+  }, [currentIndex, currentItem, isRunning, isCurrentBreak]);
   
   const handleTimerComplete = useCallback(() => {
     if (!currentItem) return;
     
-    // Mark subject as completed
-    setCompletedSubjects(prev => [...prev, currentItem.subject]);
+    // If it was a subject, mark as completed
+    if (currentItem.subject) {
+      console.log(`✅ Completed: ${currentItem.subject}`);
+      setCompletedSubjects(prev => [...prev, currentItem.subject]);
+    }
     
-    // Check if there are more subjects
-    if (currentIndex < subjectItems.length - 1) {
-      // Check for break before next subject
-      const nextBreak = schedule.find((item, idx) => {
-        const prevSubjectIndex = schedule.findIndex(s => s.subject === currentItem.subject);
-        const nextSubjectIndex = schedule.findIndex(s => s.subject === subjectItems[currentIndex + 1].subject);
-        return idx > prevSubjectIndex && idx < nextSubjectIndex && item.break;
-      });
-      
-      if (nextBreak && nextBreak.break > 0) {
-        // Start break timer
-        setIsBreakTime(true);
-        setBreakDuration(nextBreak.break * 60); // Convert to seconds
-        setIsRunning(false);
-        setIsPaused(false);
-        
-        // Auto-advance to next subject after break
-        setTimeout(() => {
-          setIsBreakTime(false);
-          setCurrentIndex(prev => prev + 1);
-          setIsRunning(false);
-          setIsPaused(false);
-        }, nextBreak.break * 60 * 1000);
-      } else {
-        // No break, move to next subject immediately
-        setCurrentIndex(prev => prev + 1);
-        setIsRunning(false);
-        setIsPaused(false);
-      }
+    // Check if there are more items
+    if (currentIndex < schedule.length - 1) {
+      console.log(`➡️ Moving to next item (${currentIndex + 1}/${schedule.length})`);
+      setCurrentIndex(prev => prev + 1);
+      setIsRunning(false);
+      setIsPaused(false);
     } else {
-      // All subjects completed - CONFETTI TIME!
+      // All sessions completed - CONFETTI TIME!
+      console.log('🎉 All sessions completed!');
       setIsRunning(false);
       triggerConfetti();
       
       if (onComplete) {
-        onComplete(completedSubjects.concat([currentItem.subject]));
+        onComplete(completedSubjects);
       }
       
       setTimeout(() => {
-        alert('🎉 Congratulations! You completed all your study sessions! Amazing work!');
-      }, 500);
+        alert('🎉 Session Complete! You finished all your study sessions! Amazing work! 🌟');
+      }, 1000);
     }
-  }, [currentIndex, currentItem, subjectItems, schedule, completedSubjects, onComplete]);
+  }, [currentIndex, currentItem, schedule, completedSubjects, onComplete]);
   
   const triggerConfetti = () => {
     const duration = 3000;
@@ -124,26 +117,6 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
       if (interval) clearInterval(interval);
     };
   }, [isRunning, isPaused, timeRemaining, handleTimerComplete]);
-
-  // Break timer countdown
-  useEffect(() => {
-    let breakInterval = null;
-    
-    if (isBreakTime && breakDuration > 0) {
-      breakInterval = setInterval(() => {
-        setBreakDuration(prev => {
-          if (prev <= 1) {
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    
-    return () => {
-      if (breakInterval) clearInterval(breakInterval);
-    };
-  }, [isBreakTime, breakDuration]);
   
   const startTimer = () => {
     setIsRunning(true);
@@ -361,10 +334,10 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
               }}>
                 <Target size={20} color="#a78bfa" style={{ marginBottom: '0.5rem' }} />
                 <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'white' }}>
-                  {currentIndex + 1}/{subjectItems.length}
+                  {isCurrentBreak ? '☕' : `${currentSubjectIndex + 1}/${subjectItems.length}`}
                 </div>
                 <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)', marginTop: '0.25rem' }}>
-                  Current Session
+                  {isCurrentBreak ? 'Break Time' : 'Current Session'}
                 </div>
               </div>
               
