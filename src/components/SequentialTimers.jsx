@@ -26,9 +26,12 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
   useEffect(() => {
     if (currentItem && !isRunning) {
       if (isCurrentBreak) {
-        console.log(`☕ Starting break: ${currentItem.break} minutes`);
+        console.log(`☕ Auto-starting break: ${currentItem.break} minutes`);
         setTimeRemaining(currentItem.break * 60);
         setIsBreakTime(true);
+        // Auto-start breaks immediately
+        setIsRunning(true);
+        setIsPaused(false);
       } else if (currentItem.subject) {
         console.log(`📚 Starting subject: ${currentItem.subject} (${currentItem.duration} min)`);
         setTimeRemaining(currentItem.duration * 60);
@@ -132,7 +135,8 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
   };
   
   const skipSubject = () => {
-    if (window.confirm(`Skip ${currentItem.subject}?`)) {
+    const itemName = isCurrentBreak ? 'this break' : currentItem?.subject || 'this session';
+    if (window.confirm(`Skip ${itemName}?`)) {
       handleTimerComplete();
     }
   };
@@ -155,7 +159,9 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
   
   const getProgress = () => {
     if (!currentItem) return 0;
-    const totalSeconds = currentItem.duration * 60;
+    const totalSeconds = isCurrentBreak 
+      ? (currentItem.break * 60) 
+      : (currentItem.duration * 60);
     return ((totalSeconds - timeRemaining) / totalSeconds) * 100;
   };
   
@@ -537,7 +543,7 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
                   boxShadow: '0 8px 32px rgba(251, 146, 60, 0.3)'
                 }}
               >
-                {Math.floor(breakDuration / 60)}:{(breakDuration % 60).toString().padStart(2, '0')}
+                {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
               </motion.div>
               
               <div style={{
@@ -616,7 +622,7 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
                         backgroundClip: 'text'
                       }}
                     >
-                      {currentItem.subject}
+                      {currentItem.subject || 'Break Time'}
                     </motion.h4>
                     <p style={{
                       margin: '0.5rem 0 0 0',
@@ -627,21 +633,23 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
                     </p>
                   </div>
                   
-                  <div style={{
-                    background: 'rgba(139, 92, 246, 0.2)',
-                    border: '1px solid rgba(139, 92, 246, 0.4)',
-                    padding: '0.75rem 1.25rem',
-                    borderRadius: '16px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    color: '#c4b5fd',
-                    fontSize: '0.9375rem',
-                    fontWeight: 500
-                  }}>
-                    <Clock size={16} />
-                    {currentItem.start} - {currentItem.end}
-                  </div>
+                  {currentItem.start && currentItem.end && (
+                    <div style={{
+                      background: 'rgba(139, 92, 246, 0.2)',
+                      border: '1px solid rgba(139, 92, 246, 0.4)',
+                      padding: '0.75rem 1.25rem',
+                      borderRadius: '16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      color: '#c4b5fd',
+                      fontSize: '0.9375rem',
+                      fontWeight: 500
+                    }}>
+                      <Clock size={16} />
+                      {currentItem.start} - {currentItem.end}
+                    </div>
+                  )}
                 </div>
                 
                 {/* Circular Timer Display */}
@@ -772,7 +780,7 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
                         fontWeight: 600,
                         color: 'white'
                       }}>
-                        {currentItem.duration} min
+                        {isCurrentBreak ? `${currentItem.break} min` : `${currentItem.duration} min`}
                       </div>
                     </div>
                     

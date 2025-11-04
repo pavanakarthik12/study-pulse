@@ -7,8 +7,14 @@ const NotificationSidebar = ({ currentSubject, timeRemaining, isBreak, schedule,
   useEffect(() => {
     const newNotifications = [];
 
-    // Session start notification
-    if (currentSubject && timeRemaining > 0 && timeRemaining === currentSubject.duration * 60) {
+    if (!currentSubject) return;
+
+    const totalDuration = isBreak ? currentSubject.break : currentSubject.duration;
+    const totalSeconds = totalDuration * 60;
+    const elapsed = totalSeconds - timeRemaining;
+
+    // Session start notification (within first 3 seconds)
+    if (!isBreak && elapsed >= 0 && elapsed <= 3) {
       newNotifications.push({
         id: `start-${currentIndex}`,
         type: 'start',
@@ -19,8 +25,9 @@ const NotificationSidebar = ({ currentSubject, timeRemaining, isBreak, schedule,
       });
     }
 
-    // Halfway reminder
-    if (currentSubject && timeRemaining === Math.floor(currentSubject.duration * 30)) {
+    // Halfway reminder (within 3 second window of halfway point)
+    const halfwayPoint = totalSeconds / 2;
+    if (!isBreak && elapsed >= halfwayPoint - 1 && elapsed <= halfwayPoint + 2) {
       newNotifications.push({
         id: `halfway-${currentIndex}`,
         type: 'progress',
@@ -31,8 +38,8 @@ const NotificationSidebar = ({ currentSubject, timeRemaining, isBreak, schedule,
       });
     }
 
-    // 5 minutes left warning
-    if (currentSubject && timeRemaining === 300) {
+    // 5 minutes left warning (within 3 second window)
+    if (!isBreak && timeRemaining >= 298 && timeRemaining <= 301) {
       newNotifications.push({
         id: `warning-${currentIndex}`,
         type: 'warning',
@@ -43,10 +50,11 @@ const NotificationSidebar = ({ currentSubject, timeRemaining, isBreak, schedule,
       });
     }
 
-    // Hydration reminder every 20 minutes
-    if (currentSubject && timeRemaining % 1200 === 0 && timeRemaining > 0 && timeRemaining < currentSubject.duration * 60) {
+    // Hydration reminder every 20 minutes (within 3 second window)
+    const twentyMinutes = 1200;
+    if (!isBreak && elapsed > 10 && elapsed % twentyMinutes <= 3) {
       newNotifications.push({
-        id: `hydration-${Date.now()}`,
+        id: `hydration-${Math.floor(elapsed / twentyMinutes)}`,
         type: 'hydration',
         title: '💧 Stay Hydrated!',
         message: 'Take a sip of water while studying.',
@@ -55,10 +63,10 @@ const NotificationSidebar = ({ currentSubject, timeRemaining, isBreak, schedule,
       });
     }
 
-    // Break notification
-    if (isBreak) {
+    // Break notification (within first 3 seconds of break)
+    if (isBreak && elapsed >= 0 && elapsed <= 3) {
       newNotifications.push({
-        id: `break-${Date.now()}`,
+        id: `break-${currentIndex}`,
         type: 'break',
         title: '☕ Break Time!',
         message: 'Take a short break. Stretch, walk around, or relax.',
