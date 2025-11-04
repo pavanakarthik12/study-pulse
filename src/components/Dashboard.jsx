@@ -3,7 +3,6 @@ import { auth } from '../firebase/config';
 import { useNavigate } from 'react-router-dom';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { getStudyRecommendations } from '../services/api';
-import RecommendationCard from './RecommendationCard';
 import SequentialTimers from './SequentialTimers';
 import ScheduleEditor from './ScheduleEditor';
 import MusicPlayer from './MusicPlayer';
@@ -217,6 +216,7 @@ const Dashboard = () => {
   const [currentDuration, setCurrentDuration] = useState(45);
   const [hasBreak, setHasBreak] = useState(true);
   const [breakDuration, setBreakDuration] = useState(10);
+  const [endBreak, setEndBreak] = useState(false); // NEW: end break option
   const [subjectQueue, setSubjectQueue] = useState([]);
   const [showPastSessions, setShowPastSessions] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -346,6 +346,7 @@ const Dashboard = () => {
     setCurrentDuration(45);
     setHasBreak(true);
     setBreakDuration(10);
+    setEndBreak(false);
     setSearchQuery('');
   };
   
@@ -657,6 +658,8 @@ const Dashboard = () => {
             setHasBreak={setHasBreak}
             breakDuration={breakDuration}
             setBreakDuration={setBreakDuration}
+            endBreak={endBreak}
+            setEndBreak={setEndBreak}
             isLoading={isLoading}
             handleSubmit={handleSubmit}
             onNavigate={() => navigate('/')}
@@ -688,7 +691,127 @@ const Dashboard = () => {
               minHeight: '500px'
             }}
           >
-            <RecommendationCard recommendations={recommendations} isLoading={isLoading} />
+            {/* Schedule Display */}
+            {isLoading ? (
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '3rem',
+                gap: '1rem'
+              }}>
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  style={{
+                    width: '48px',
+                    height: '48px',
+                    border: '4px solid rgba(139, 92, 246, 0.2)',
+                    borderTop: '4px solid #8b5cf6',
+                    borderRadius: '50%'
+                  }}
+                />
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.9375rem' }}>
+                  Generating your schedule...
+                </p>
+              </div>
+            ) : recommendations.recommended_schedule.length > 0 ? (
+              <>
+                <h3 style={{
+                  fontSize: '1.25rem',
+                  fontWeight: 700,
+                  color: 'white',
+                  marginBottom: '1.5rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}>
+                  📅 Your Study Schedule
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {recommendations.recommended_schedule.map((item, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      style={{
+                        padding: '1rem',
+                        background: item.break 
+                          ? 'rgba(34, 197, 94, 0.1)' 
+                          : 'rgba(139, 92, 246, 0.1)',
+                        border: item.break
+                          ? '1px solid rgba(34, 197, 94, 0.3)'
+                          : '1px solid rgba(139, 92, 246, 0.3)',
+                        borderRadius: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between'
+                      }}
+                    >
+                      <div>
+                        <div style={{
+                          fontSize: '1rem',
+                          fontWeight: 600,
+                          color: 'white',
+                          marginBottom: '0.25rem'
+                        }}>
+                          {item.break ? `☕ Break` : `📚 ${item.subject}`}
+                        </div>
+                        {!item.break && (
+                          <div style={{
+                            fontSize: '0.875rem',
+                            color: 'rgba(255, 255, 255, 0.6)'
+                          }}>
+                            {item.start} - {item.end}
+                          </div>
+                        )}
+                      </div>
+                      <div style={{
+                        padding: '0.5rem 0.875rem',
+                        background: item.break
+                          ? 'rgba(34, 197, 94, 0.2)'
+                          : 'rgba(139, 92, 246, 0.2)',
+                        borderRadius: '8px',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        color: item.break ? '#4ade80' : '#a78bfa'
+                      }}>
+                        {item.break ? `${item.break} min` : `${item.duration} min`}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '3rem',
+                gap: '1rem',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '3rem' }}>📚</div>
+                <h3 style={{
+                  fontSize: '1.25rem',
+                  fontWeight: 600,
+                  color: 'white',
+                  marginBottom: '0.5rem'
+                }}>
+                  No Schedule Yet
+                </h3>
+                <p style={{
+                  fontSize: '0.9375rem',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  maxWidth: '300px'
+                }}>
+                  Add subjects in the sidebar and generate your personalized study schedule
+                </p>
+              </div>
+            )}
             
             {!showTimers && recommendations.recommended_schedule.length > 0 && (
               <div style={{

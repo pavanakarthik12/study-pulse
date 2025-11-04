@@ -191,6 +191,7 @@ def predict_schedule():
         available_time = data.get('available_time')
         past_sessions = data.get('past_sessions', [])
         preferred_duration = data.get('preferred_duration', 45)
+        end_break = data.get('end_break', False)  # NEW: Get end break preference
         
         # Validate required fields
         missing_fields = []
@@ -238,7 +239,8 @@ def predict_schedule():
             preferred_duration=preferred_duration,
             past_sessions=past_sessions,
             start_time_model=start_time_model,
-            duration_model=duration_model
+            duration_model=duration_model,
+            end_break=end_break
         )
         
         if not schedule or 'recommended_schedule' not in schedule:

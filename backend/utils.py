@@ -313,7 +313,7 @@ def generate_dummy_data(num_samples=100):
     return X_start_time, y_start_time, X_duration, y_duration, past_sessions_list
 
 def generate_study_schedule(subjects, focus_rating, day_of_week, start_hour, available_hours, 
-                           preferred_duration, past_sessions, start_time_model, duration_model):
+                           preferred_duration, past_sessions, start_time_model, duration_model, end_break=False):
     """
     Generate a comprehensive study schedule for multiple subjects.
     
@@ -327,6 +327,7 @@ def generate_study_schedule(subjects, focus_rating, day_of_week, start_hour, ava
         past_sessions: List of past study sessions
         start_time_model: ML model for predicting start times
         duration_model: ML model for predicting durations
+        end_break: Whether to add a final break after the last subject
     
     Returns:
         Dictionary with recommended_schedule and confidence score
@@ -437,6 +438,18 @@ def generate_study_schedule(subjects, focus_rating, day_of_week, start_hour, ava
                 else:
                     # No time for break, end schedule
                     break
+        
+        # Add final break if requested and there's time available
+        if end_break and schedule:
+            final_break_duration = 15  # 15-minute final break
+            
+            if total_minutes_used + final_break_duration <= total_minutes_available:
+                schedule.append({
+                    "break": final_break_duration
+                })
+                print(f"Added final break of {final_break_duration} minutes")
+            else:
+                print("Not enough time for final break")
         
         return {
             "recommended_schedule": schedule,

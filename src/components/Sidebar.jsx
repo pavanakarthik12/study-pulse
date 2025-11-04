@@ -9,12 +9,14 @@ import {
   Clock,
   X,
   Sparkles,
-  CheckCircle2
+  CheckCircle2,
+  Coffee
 } from 'lucide-react';
 import { getStudyRecommendations } from '../services/api';
 
 const Sidebar = ({ 
   user,
+  sidebarOpen,
   subjectQueue,
   setSubjectQueue,
   recommendations,
@@ -25,6 +27,7 @@ const Sidebar = ({
   // State management
   const [subjectName, setSubjectName] = useState('');
   const [duration, setDuration] = useState('45');
+  const [endBreak, setEndBreak] = useState(false); // NEW: Add end break option
   const [loading, setLoading] = useState(false);
   const [scheduleGenerated, setScheduleGenerated] = useState(false);
   const [error, setError] = useState(null);
@@ -88,7 +91,8 @@ const Sidebar = ({
         focus_level: 0.8, // Default focus level
         available_time: '09:00 - 18:00', // Default time range
         preferred_duration: 45,
-        past_sessions: []
+        past_sessions: [],
+        end_break: endBreak // Include end break preference
       };
 
       console.log('📤 Sending schedule request:', requestData);
@@ -137,7 +141,10 @@ const Sidebar = ({
   return (
     <motion.div
       initial={{ x: -400, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
+      animate={{ 
+        x: sidebarOpen ? 0 : -420, 
+        opacity: sidebarOpen ? 1 : 0 
+      }}
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       style={{
         position: 'fixed',
@@ -420,6 +427,55 @@ const Sidebar = ({
                 </motion.button>
               ))}
             </div>
+          </div>
+
+          {/* Add End Break Toggle */}
+          <div style={{ marginBottom: '1.5rem' }}>
+            <motion.button
+              onClick={() => setEndBreak(!endBreak)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              style={{
+                width: '100%',
+                padding: '1rem',
+                background: endBreak
+                  ? 'rgba(34, 197, 94, 0.15)'
+                  : 'rgba(255, 255, 255, 0.05)',
+                border: endBreak
+                  ? '1.5px solid rgba(34, 197, 94, 0.5)'
+                  : '1.5px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '10px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                transition: 'all 0.2s ease',
+                fontFamily: "'Outfit', sans-serif"
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+                <Coffee size={20} color={endBreak ? '#4ade80' : 'rgba(255, 255, 255, 0.6)'} />
+                <span style={{
+                  fontSize: '0.9375rem',
+                  fontWeight: 600,
+                  color: endBreak ? '#4ade80' : 'rgba(255, 255, 255, 0.7)'
+                }}>
+                  Add final break after last subject
+                </span>
+              </div>
+              <div style={{
+                width: '20px',
+                height: '20px',
+                borderRadius: '6px',
+                background: endBreak ? '#22c55e' : 'rgba(255, 255, 255, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s ease'
+              }}>
+                {endBreak && <CheckCircle2 size={14} color="white" />}
+              </div>
+            </motion.button>
           </div>
 
           {/* Add Button */}
