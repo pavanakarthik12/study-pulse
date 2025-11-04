@@ -1,1078 +1,611 @@
-import React, { useState, useEffect, useRef } from "react";
-
-// Curated calm focus playlists
-const CALM_PLAYLISTS = [
-  { id: 'lofi', name: '🎧 Lofi Beats', videos: [
-    { id: 'jfKfPfyJRdk', title: 'Lofi Hip Hop Radio' },
-    { id: '5qap5aO4i9A', title: 'Chill Lofi Study' },
-    { id: 'lTRiuFIWV54', title: 'Peaceful Lofi' }
-  ]},
-  { id: 'ambient', name: '🌊 Ambient', videos: [
-    { id: 'DWcJFNfaw9c', title: 'Ambient Space Music' },
-    { id: '1ZYbU82GVz4', title: 'Deep Ambient' },
-    { id: 'M5QY2_8704o', title: 'Cosmic Ambient' }
-  ]},
-  { id: 'rain', name: '🌧️ Rain Sounds', videos: [
-    { id: 'nDq6TstdEi8', title: 'Rain & Thunder' },
-    { id: 'SUiCZ6qTzJE', title: 'Heavy Rain Sounds' },
-    { id: 'q76bMs-NwRk', title: 'Gentle Rain' }
-  ]},
-  { id: 'piano', name: '🎹 Piano', videos: [
-    { id: 'EeORDhrZAQQ', title: 'Peaceful Piano' },
-    { id: '3jWRrafhO7M', title: 'Relaxing Piano' },
-    { id: 'lCOF9LN_Zxs', title: 'Study Piano' }
-  ]},
-  { id: 'nature', name: '🌲 Nature', videos: [
-    { id: 'eKFTSSKCzWA', title: 'Forest Sounds' },
-    { id: 'bn9F19Hi1Lk', title: 'Ocean Waves' },
-    { id: 'wzjWIxXBs_s', title: 'Birds Singing' }
-  ]}
-];
+import React, { useState, useRef, useEffect } from 'react';
+import { Play, Pause, SkipForward, SkipBack, Volume2, Plus, List, X } from 'lucide-react';
 
 const MusicPlayer = () => {
-  const [currentPlaylist, setCurrentPlaylist] = useState(null);
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(50);
-  const [userPlaylists, setUserPlaylists] = useState([]);
-  const [showAddSong, setShowAddSong] = useState(false);
+  const [currentTrack, setCurrentTrack] = useState(0);
+  const [volume, setVolume] = useState(0.7);
+  const [showPlaylistModal, setShowPlaylistModal] = useState(false);
+  const [showAddSongModal, setShowAddSongModal] = useState(false);
+  const [newSongTitle, setNewSongTitle] = useState('');
   const [newSongUrl, setNewSongUrl] = useState('');
-  const [newPlaylistName, setNewPlaylistName] = useState('');
-  const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
-  const [selectedUserPlaylist, setSelectedUserPlaylist] = useState(null);
-  const [ytReady, setYtReady] = useState(false);
-  const [apiLoaded, setApiLoaded] = useState(false);
-  const playerRef = useRef(null);
-  const intervalRef = useRef(null);
-  const playerContainerRef = useRef(null);
+  const audioRef = useRef(null);
 
-  // Load user playlists from localStorage
+  const [playlist, setPlaylist] = useState([
+    {
+      title: "Lofi Study Beats",
+      artist: "Chill Vibes",
+      url: "https://www.bensound.com/bensound-music/bensound-slowmotion.mp3",
+      color: "#8B5CF6"
+    },
+    {
+      title: "Peaceful Piano",
+      artist: "Relaxing Melodies",
+      url: "https://www.bensound.com/bensound-music/bensound-dreams.mp3",
+      color: "#EC4899"
+    },
+    {
+      title: "Ambient Waves",
+      artist: "Nature Sounds",
+      url: "https://www.bensound.com/bensound-music/bensound-relaxing.mp3",
+      color: "#06B6D4"
+    },
+    {
+      title: "Midnight Jazz",
+      artist: "Smooth Sessions",
+      url: "https://www.bensound.com/bensound-music/bensound-jazzyfrenchy.mp3",
+      color: "#F59E0B"
+    }
+  ]);
+
   useEffect(() => {
-    const saved = localStorage.getItem('userMusicPlaylists');
-    if (saved) {
-      try {
-        setUserPlaylists(JSON.parse(saved));
-      } catch (e) {
-        console.error('Failed to load playlists:', e);
-      }
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
     }
-  }, []);
+  }, [volume]);
 
-  // Save user playlists to localStorage
   useEffect(() => {
-    if (userPlaylists.length > 0) {
-      localStorage.setItem('userMusicPlaylists', JSON.stringify(userPlaylists));
-    }
-  }, [userPlaylists]);
-
-  // Load YouTube IFrame API
-  useEffect(() => {
-    if (window.YT && window.YT.Player) {
-      setApiLoaded(true);
-      return;
-    }
-
-    if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      tag.async = true;
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-      window.onYouTubeIframeAPIReady = () => {
-        console.log('YouTube IFrame API loaded successfully');
-        setApiLoaded(true);
-      };
-    }
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, []);
-
-  // Initialize or update player when track changes
-  useEffect(() => {
-    if (!currentPlaylist || !apiLoaded || !window.YT || !window.YT.Player) {
-      return;
-    }
-
-    const currentTrack = currentPlaylist.videos[currentTrackIndex];
-    if (!currentTrack) return;
-
-    // Destroy existing player
-    if (playerRef.current && typeof playerRef.current.destroy === 'function') {
-      try {
-        playerRef.current.destroy();
-      } catch (e) {
-        console.error('Error destroying player:', e);
-      }
-      playerRef.current = null;
-    }
-
-    setYtReady(false);
-
-    try {
-      // Create new YT.Player instance
-      playerRef.current = new window.YT.Player('youtube-player', {
-        height: '0',
-        width: '0',
-        videoId: currentTrack.id,
-        playerVars: {
-          autoplay: 1,
-          controls: 0,
-          modestbranding: 1,
-          playsinline: 1
-        },
-        events: {
-          onReady: onPlayerReady,
-          onStateChange: onPlayerStateChange,
-          onError: onPlayerError
-        },
-      });
-    } catch (error) {
-      console.error('Failed to create YT.Player:', error);
-    }
-  }, [currentPlaylist, currentTrackIndex, apiLoaded]);
-
-  const onPlayerReady = (event) => {
-    console.log('YT Player ready');
-    const player = event.target;
-    
-    try {
-      const dur = player.getDuration();
-      setDuration(dur);
-      player.setVolume(volume);
-      setYtReady(true);
-      setIsPlaying(true);
-      startTimeUpdate();
-    } catch (e) {
-      console.error('Error in onPlayerReady:', e);
-    }
-  };
-
-  const onPlayerStateChange = (event) => {
-    const state = event.data;
-    
-    if (state === window.YT.PlayerState.PLAYING) {
-      setIsPlaying(true);
-      startTimeUpdate();
-    } else if (state === window.YT.PlayerState.PAUSED) {
-      setIsPlaying(false);
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    } else if (state === window.YT.PlayerState.ENDED) {
-      setIsPlaying(false);
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      handleNext();
-    }
-  };
-
-  const onPlayerError = (event) => {
-    console.error('YT Player error:', event.data);
-    // Auto-skip to next track on error
-    setTimeout(() => handleNext(), 1000);
-  };
-
-  const startTimeUpdate = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    
-    intervalRef.current = setInterval(() => {
-      if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function') {
-        try {
-          const time = playerRef.current.getCurrentTime();
-          setCurrentTime(time);
-        } catch (e) {
-          console.error('Error getting current time:', e);
-        }
-      }
-    }, 1000);
-  };
-
-  const handlePlaylistSelect = (playlist) => {
-    setCurrentPlaylist(playlist);
-    setCurrentTrackIndex(0);
-    setSelectedUserPlaylist(null);
-  };
-
-  const handleUserPlaylistSelect = (playlistIndex) => {
-    const playlist = userPlaylists[playlistIndex];
-    setCurrentPlaylist(playlist);
-    setCurrentTrackIndex(0);
-    setSelectedUserPlaylist(playlistIndex);
-  };
-
-  const handlePlayPause = () => {
-    if (!playerRef.current) {
-      console.error('YT player not initialized');
-      return;
-    }
-
-    if (!ytReady) {
-      console.warn('YT player not ready yet');
-      return;
-    }
-
-    try {
-      if (typeof playerRef.current.pauseVideo !== 'function') {
-        console.error('pauseVideo is not a function - player not properly initialized');
-        return;
-      }
-
+    if (audioRef.current) {
+      audioRef.current.src = playlist[currentTrack].url;
       if (isPlaying) {
-        playerRef.current.pauseVideo();
-      } else {
-        playerRef.current.playVideo();
-      }
-    } catch (e) {
-      console.error('Error in play/pause:', e);
-    }
-  };
-
-  const handleNext = () => {
-    if (currentPlaylist) {
-      const nextIndex = (currentTrackIndex + 1) % currentPlaylist.videos.length;
-      setCurrentTrackIndex(nextIndex);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (currentPlaylist) {
-      const prevIndex = currentTrackIndex === 0 ? currentPlaylist.videos.length - 1 : currentTrackIndex - 1;
-      setCurrentTrackIndex(prevIndex);
-    }
-  };
-
-  const handleSkipForward = () => {
-    if (!playerRef.current || !ytReady) {
-      console.warn('YT player not ready');
-      return;
-    }
-
-    try {
-      if (typeof playerRef.current.seekTo !== 'function') {
-        console.error('seekTo is not a function');
-        return;
-      }
-
-      const newTime = Math.min(currentTime + 10, duration);
-      playerRef.current.seekTo(newTime, true);
-      setCurrentTime(newTime);
-    } catch (e) {
-      console.error('Error in skip forward:', e);
-    }
-  };
-
-  const handleSkipBackward = () => {
-    if (!playerRef.current || !ytReady) {
-      console.warn('YT player not ready');
-      return;
-    }
-
-    try {
-      if (typeof playerRef.current.seekTo !== 'function') {
-        console.error('seekTo is not a function');
-        return;
-      }
-
-      const newTime = Math.max(currentTime - 10, 0);
-      playerRef.current.seekTo(newTime, true);
-      setCurrentTime(newTime);
-    } catch (e) {
-      console.error('Error in skip backward:', e);
-    }
-  };
-
-  const handleVolumeChange = (e) => {
-    const newVolume = parseInt(e.target.value);
-    setVolume(newVolume);
-    
-    if (playerRef.current && ytReady && typeof playerRef.current.setVolume === 'function') {
-      try {
-        playerRef.current.setVolume(newVolume);
-      } catch (e) {
-        console.error('Error setting volume:', e);
+        audioRef.current.play();
       }
     }
-  };
+  }, [currentTrack]);
 
-  const handleSeek = (e) => {
-    const newTime = parseFloat(e.target.value);
-    setCurrentTime(newTime);
-    
-    if (playerRef.current && ytReady && typeof playerRef.current.seekTo === 'function') {
-      try {
-        playerRef.current.seekTo(newTime, true);
-      } catch (e) {
-        console.error('Error seeking:', e);
-      }
+  const togglePlay = () => {
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play();
     }
+    setIsPlaying(!isPlaying);
   };
 
-  const extractVideoId = (url) => {
-    const match = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11}).*/);
-    return match ? match[1] : null;
+  const nextTrack = () => {
+    setCurrentTrack((prev) => (prev + 1) % playlist.length);
   };
 
-  const handleAddSongToPlaylist = () => {
-    const videoId = extractVideoId(newSongUrl);
-    if (!videoId) {
-      alert('Invalid YouTube URL');
-      return;
-    }
+  const prevTrack = () => {
+    setCurrentTrack((prev) => (prev - 1 + playlist.length) % playlist.length);
+  };
 
-    if (selectedUserPlaylist !== null) {
-      const updated = [...userPlaylists];
-      updated[selectedUserPlaylist].videos.push({
-        id: videoId,
-        title: `Song ${updated[selectedUserPlaylist].videos.length + 1}`
-      });
-      setUserPlaylists(updated);
+  const addSong = () => {
+    if (newSongTitle && newSongUrl) {
+      const colors = ["#8B5CF6", "#EC4899", "#06B6D4", "#F59E0B", "#10B981", "#EF4444"];
+      setPlaylist([...playlist, {
+        title: newSongTitle,
+        artist: "Custom Track",
+        url: newSongUrl,
+        color: colors[Math.floor(Math.random() * colors.length)]
+      }]);
+      setNewSongTitle('');
       setNewSongUrl('');
-      setShowAddSong(false);
+      setShowAddSongModal(false);
     }
   };
 
-  const handleCreatePlaylist = () => {
-    if (!newPlaylistName.trim()) return;
-    
-    const videoId = extractVideoId(newSongUrl);
-    if (!videoId) {
-      alert('Invalid YouTube URL');
-      return;
+  const selectTrack = (index) => {
+    setCurrentTrack(index);
+    setShowPlaylistModal(false);
+    if (!isPlaying) {
+      setIsPlaying(true);
+      setTimeout(() => audioRef.current.play(), 100);
     }
-
-    const newPlaylist = {
-      id: `custom-${Date.now()}`,
-      name: newPlaylistName,
-      videos: [{ id: videoId, title: 'Song 1' }]
-    };
-
-    setUserPlaylists([...userPlaylists, newPlaylist]);
-    setNewPlaylistName('');
-    setNewSongUrl('');
-    setShowCreatePlaylist(false);
-  };
-
-  const handleDeleteSong = (songIndex) => {
-    if (selectedUserPlaylist !== null) {
-      const updated = [...userPlaylists];
-      updated[selectedUserPlaylist].videos.splice(songIndex, 1);
-      setUserPlaylists(updated);
-      
-      if (currentTrackIndex >= updated[selectedUserPlaylist].videos.length) {
-        setCurrentTrackIndex(0);
-      }
-    }
-  };
-
-  const handleMoveSong = (songIndex, direction) => {
-    if (selectedUserPlaylist !== null) {
-      const updated = [...userPlaylists];
-      const playlist = updated[selectedUserPlaylist];
-      const newIndex = direction === 'up' ? songIndex - 1 : songIndex + 1;
-      
-      if (newIndex >= 0 && newIndex < playlist.videos.length) {
-        [playlist.videos[songIndex], playlist.videos[newIndex]] = 
-        [playlist.videos[newIndex], playlist.videos[songIndex]];
-        setUserPlaylists(updated);
-      }
-    }
-  };
-
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const getCurrentTrack = () => {
-    if (!currentPlaylist) return null;
-    return currentPlaylist.videos[currentTrackIndex];
   };
 
   return (
     <div style={{
-      margin: '20px auto',
-      maxWidth: '450px',
-      width: '100%'
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '2rem'
     }}>
-      <div style={{
-        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.95) 100%)',
-        backdropFilter: 'blur(20px)',
-        borderRadius: '20px',
-        padding: '24px',
-        border: '1px solid rgba(229, 231, 235, 0.8)',
-        boxShadow: '0 10px 40px rgba(0, 0, 0, 0.08)'
-      }}>
-        <h3 style={{
-          margin: '0 0 20px 0',
-          fontSize: '20px',
-          fontWeight: '700',
-          background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text',
-          textAlign: 'center'
-        }}>🎵 Calm Focus Music</h3>
-        
-        {/* Curated Playlists */}
-        <div style={{ marginBottom: '20px' }}>
-          <div style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '8px'
-          }}>
-            {CALM_PLAYLISTS.map((playlist) => (
-              <button
-                key={playlist.id}
-                onClick={() => handlePlaylistSelect(playlist)}
-                style={{
-                  flex: '1',
-                  minWidth: 'calc(50% - 4px)',
-                  padding: '12px 16px',
-                  background: currentPlaylist?.id === playlist.id 
-                    ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' 
-                    : 'linear-gradient(135deg, #f3f4f6, #e5e7eb)',
-                  border: '2px solid transparent',
-                  borderRadius: '12px',
-                  fontSize: '13px',
-                  fontWeight: '600',
-                  color: currentPlaylist?.id === playlist.id ? 'white' : '#374151',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  boxShadow: currentPlaylist?.id === playlist.id 
-                    ? '0 4px 16px rgba(99, 102, 241, 0.3)' 
-                    : 'none',
-                  transform: currentPlaylist?.id === playlist.id ? 'translateY(-2px)' : 'none'
-                }}
-                onMouseEnter={(e) => {
-                  if (currentPlaylist?.id !== playlist.id) {
-                    e.target.style.background = 'linear-gradient(135deg, #e5e7eb, #d1d5db)';
-                    e.target.style.transform = 'translateY(-2px)';
-                    e.target.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (currentPlaylist?.id !== playlist.id) {
-                    e.target.style.background = 'linear-gradient(135deg, #f3f4f6, #e5e7eb)';
-                    e.target.style.transform = 'none';
-                    e.target.style.boxShadow = 'none';
-                  }
-                }}
-              >
-                {playlist.name}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Current Track Display */}
-        {currentPlaylist && (
-          <>
-            <div id="youtube-player" style={{ display: 'none' }}></div>
-            
-            <div style={{
-              background: 'linear-gradient(135deg, #faf5ff, #f3e8ff)',
-              borderRadius: '14px',
-              padding: '16px',
-              marginBottom: '16px',
-              textAlign: 'center',
-              border: '1px solid #e9d5ff',
-              animation: 'fadeIn 0.5s ease-in'
-            }}>
-              <div style={{
-                fontSize: '15px',
-                fontWeight: '600',
-                color: '#4c1d95',
-                marginBottom: '4px'
-              }}>{getCurrentTrack()?.title || 'Loading...'}</div>
-              <div style={{
-                fontSize: '12px',
-                color: '#7c3aed',
-                opacity: '0.8'
-              }}>{currentPlaylist.name}</div>
-            </div>
-
-            {/* Seek Bar */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              marginBottom: '16px'
-            }}>
-              <span style={{
-                fontSize: '11px',
-                color: '#6b7280',
-                fontWeight: '600',
-                minWidth: '38px',
-                textAlign: 'center'
-              }}>{formatTime(currentTime)}</span>
-              <input
-                type="range"
-                min="0"
-                max={duration || 0}
-                value={currentTime}
-                onChange={handleSeek}
-                style={{
-                  flex: '1',
-                  height: '6px',
-                  borderRadius: '3px',
-                  background: '#e5e7eb',
-                  outline: 'none',
-                  appearance: 'none',
-                  cursor: 'pointer'
-                }}
-              />
-              <span style={{
-                fontSize: '11px',
-                color: '#6b7280',
-                fontWeight: '600',
-                minWidth: '38px',
-                textAlign: 'center'
-              }}>{formatTime(duration)}</span>
-            </div>
-
-            {/* Playback Controls */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: '10px',
-              marginBottom: '16px'
-            }}>
-              <button onClick={handleSkipBackward} title="-10s" style={{
-                width: '38px',
-                height: '38px',
-                borderRadius: '50%',
-                background: '#f3f4f6',
-                color: '#6366f1',
-                border: '2px solid #e5e7eb',
-                fontSize: '16px',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.background = '#e5e7eb';
-                e.target.style.borderColor = '#6366f1';
-                e.target.style.transform = 'scale(1.05)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = '#f3f4f6';
-                e.target.style.borderColor = '#e5e7eb';
-                e.target.style.transform = 'scale(1)';
-              }}
-              >
-                ⏪
-              </button>
-              <button onClick={handlePrevious} title="Previous" style={{
-                width: '38px',
-                height: '38px',
-                borderRadius: '50%',
-                background: '#f3f4f6',
-                color: '#6366f1',
-                border: '2px solid #e5e7eb',
-                fontSize: '16px',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.background = '#e5e7eb';
-                e.target.style.borderColor = '#6366f1';
-                e.target.style.transform = 'scale(1.05)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = '#f3f4f6';
-                e.target.style.borderColor = '#e5e7eb';
-                e.target.style.transform = 'scale(1)';
-              }}
-              >
-                ⏮️
-              </button>
-              <button onClick={handlePlayPause} title={isPlaying ? "Pause" : "Play"} style={{
-                width: '54px',
-                height: '54px',
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                color: 'white',
-                border: 'none',
-                fontSize: '22px',
-                cursor: 'pointer',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                boxShadow: '0 4px 14px rgba(99, 102, 241, 0.35)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.transform = 'scale(1.08)';
-                e.target.style.boxShadow = '0 6px 20px rgba(99, 102, 241, 0.45)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = 'scale(1)';
-                e.target.style.boxShadow = '0 4px 14px rgba(99, 102, 241, 0.35)';
-              }}
-              >
-                {isPlaying ? '⏸️' : '▶️'}
-              </button>
-              <button onClick={handleNext} title="Next" style={{
-                width: '38px',
-                height: '38px',
-                borderRadius: '50%',
-                background: '#f3f4f6',
-                color: '#6366f1',
-                border: '2px solid #e5e7eb',
-                fontSize: '16px',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.background = '#e5e7eb';
-                e.target.style.borderColor = '#6366f1';
-                e.target.style.transform = 'scale(1.05)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = '#f3f4f6';
-                e.target.style.borderColor = '#e5e7eb';
-                e.target.style.transform = 'scale(1)';
-              }}
-              >
-                ⏭️
-              </button>
-              <button onClick={handleSkipForward} title="+10s" style={{
-                width: '38px',
-                height: '38px',
-                borderRadius: '50%',
-                background: '#f3f4f6',
-                color: '#6366f1',
-                border: '2px solid #e5e7eb',
-                fontSize: '16px',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.background = '#e5e7eb';
-                e.target.style.borderColor = '#6366f1';
-                e.target.style.transform = 'scale(1.05)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = '#f3f4f6';
-                e.target.style.borderColor = '#e5e7eb';
-                e.target.style.transform = 'scale(1)';
-              }}
-              >
-                ⏩
-              </button>
-            </div>
-
-            {/* Volume */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '10px 14px',
-              background: 'rgba(243, 244, 246, 0.6)',
-              borderRadius: '10px',
-              marginBottom: '20px'
-            }}>
-              <span style={{ fontSize: '16px' }}>🔊</span>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={volume}
-                onChange={handleVolumeChange}
-                style={{
-                  flex: '1',
-                  height: '4px',
-                  borderRadius: '2px',
-                  background: '#e5e7eb',
-                  outline: 'none',
-                  appearance: 'none',
-                  cursor: 'pointer'
-                }}
-              />
-              <span style={{
-                fontSize: '11px',
-                color: '#6b7280',
-                fontWeight: '600',
-                minWidth: '35px',
-                textAlign: 'right'
-              }}>{volume}%</span>
-            </div>
-          </>
-        )}
-
-        {/* User Playlists Section */}
+      <audio ref={audioRef} onEnded={nextTrack} />
+      
+      <div style={{ position: 'relative' }}>
+        {/* Player Card */}
         <div style={{
-          borderTop: '1px solid #e5e7eb',
-          paddingTop: '20px'
+          backdropFilter: 'blur(24px)',
+          background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(124, 58, 237, 0.95) 50%, rgba(15, 23, 42, 0.95) 100%)',
+          borderRadius: '24px',
+          padding: '2rem',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          width: '384px'
         }}>
+          
+          {/* Spinning Vinyl Record */}
           <div style={{
             display: 'flex',
-            justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '12px'
+            justifyContent: 'center',
+            marginBottom: '2rem'
           }}>
-            <h4 style={{
-              margin: '0',
-              fontSize: '16px',
-              fontWeight: '700',
-              color: '#374151'
-            }}>📁 Your Music</h4>
-            <button onClick={() => setShowCreatePlaylist(!showCreatePlaylist)} style={{
-              padding: '6px 14px',
-              background: 'linear-gradient(135deg, #10b981, #059669)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '12px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = 'none';
-            }}
+            <div 
+              style={{
+                width: '256px',
+                height: '256px',
+                borderRadius: '50%',
+                position: 'relative',
+                transition: 'all 0.5s ease',
+                animation: isPlaying ? 'spin 3s linear infinite' : 'none',
+                background: `radial-gradient(circle at center, ${playlist[currentTrack].color}30 0%, ${playlist[currentTrack].color}50 25%, #1a1a1a 26%, #0a0a0a 100%)`,
+                boxShadow: `0 8px 32px ${playlist[currentTrack].color}40`,
+                animationDuration: '3s',
+                animationTimingFunction: 'linear',
+                animationIterationCount: 'infinite'
+              }}
             >
-              + New Playlist
+              {/* Vinyl grooves */}
+              {[...Array(15)].map((_, i) => (
+                <div
+                  key={i}
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    borderRadius: '50%',
+                    border: '1px solid rgba(31, 41, 55, 0.4)',
+                    margin: `${8 + i * 8}px`
+                  }}
+                />
+              ))}
+              
+              {/* Center label */}
+              <div 
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: '96px',
+                  height: '96px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                  background: `linear-gradient(135deg, ${playlist[currentTrack].color}, ${playlist[currentTrack].color}cc)`
+                }}
+              >
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{
+                    width: '16px',
+                    height: '16px',
+                    backgroundColor: 'black',
+                    borderRadius: '50%',
+                    margin: '0 auto 4px'
+                  }} />
+                  <div style={{
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    color: 'white',
+                    opacity: 0.8
+                  }}>NOW</div>
+                  <div style={{
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    color: 'white',
+                    opacity: 0.8
+                  }}>PLAYING</div>
+                </div>
+              </div>
+
+              {/* Vinyl shine effect */}
+              <div 
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  borderRadius: '50%',
+                  opacity: 0.2,
+                  background: 'linear-gradient(135deg, transparent 0%, white 50%, transparent 100%)'
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Track Info */}
+          <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+            <h2 style={{
+              fontSize: '1.5rem',
+              fontWeight: 'bold',
+              color: 'white',
+              marginBottom: '0.25rem',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}>{playlist[currentTrack].title}</h2>
+            <p style={{ color: '#c084fc' }}>{playlist[currentTrack].artist}</p>
+          </div>
+
+          {/* Controls */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '1rem',
+            marginBottom: '1.5rem'
+          }}>
+            <button
+              onClick={prevTrack}
+              style={{
+                padding: '0.75rem',
+                borderRadius: '50%',
+                background: 'rgba(255, 255, 255, 0.1)',
+                transition: 'all 0.3s ease',
+                cursor: 'pointer',
+                border: 'none'
+              }}
+              onMouseEnter={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.2)'}
+              onMouseLeave={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'}
+            >
+              <SkipBack style={{ width: '1.25rem', height: '1.25rem', color: 'white' }} />
+            </button>
+            
+            <button
+              onClick={togglePlay}
+              style={{
+                padding: '1.25rem',
+                borderRadius: '50%',
+                background: 'linear-gradient(90deg, #8b5cf6, #ec4899)',
+                transition: 'all 0.3s ease',
+                cursor: 'pointer',
+                border: 'none',
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'linear-gradient(90deg, #7c3aed, #db2777)';
+                e.target.style.transform = 'scale(1.1)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'linear-gradient(90deg, #8b5cf6, #ec4899)';
+                e.target.style.transform = 'scale(1)';
+              }}
+            >
+              {isPlaying ? (
+                <Pause style={{ width: '1.75rem', height: '1.75rem', color: 'white' }} fill="white" />
+              ) : (
+                <Play style={{ width: '1.75rem', height: '1.75rem', color: 'white' }} fill="white" />
+              )}
+            </button>
+            
+            <button
+              onClick={nextTrack}
+              style={{
+                padding: '0.75rem',
+                borderRadius: '50%',
+                background: 'rgba(255, 255, 255, 0.1)',
+                transition: 'all 0.3s ease',
+                cursor: 'pointer',
+                border: 'none'
+              }}
+              onMouseEnter={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.2)'}
+              onMouseLeave={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'}
+            >
+              <SkipForward style={{ width: '1.25rem', height: '1.25rem', color: 'white' }} />
             </button>
           </div>
 
-          {showCreatePlaylist && (
-            <div style={{
-              background: '#f9fafb',
-              padding: '12px',
-              borderRadius: '10px',
-              marginBottom: '12px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '8px'
-            }}>
-              <input
-                type="text"
-                placeholder="Playlist name"
-                value={newPlaylistName}
-                onChange={(e) => setNewPlaylistName(e.target.value)}
-                style={{
-                  padding: '10px 12px',
-                  border: '2px solid #e5e7eb',
-                  borderRadius: '8px',
-                  fontSize: '13px',
-                  outline: 'none',
-                  transition: 'border-color 0.3s ease'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#6366f1';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#e5e7eb';
-                }}
-              />
-              <input
-                type="text"
-                placeholder="First YouTube URL"
-                value={newSongUrl}
-                onChange={(e) => setNewSongUrl(e.target.value)}
-                style={{
-                  padding: '10px 12px',
-                  border: '2px solid #e5e7eb',
-                  borderRadius: '8px',
-                  fontSize: '13px',
-                  outline: 'none',
-                  transition: 'border-color 0.3s ease'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#6366f1';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#e5e7eb';
-                }}
-              />
-              <button onClick={handleCreatePlaylist} style={{
-                padding: '8px 16px',
-                background: '#6366f1',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '13px',
-                fontWeight: '600',
+          {/* Volume Control */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            marginBottom: '1.5rem'
+          }}>
+            <Volume2 style={{ width: '1.25rem', height: '1.25rem', color: '#c084fc' }} />
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={volume}
+              onChange={(e) => setVolume(parseFloat(e.target.value))}
+              style={{
+                flex: 1,
+                height: '0.5rem',
+                background: 'rgba(255, 255, 255, 0.1)',
+                borderRadius: '0.5rem',
+                appearance: 'none',
+                cursor: 'pointer'
+              }}
+            />
+          </div>
+
+          {/* Playlist Actions */}
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <button
+              onClick={() => setShowPlaylistModal(true)}
+              style={{
+                flex: 1,
+                padding: '0.75rem 1rem',
+                background: 'rgba(255, 255, 255, 0.1)',
+                borderRadius: '0.75rem',
+                transition: 'all 0.3s ease',
                 cursor: 'pointer',
-                transition: 'all 0.3s ease'
+                border: 'none',
+                color: 'white',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem'
+              }}
+              onMouseEnter={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.2)'}
+              onMouseLeave={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'}
+            >
+              <List style={{ width: '1.25rem', height: '1.25rem' }} />
+              <span>Playlist</span>
+            </button>
+            <button
+              onClick={() => setShowAddSongModal(true)}
+              style={{
+                flex: 1,
+                padding: '0.75rem 1rem',
+                background: 'linear-gradient(90deg, rgba(139, 92, 246, 0.3), rgba(236, 72, 153, 0.3))',
+                borderRadius: '0.75rem',
+                transition: 'all 0.3s ease',
+                cursor: 'pointer',
+                border: '1px solid rgba(192, 132, 252, 0.3)',
+                color: 'white',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem'
               }}
               onMouseEnter={(e) => {
-                e.target.style.background = '#4f46e5';
-                e.target.style.transform = 'translateY(-1px)';
+                e.target.style.background = 'linear-gradient(90deg, rgba(139, 92, 246, 0.4), rgba(236, 72, 153, 0.4))';
+                e.target.style.transform = 'scale(1.05)';
               }}
               onMouseLeave={(e) => {
-                e.target.style.background = '#6366f1';
-                e.target.style.transform = 'translateY(0)';
+                e.target.style.background = 'linear-gradient(90deg, rgba(139, 92, 246, 0.3), rgba(236, 72, 153, 0.3))';
+                e.target.style.transform = 'scale(1)';
               }}
+            >
+              <Plus style={{ width: '1.25rem', height: '1.25rem' }} />
+              <span>Add Song</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Playlist Modal */}
+      {showPlaylistModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0, 0, 0, 0.6)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 50,
+          padding: '1rem'
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #0f172a, #7e22ce)',
+            borderRadius: '24px',
+            padding: '1.5rem',
+            maxWidth: '32rem',
+            width: '100%',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '1rem'
+            }}>
+              <h3 style={{
+                fontSize: '1.5rem',
+                fontWeight: 'bold',
+                color: 'white'
+              }}>Playlist</h3>
+              <button
+                onClick={() => setShowPlaylistModal(false)}
+                style={{
+                  padding: '0.5rem',
+                  borderRadius: '50%',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer',
+                  border: 'none'
+                }}
+                onMouseEnter={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.2)'}
+                onMouseLeave={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'}
               >
-                Create
+                <X style={{ width: '1.5rem', height: '1.5rem', color: 'white' }} />
               </button>
             </div>
-          )}
-
-          {userPlaylists.map((playlist, idx) => (
-            <div key={playlist.id} style={{ marginBottom: '12px' }}>
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                gap: '8px'
-              }}>
+            <div style={{
+              maxHeight: '24rem',
+              overflowY: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem'
+            }}>
+              {playlist.map((track, index) => (
                 <button
-                  onClick={() => handleUserPlaylistSelect(idx)}
+                  key={index}
+                  onClick={() => selectTrack(index)}
                   style={{
-                    flex: '1',
-                    padding: '10px 14px',
-                    background: selectedUserPlaylist === idx 
-                      ? 'linear-gradient(135deg, #10b981, #059669)' 
-                      : '#f3f4f6',
-                    border: '2px solid transparent',
-                    borderRadius: '10px',
-                    fontSize: '13px',
-                    fontWeight: '600',
-                    color: selectedUserPlaylist === idx ? 'white' : '#374151',
-                    cursor: 'pointer',
+                    width: '100%',
+                    padding: '1rem',
+                    borderRadius: '0.75rem',
                     textAlign: 'left',
                     transition: 'all 0.3s ease',
-                    borderColor: selectedUserPlaylist === idx ? '#10b981' : 'transparent'
+                    cursor: 'pointer',
+                    border: 'none',
+                    background: currentTrack === index
+                      ? 'linear-gradient(90deg, rgba(139, 92, 246, 0.4), rgba(236, 72, 153, 0.4))'
+                      : 'rgba(255, 255, 255, 0.05)',
+                    border: currentTrack === index ? '1px solid rgba(192, 132, 252, 0.5)' : 'none'
                   }}
                   onMouseEnter={(e) => {
-                    if (selectedUserPlaylist !== idx) {
-                      e.target.style.background = '#e5e7eb';
+                    if (currentTrack !== index) {
+                      e.target.style.background = 'rgba(255, 255, 255, 0.1)';
                     }
                   }}
                   onMouseLeave={(e) => {
-                    if (selectedUserPlaylist !== idx) {
-                      e.target.style.background = '#f3f4f6';
+                    if (currentTrack !== index) {
+                      e.target.style.background = 'rgba(255, 255, 255, 0.05)';
                     }
                   }}
                 >
-                  {playlist.name} ({playlist.videos.length})
+                  <div style={{
+                    fontWeight: '600',
+                    color: 'white'
+                  }}>{track.title}</div>
+                  <div style={{
+                    fontSize: '0.875rem',
+                    color: '#c084fc'
+                  }}>{track.artist}</div>
                 </button>
-                {selectedUserPlaylist === idx && (
-                  <button onClick={() => setShowAddSong(!showAddSong)} style={{
-                    padding: '8px 12px',
-                    background: '#e5e7eb',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '12px',
-                    fontWeight: '600',
-                    color: '#374151',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.background = '#d1d5db';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.background = '#e5e7eb';
-                  }}
-                  >
-                    + Add Song
-                  </button>
-                )}
-              </div>
-
-              {selectedUserPlaylist === idx && showAddSong && (
-                <div style={{
-                  background: '#f9fafb',
-                  padding: '12px',
-                  borderRadius: '10px',
-                  marginBottom: '12px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px'
-                }}>
-                  <input
-                    type="text"
-                    placeholder="YouTube URL"
-                    value={newSongUrl}
-                    onChange={(e) => setNewSongUrl(e.target.value)}
-                    style={{
-                      padding: '10px 12px',
-                      border: '2px solid #e5e7eb',
-                      borderRadius: '8px',
-                      fontSize: '13px',
-                      outline: 'none',
-                      transition: 'border-color 0.3s ease'
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = '#6366f1';
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = '#e5e7eb';
-                    }}
-                  />
-                  <button onClick={handleAddSongToPlaylist} style={{
-                    padding: '8px 16px',
-                    background: '#6366f1',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '13px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.background = '#4f46e5';
-                    e.target.style.transform = 'translateY(-1px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.background = '#6366f1';
-                    e.target.style.transform = 'translateY(0)';
-                  }}
-                  >
-                    Add
-                  </button>
-                </div>
-              )}
-
-              {selectedUserPlaylist === idx && (
-                <div style={{
-                  marginTop: '10px',
-                  background: '#f9fafb',
-                  borderRadius: '8px',
-                  padding: '8px'
-                }}>
-                  {playlist.videos.map((song, songIdx) => (
-                    <div key={songIdx} style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '8px 10px',
-                      background: 'white',
-                      borderRadius: '6px',
-                      marginBottom: '6px',
-                      transition: 'all 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.boxShadow = 'none';
-                    }}
-                    >
-                      <span style={{
-                        fontSize: '12px',
-                        color: '#374151',
-                        fontWeight: '500'
-                      }}>{song.title}</span>
-                      <div style={{
-                        display: 'flex',
-                        gap: '6px'
-                      }}>
-                        <button onClick={() => handleMoveSong(songIdx, 'up')} disabled={songIdx === 0} style={{
-                          width: '26px',
-                          height: '26px',
-                          borderRadius: '6px',
-                          border: 'none',
-                          fontSize: '12px',
-                          cursor: songIdx === 0 ? 'not-allowed' : 'pointer',
-                          transition: 'all 0.2s ease',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          background: '#e5e7eb',
-                          color: '#374151',
-                          opacity: songIdx === 0 ? '0.3' : '1'
-                        }}
-                        onMouseEnter={(e) => {
-                          if (songIdx !== 0) {
-                            e.target.style.background = '#d1d5db';
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (songIdx !== 0) {
-                            e.target.style.background = '#e5e7eb';
-                          }
-                        }}
-                        >
-                          ↑
-                        </button>
-                        <button onClick={() => handleMoveSong(songIdx, 'down')} disabled={songIdx === playlist.videos.length - 1} style={{
-                          width: '26px',
-                          height: '26px',
-                          borderRadius: '6px',
-                          border: 'none',
-                          fontSize: '12px',
-                          cursor: songIdx === playlist.videos.length - 1 ? 'not-allowed' : 'pointer',
-                          transition: 'all 0.2s ease',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          background: '#e5e7eb',
-                          color: '#374151',
-                          opacity: songIdx === playlist.videos.length - 1 ? '0.3' : '1'
-                        }}
-                        onMouseEnter={(e) => {
-                          if (songIdx !== playlist.videos.length - 1) {
-                            e.target.style.background = '#d1d5db';
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (songIdx !== playlist.videos.length - 1) {
-                            e.target.style.background = '#e5e7eb';
-                          }
-                        }}
-                        >
-                          ↓
-                        </button>
-                        <button onClick={() => handleDeleteSong(songIdx)} style={{
-                          width: '26px',
-                          height: '26px',
-                          borderRadius: '6px',
-                          border: 'none',
-                          fontSize: '12px',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          background: '#fee2e2',
-                          color: '#ef4444'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.target.style.background = '#fecaca';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.background = '#fee2e2';
-                        }}
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              ))}
             </div>
-          ))}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Add Song Modal */}
+      {showAddSongModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0, 0, 0, 0.6)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 50,
+          padding: '1rem'
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #0f172a, #7e22ce)',
+            borderRadius: '24px',
+            padding: '1.5rem',
+            maxWidth: '32rem',
+            width: '100%',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '1rem'
+            }}>
+              <h3 style={{
+                fontSize: '1.5rem',
+                fontWeight: 'bold',
+                color: 'white'
+              }}>Add New Song</h3>
+              <button
+                onClick={() => setShowAddSongModal(false)}
+                style={{
+                  padding: '0.5rem',
+                  borderRadius: '50%',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer',
+                  border: 'none'
+                }}
+                onMouseEnter={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.2)'}
+                onMouseLeave={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'}
+              >
+                <X style={{ width: '1.5rem', height: '1.5rem', color: 'white' }} />
+              </button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{
+                  display: 'block',
+                  color: '#c084fc',
+                  marginBottom: '0.5rem'
+                }}>Song Title</label>
+                <input
+                  type="text"
+                  value={newSongTitle}
+                  onChange={(e) => setNewSongTitle(e.target.value)}
+                  placeholder="Enter song title"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '0.75rem',
+                    color: 'white',
+                    placeholderColor: 'rgba(192, 132, 252, 0.5)',
+                    outline: 'none'
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = '#a855f7'}
+                  onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)'}
+                />
+              </div>
+              <div>
+                <label style={{
+                  display: 'block',
+                  color: '#c084fc',
+                  marginBottom: '0.5rem'
+                }}>Audio URL</label>
+                <input
+                  type="text"
+                  value={newSongUrl}
+                  onChange={(e) => setNewSongUrl(e.target.value)}
+                  placeholder="Enter MP3 URL"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '0.75rem',
+                    color: 'white',
+                    placeholderColor: 'rgba(192, 132, 252, 0.5)',
+                    outline: 'none'
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = '#a855f7'}
+                  onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)'}
+                />
+              </div>
+              <button
+                onClick={addSong}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  background: 'linear-gradient(90deg, #8b5cf6, #ec4899)',
+                  borderRadius: '0.75rem',
+                  color: 'white',
+                  fontWeight: '600',
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer',
+                  border: 'none'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = 'linear-gradient(90deg, #7c3aed, #db2777)';
+                  e.target.style.transform = 'scale(1.05)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'linear-gradient(90deg, #8b5cf6, #ec4899)';
+                  e.target.style.transform = 'scale(1)';
+                }}
+              >
+                Add to Playlist
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      <style>{`
+        @keyframes spin {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+      `}</style>
     </div>
   );
 };

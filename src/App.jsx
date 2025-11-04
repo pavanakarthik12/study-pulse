@@ -9,6 +9,7 @@ import Signup from './components/Signup';
 import Dashboard from './components/Dashboard';
 import Navigation from './components/Navigation';
 
+
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
