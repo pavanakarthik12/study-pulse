@@ -12,6 +12,8 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
   const [completedSubjects, setCompletedSubjects] = useState([]);
   const [isBreakTime, setIsBreakTime] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [skippedSubjects, setSkippedSubjects] = useState([]);
+  const [pausedSubjects, setPausedSubjects] = useState([]);
   
   console.log('🎬 SequentialTimers initialized with schedule:', schedule);
   
@@ -63,14 +65,18 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
       triggerConfetti();
       
       if (onComplete) {
-        onComplete(completedSubjects);
+        onComplete({
+          completedSubjects,
+          skippedSubjects,
+          pausedSubjects
+        });
       }
       
       setTimeout(() => {
         alert('🎉 Session Complete! You finished all your study sessions! Amazing work! 🌟');
       }, 1000);
     }
-  }, [currentIndex, currentItem, schedule, completedSubjects, onComplete]);
+  }, [currentIndex, currentItem, schedule, completedSubjects, onComplete, skippedSubjects, pausedSubjects]);
   
   const triggerConfetti = () => {
     const duration = 3000;
@@ -129,6 +135,9 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
   
   const pauseTimer = () => {
     setIsPaused(true);
+    if (currentItem?.subject && !pausedSubjects.includes(currentItem.subject)) {
+      setPausedSubjects(prev => [...prev, currentItem.subject]);
+    }
   };
   
   const resumeTimer = () => {
@@ -138,6 +147,9 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
   const skipSubject = () => {
     const itemName = isCurrentBreak ? 'this break' : currentItem?.subject || 'this session';
     if (window.confirm(`Skip ${itemName}?`)) {
+      if (currentItem?.subject) {
+        setSkippedSubjects(prev => [...prev, currentItem.subject]);
+      }
       handleTimerComplete();
     }
   };
@@ -147,7 +159,11 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
       setIsRunning(false);
       setIsPaused(false);
       if (onCancel) {
-        onCancel(completedSubjects);
+        onCancel({
+          completedSubjects,
+          skippedSubjects,
+          pausedSubjects
+        });
       }
     }
   };

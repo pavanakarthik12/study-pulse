@@ -195,6 +195,8 @@ const Dashboard = () => {
   const [showTimers, setShowTimers] = useState(false);
   const [confirmedSchedule, setConfirmedSchedule] = useState([]);
   const [showEditor, setShowEditor] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
+  const [sessionReview, setSessionReview] = useState(null);
   
   // New Planner UI State
   const [plannerStep, setPlannerStep] = useState(1);
@@ -382,6 +384,8 @@ const Dashboard = () => {
     console.log('✅ Starting timers with schedule:', schedule);
     setConfirmedSchedule(schedule);
     setShowTimers(true);
+    setFocusMode(true);
+    setSessionReview(null);
   };
   const handleAdjustSchedule = () => {
     setShowTimers(false);
@@ -393,6 +397,8 @@ const Dashboard = () => {
     setConfirmedSchedule(adjustedSchedule);
     setShowEditor(false);
     setShowTimers(true);
+    setFocusMode(true);
+    setSessionReview(null);
   };
 
   // Handle editor cancel
@@ -401,21 +407,45 @@ const Dashboard = () => {
   };
 
   // Handle timer completion
-  const handleTimersComplete = (completedSubjects) => {
-    console.log('Completed subjects:', completedSubjects);
+  const handleTimersComplete = (result) => {
+    console.log('Completed session result:', result);
     setShowTimers(false);
+    setFocusMode(false);
     setError(null);
-    alert(`🎉 Great work! You completed ${completedSubjects.length} study session(s)!`);
-    // Could store completed sessions in Firebase here
+    const review = {
+      completed: result?.completedSubjects || [],
+      skipped: result?.skippedSubjects || [],
+      paused: result?.pausedSubjects || [],
+      timestamp: Date.now()
+    };
+    setSessionReview(review);
+    // Save to local history and preferences
+    try {
+      const existing = JSON.parse(localStorage.getItem('study_history') || '[]');
+      const updated = [review, ...existing].slice(0, 100);
+      localStorage.setItem('study_history', JSON.stringify(updated));
+    } catch (e) {
+      console.warn('Failed to persist local history', e);
+    }
+    setPreferences(prev => ({
+      ...prev,
+      pastSessions: [...(prev.pastSessions || []), review]
+    }));
   };
 
   // Handle timer cancellation
-  const handleTimersCancel = (completedSubjects) => {
-    console.log('Cancelled after completing:', completedSubjects);
+  const handleTimersCancel = (result) => {
+    console.log('Cancelled after partial completion:', result);
     setShowTimers(false);
-    if (completedSubjects.length > 0) {
-      alert(`You completed ${completedSubjects.length} session(s) before canceling.`);
-    }
+    setFocusMode(false);
+    const review = {
+      completed: result?.completedSubjects || [],
+      skipped: result?.skippedSubjects || [],
+      paused: result?.pausedSubjects || [],
+      timestamp: Date.now(),
+      cancelled: true
+    };
+    setSessionReview(review);
   };
 
   // Clean up on unmount
@@ -507,12 +537,13 @@ const Dashboard = () => {
         position: 'relative',
         zIndex: 10,
         display: 'grid',
-        gridTemplateColumns: isNarrow ? '1fr' : (sidebarOpen ? '340px 1fr' : '0px 1fr'),
+        gridTemplateColumns: focusMode ? '1fr' : (isNarrow ? '1fr' : (sidebarOpen ? '340px 1fr' : '0px 1fr')),
         minHeight: 'calc(100vh - 80px)',
         gap: '1.5rem'
       }}
       className="dashboard-layout">
-        {/* Sidebar - sticky in grid, responsive to toggle */}
+        {/* Sidebar - hidden in focus mode */}
+        {!focusMode && (
         <div style={{
           position: isNarrow ? 'relative' : 'sticky',
           top: isNarrow ? undefined : '80px',
@@ -549,6 +580,7 @@ const Dashboard = () => {
             handleAdjustSchedule={handleAdjustSchedule}
           />
         </div>
+        )}
 
         {/* Main Content Area */}
         <div style={{
@@ -557,7 +589,7 @@ const Dashboard = () => {
         }}
         className="main-content">
           <div style={{
-            maxWidth: '1000px',
+            maxWidth: focusMode ? '1200px' : '1000px',
             margin: '0 auto'
           }}>
           {/* Error Message */}
@@ -613,7 +645,8 @@ const Dashboard = () => {
             </p>
           </motion.div>
 
-          {/* Schedule Display Area */}
+          {/* Schedule Display Area (hidden in focus mode) */}
+          {!focusMode && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -800,6 +833,7 @@ const Dashboard = () => {
               </div>
             )}
           </motion.div>
+          )}
 
           {/* Sequential Timers Section - Appears when schedule is started */}
           {showTimers && confirmedSchedule.length > 0 && (
@@ -808,7 +842,11 @@ const Dashboard = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               style={{
-                marginTop: '1.5rem'
+                marginTop: focusMode ? '2rem' : '1.5rem',
+                minHeight: focusMode ? 'calc(100vh - 160px)' : undefined,
+                display: focusMode ? 'flex' : 'block',
+                alignItems: focusMode ? 'center' : undefined,
+                justifyContent: focusMode ? 'center' : undefined
               }}
             >
               <SequentialTimers 
@@ -833,7 +871,7 @@ const Dashboard = () => {
             bottom: 'max(1rem, env(safe-area-inset-bottom))',
             right: 'max(1rem, env(safe-area-inset-right))',
             zIndex: 1300,
-            width: '320px',
+            width: focusMode ? '360px' : '320px',
             maxWidth: 'min(92vw, 400px)'
           }}
         >
@@ -847,6 +885,76 @@ const Dashboard = () => {
           }}>
             <MusicPlayer />
           </div>
+        </motion.div>
+      )}
+
+      {/* Session Review Modal */}
+      {sessionReview && !focusMode && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.6)',
+            backdropFilter: 'blur(6px)',
+            zIndex: 2000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem'
+          }}
+        >
+          <motion.div
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            style={{
+              width: '100%',
+              maxWidth: '720px',
+              background: 'rgba(10,10,15,0.95)',
+              border: '1px solid rgba(139,92,246,0.3)',
+              borderRadius: '16px',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+              padding: '1.25rem'
+            }}
+          >
+            <h3 style={{
+              margin: 0,
+              marginBottom: '0.75rem',
+              color: 'white',
+              fontSize: '1.25rem',
+              fontWeight: 700
+            }}>Session Review</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
+              <div style={{ padding: '0.75rem', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: '12px' }}>
+                <div style={{ color: '#4ade80', fontWeight: 700, marginBottom: '0.25rem' }}>Completed</div>
+                <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>{sessionReview.completed.join(', ') || '—'}</div>
+              </div>
+              <div style={{ padding: '0.75rem', background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.25)', borderRadius: '12px' }}>
+                <div style={{ color: '#fbbf24', fontWeight: 700, marginBottom: '0.25rem' }}>Paused</div>
+                <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>{sessionReview.paused.join(', ') || '—'}</div>
+              </div>
+              <div style={{ padding: '0.75rem', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: '12px' }}>
+                <div style={{ color: '#f87171', fontWeight: 700, marginBottom: '0.25rem' }}>Skipped</div>
+                <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>{sessionReview.skipped.join(', ') || '—'}</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+              <button
+                onClick={() => setSessionReview(null)}
+                style={{
+                  padding: '0.6rem 1rem',
+                  background: 'rgba(255,255,255,0.06)',
+                  border: '1px solid rgba(255,255,255,0.18)',
+                  borderRadius: '10px',
+                  color: 'white',
+                  cursor: 'pointer'
+                }}
+              >Close</button>
+            </div>
+          </motion.div>
         </motion.div>
       )}
 
