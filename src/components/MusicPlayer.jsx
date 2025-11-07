@@ -96,11 +96,7 @@ const MusicPlayer = () => {
 
   return (
     <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '2rem'
+      padding: 0
     }}>
       <audio ref={audioRef} onEnded={nextTrack} />
       
@@ -110,10 +106,10 @@ const MusicPlayer = () => {
           backdropFilter: 'blur(24px)',
           background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(124, 58, 237, 0.95) 50%, rgba(15, 23, 42, 0.95) 100%)',
           borderRadius: '24px',
-          padding: '2rem',
+          padding: '1.25rem',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
           border: '1px solid rgba(255, 255, 255, 0.2)',
-          width: '384px'
+          width: '100%'
         }}>
           
           {/* Spinning Vinyl Record */}
@@ -121,12 +117,12 @@ const MusicPlayer = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            marginBottom: '2rem'
+            marginBottom: '1.25rem'
           }}>
             <div 
               style={{
-                width: '256px',
-                height: '256px',
+                width: 'min(240px, 52vw)',
+                height: 'min(240px, 52vw)',
                 borderRadius: '50%',
                 position: 'relative',
                 transition: 'all 0.5s ease',
@@ -206,7 +202,7 @@ const MusicPlayer = () => {
           </div>
 
           {/* Track Info */}
-          <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
             <h2 style={{
               fontSize: '1.5rem',
               fontWeight: 'bold',
@@ -223,8 +219,8 @@ const MusicPlayer = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '1rem',
-            marginBottom: '1.5rem'
+            gap: '0.75rem',
+            marginBottom: '1rem'
           }}>
             <button
               onClick={prevTrack}
@@ -291,7 +287,7 @@ const MusicPlayer = () => {
             display: 'flex',
             alignItems: 'center',
             gap: '0.75rem',
-            marginBottom: '1.5rem'
+            marginBottom: '1rem'
           }}>
             <Volume2 style={{ width: '1.25rem', height: '1.25rem', color: '#c084fc' }} />
             <input

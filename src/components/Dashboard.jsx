@@ -160,38 +160,25 @@ const keyframeAnimations = `
     50% { transform: translate(-50%, -50%) scale(0.9); }
   }
   
-  @media (max-width: 1400px) {
-    .fixed-sidebar {
-      width: 300px !important;
-      left: 1rem !important;
-    }
-    .dashboard-grid {
-      grid-template-columns: 300px 1fr 320px !important;
-    }
-  }
-  
   @media (max-width: 1200px) {
-    .fixed-sidebar {
-      position: relative !important;
-      left: 0 !important;
-      width: 100% !important;
-      height: auto !important;
+    .dashboard-layout {
+      grid-template-columns: 1fr;
+    }
+    .sidebar-container {
+      position: relative;
+      width: 100%;
+      height: auto;
       margin-bottom: 1.5rem;
     }
-    .dashboard-grid {
-      grid-template-columns: 1fr 1fr !important;
-    }
-    .dashboard-grid > div:first-child {
-      grid-column: 1 / -1;
-    }
-    .dashboard-grid > div:last-child {
-      grid-column: 1 / -1;
+    .main-content {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
     }
   }
   
   @media (max-width: 768px) {
-    .dashboard-grid {
-      grid-template-columns: 1fr !important;
+    .main-content {
+      padding: 1rem;
     }
   }
 `;
@@ -221,6 +208,20 @@ const Dashboard = () => {
   const [showPastSessions, setShowPastSessions] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(true); // Sidebar toggle state
+  const [isNarrow, setIsNarrow] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      try {
+        setIsNarrow(window.innerWidth <= 1200);
+      } catch (e) {
+        // noop for SSR
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   // Available subjects
   const availableSubjects = [
@@ -501,147 +502,26 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Main Content */}
+      {/* Main Dashboard Layout - Two Panel Structure */}
       <div style={{
         position: 'relative',
         zIndex: 10,
+        display: 'grid',
+        gridTemplateColumns: isNarrow ? '1fr' : (sidebarOpen ? '340px 1fr' : '0px 1fr'),
         minHeight: 'calc(100vh - 80px)',
-        padding: '2rem 1.5rem',
-        maxWidth: '1400px',
-        margin: '0 auto'
-      }}>
-        {/* Error Message */}
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            style={{
-              padding: '1rem',
-              marginBottom: '1.5rem',
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              borderRadius: '12px',
-              color: '#fca5a5',
-              fontSize: '0.875rem',
-              textAlign: 'center'
-            }}
-          >
-            {error}
-          </motion.div>
-        )}
-
-        {/* Welcome Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          style={{
-            marginBottom: '2rem',
-            textAlign: 'center'
-          }}
-        >
-          <h1 style={{
-            fontSize: '2.5rem',
-            fontWeight: 700,
-            color: 'white',
-            margin: 0,
-            marginBottom: '0.5rem',
-            background: 'linear-gradient(135deg, #a78bfa, #c084fc, #f472b6)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            textShadow: '0 0 40px rgba(139, 92, 246, 0.3)'
-          }}>
-            Welcome back! 👋
-          </h1>
-          <p style={{
-            color: 'rgba(255, 255, 255, 0.6)',
-            margin: 0,
-            fontSize: '1rem'
-          }}>
-            Let's create your perfect study schedule
-          </p>
-        </motion.div>
-
-        {/* Music Player Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          style={{
-            marginBottom: '2rem',
-            padding: '1.5rem',
-            background: 'rgba(255, 255, 255, 0.03)',
-            backdropFilter: 'blur(30px)',
-            WebkitBackdropFilter: 'blur(30px)',
-            borderRadius: '20px',
-            border: '1px solid rgba(255, 255, 255, 0.18)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
-          }}
-        >
-          <MusicPlayer />
-        </motion.div>
-
-        {/* Main Content - Three Column Layout */}
+        gap: '1.5rem'
+      }}
+      className="dashboard-layout">
+        {/* Sidebar - sticky in grid, responsive to toggle */}
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: '380px 1fr 380px',
-          gap: '1.5rem',
-          marginBottom: '2rem',
-          alignItems: 'start'
+          position: isNarrow ? 'relative' : 'sticky',
+          top: isNarrow ? undefined : '80px',
+          height: isNarrow ? 'auto' : 'calc(100vh - 80px)',
+          zIndex: 900,
+          overflow: 'hidden',
+          width: isNarrow ? '100%' : (sidebarOpen ? '340px' : '0px')
         }}
-        className="dashboard-grid">
-          {/* Sidebar Toggle Button */}
-          <motion.button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ 
-              opacity: 1, 
-              scale: 1,
-              left: sidebarOpen ? '420px' : '1.5rem'
-            }}
-            transition={{ 
-              opacity: { duration: 0.3, delay: 0.5 },
-              scale: { duration: 0.3, delay: 0.5 },
-              left: { duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }
-            }}
-            whileHover={{ 
-              scale: 1.1,
-              boxShadow: '0 8px 24px rgba(139, 92, 246, 0.6)'
-            }}
-            whileTap={{ scale: 0.9 }}
-            style={{
-              position: 'fixed',
-              top: '110px',
-              zIndex: 1000,
-              padding: '0.875rem',
-              background: 'linear-gradient(135deg, #8b5cf6, #a78bfa)',
-              backdropFilter: 'blur(20px)',
-              border: '2px solid rgba(255, 255, 255, 0.3)',
-              borderRadius: '14px',
-              cursor: 'pointer',
-              boxShadow: '0 6px 20px rgba(139, 92, 246, 0.5)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <motion.div
-              animate={{ rotate: sidebarOpen ? 0 : 180 }}
-              transition={{ duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
-            >
-              <ChevronDown 
-                size={22} 
-                color="white" 
-                style={{ 
-                  transform: 'rotate(-90deg)',
-                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
-                }}
-              />
-            </motion.div>
-          </motion.button>
-
-          {/* Sidebar Component */}
+        className="sidebar-container">
           <Sidebar 
             user={user}
             sidebarOpen={sidebarOpen}
@@ -668,27 +548,85 @@ const Dashboard = () => {
             handleConfirmSchedule={handleConfirmSchedule}
             handleAdjustSchedule={handleAdjustSchedule}
           />
+        </div>
 
-          {/* Spacer for fixed sidebar - Dynamic based on sidebar state */}
-          <motion.div 
-            animate={{ width: sidebarOpen ? '400px' : '0px' }}
-            transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-          />
+        {/* Main Content Area */}
+        <div style={{
+          padding: '1.5rem',
+          width: '100%'
+        }}
+        className="main-content">
+          <div style={{
+            maxWidth: '1000px',
+            margin: '0 auto'
+          }}>
+          {/* Error Message */}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              style={{
+                padding: '1rem',
+                marginBottom: '1.5rem',
+                background: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                borderRadius: '16px',
+                color: '#fca5a5',
+                fontSize: '0.875rem',
+                textAlign: 'center'
+              }}
+            >
+              {error}
+            </motion.div>
+          )}
 
-          {/* Center Column - Recommendations */}
+          {/* Welcome Header */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            style={{
+              marginBottom: '1.5rem',
+              textAlign: 'center'
+            }}
+          >
+            <h1 style={{
+              fontSize: '2rem',
+              fontWeight: 700,
+              color: 'white',
+              margin: 0,
+              marginBottom: '0.5rem',
+              background: 'linear-gradient(135deg, #a78bfa, #c084fc, #f472b6)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              textShadow: '0 0 40px rgba(139, 92, 246, 0.3)'
+            }}>
+              Welcome back! 👋
+            </h1>
+            <p style={{
+              color: 'rgba(255, 255, 255, 0.6)',
+              margin: 0,
+              fontSize: '0.9rem'
+            }}>
+              Let's create your perfect study schedule
+            </p>
+          </motion.div>
+
+          {/* Schedule Display Area */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
             style={{
-              padding: '1.75rem',
+              padding: '1.5rem',
               background: 'rgba(255, 255, 255, 0.03)',
-              backdropFilter: 'blur(30px)',
-              WebkitBackdropFilter: 'blur(30px)',
-              borderRadius: '20px',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              borderRadius: '16px',
               border: '1px solid rgba(255, 255, 255, 0.18)',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-              minHeight: '500px'
+              minHeight: '400px'
             }}
           >
             {/* Schedule Display */}
@@ -698,31 +636,31 @@ const Dashboard = () => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '3rem',
+                padding: '2rem',
                 gap: '1rem'
               }}>
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                   style={{
-                    width: '48px',
-                    height: '48px',
-                    border: '4px solid rgba(139, 92, 246, 0.2)',
-                    borderTop: '4px solid #8b5cf6',
+                    width: '40px',
+                    height: '40px',
+                    border: '3px solid rgba(139, 92, 246, 0.2)',
+                    borderTop: '3px solid #8b5cf6',
                     borderRadius: '50%'
                   }}
                 />
-                <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.9375rem' }}>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.875rem' }}>
                   Generating your schedule...
                 </p>
               </div>
             ) : recommendations.recommended_schedule.length > 0 ? (
               <>
                 <h3 style={{
-                  fontSize: '1.25rem',
+                  fontSize: '1.1rem',
                   fontWeight: 700,
                   color: 'white',
-                  marginBottom: '1.5rem',
+                  marginBottom: '1.25rem',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.5rem'
@@ -737,7 +675,7 @@ const Dashboard = () => {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
                       style={{
-                        padding: '1rem',
+                        padding: '0.875rem',
                         background: item.break 
                           ? 'rgba(34, 197, 94, 0.1)' 
                           : 'rgba(139, 92, 246, 0.1)',
@@ -752,7 +690,7 @@ const Dashboard = () => {
                     >
                       <div>
                         <div style={{
-                          fontSize: '1rem',
+                          fontSize: '0.9rem',
                           fontWeight: 600,
                           color: 'white',
                           marginBottom: '0.25rem'
@@ -761,7 +699,7 @@ const Dashboard = () => {
                         </div>
                         {!item.break && (
                           <div style={{
-                            fontSize: '0.875rem',
+                            fontSize: '0.8rem',
                             color: 'rgba(255, 255, 255, 0.6)'
                           }}>
                             {item.start} - {item.end}
@@ -769,12 +707,12 @@ const Dashboard = () => {
                         )}
                       </div>
                       <div style={{
-                        padding: '0.5rem 0.875rem',
+                        padding: '0.375rem 0.75rem',
                         background: item.break
                           ? 'rgba(34, 197, 94, 0.2)'
                           : 'rgba(139, 92, 246, 0.2)',
-                        borderRadius: '8px',
-                        fontSize: '0.875rem',
+                        borderRadius: '6px',
+                        fontSize: '0.8rem',
                         fontWeight: 600,
                         color: item.break ? '#4ade80' : '#a78bfa'
                       }}>
@@ -783,6 +721,55 @@ const Dashboard = () => {
                     </motion.div>
                   ))}
                 </div>
+                
+                {!showTimers && (
+                  <div style={{
+                    display: 'flex',
+                    gap: '0.75rem',
+                    marginTop: '1.5rem'
+                  }}>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleConfirmSchedule}
+                      style={{
+                        flex: 1,
+                        padding: '0.875rem',
+                        background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.9), rgba(16, 185, 129, 0.9))',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        borderRadius: '12px',
+                        color: 'white',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 20px rgba(34, 197, 94, 0.4)',
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
+                      ✓ Start Timers
+                    </motion.button>
+                    
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleAdjustSchedule}
+                      style={{
+                        padding: '0.875rem 1.25rem',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        borderRadius: '12px',
+                        color: 'white',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      Adjust
+                    </motion.button>
+                  </div>
+                )}
               </>
             ) : (
               <div style={{
@@ -790,13 +777,13 @@ const Dashboard = () => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '3rem',
+                padding: '2rem',
                 gap: '1rem',
                 textAlign: 'center'
               }}>
-                <div style={{ fontSize: '3rem' }}>📚</div>
+                <div style={{ fontSize: '2.5rem' }}>📚</div>
                 <h3 style={{
-                  fontSize: '1.25rem',
+                  fontSize: '1.1rem',
                   fontWeight: 600,
                   color: 'white',
                   marginBottom: '0.5rem'
@@ -804,195 +791,64 @@ const Dashboard = () => {
                   No Schedule Yet
                 </h3>
                 <p style={{
-                  fontSize: '0.9375rem',
+                  fontSize: '0.875rem',
                   color: 'rgba(255, 255, 255, 0.6)',
-                  maxWidth: '300px'
+                  maxWidth: '250px'
                 }}>
                   Add subjects in the sidebar and generate your personalized study schedule
                 </p>
               </div>
             )}
-            
-            {!showTimers && recommendations.recommended_schedule.length > 0 && (
-              <div style={{
-                display: 'flex',
-                gap: '0.75rem',
+          </motion.div>
+
+          {/* Sequential Timers Section - Appears when schedule is started */}
+          {showTimers && confirmedSchedule.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              style={{
                 marginTop: '1.5rem'
-              }}>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleConfirmSchedule}
-                  style={{
-                    flex: 1,
-                    padding: '0.875rem',
-                    background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.9), rgba(16, 185, 129, 0.9))',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: '12px',
-                    color: 'white',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 20px rgba(34, 197, 94, 0.4)',
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  ✓ Start Timers
-                </motion.button>
-                
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleAdjustSchedule}
-                  style={{
-                    padding: '0.875rem 1.25rem',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: '12px',
-                    color: 'white',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    whiteSpace: 'nowrap'
-                  }}
-                >
-                  Adjust
-                </motion.button>
-              </div>
-            )}
-          </motion.div>
-
-          {/* Right Column - Quick Stats / Info */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            style={{
-              position: 'sticky',
-              top: '100px'
-            }}
-          >
-            {/* Stats Card */}
-            <div style={{
-              padding: '1.75rem',
-              background: 'rgba(255, 255, 255, 0.03)',
-              backdropFilter: 'blur(30px)',
-              WebkitBackdropFilter: 'blur(30px)',
-              borderRadius: '20px',
-              border: '1px solid rgba(255, 255, 255, 0.18)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-              marginBottom: '1.5rem'
-            }}>
-              <h4 style={{
-                fontSize: '1rem',
-                fontWeight: 600,
-                color: 'white',
-                margin: '0 0 1rem 0'
-              }}>
-                Today's Progress
-              </h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div style={{
-                  padding: '1rem',
-                  background: 'rgba(139, 92, 246, 0.1)',
-                  borderRadius: '12px',
-                  border: '1px solid rgba(139, 92, 246, 0.2)'
-                }}>
-                  <div style={{
-                    fontSize: '0.75rem',
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    marginBottom: '0.25rem'
-                  }}>
-                    Sessions Completed
-                  </div>
-                  <div style={{
-                    fontSize: '1.75rem',
-                    fontWeight: 700,
-                    color: '#a78bfa'
-                  }}>
-                    0
-                  </div>
-                </div>
-                
-                <div style={{
-                  padding: '1rem',
-                  background: 'rgba(236, 72, 153, 0.1)',
-                  borderRadius: '12px',
-                  border: '1px solid rgba(236, 72, 153, 0.2)'
-                }}>
-                  <div style={{
-                    fontSize: '0.75rem',
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    marginBottom: '0.25rem'
-                  }}>
-                    Time Studied
-                  </div>
-                  <div style={{
-                    fontSize: '1.75rem',
-                    fontWeight: 700,
-                    color: '#f472b6'
-                  }}>
-                    0 min
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Tips Card */}
-            <div style={{
-              padding: '1.75rem',
-              background: 'rgba(255, 255, 255, 0.03)',
-              backdropFilter: 'blur(30px)',
-              WebkitBackdropFilter: 'blur(30px)',
-              borderRadius: '20px',
-              border: '1px solid rgba(255, 255, 255, 0.18)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
-            }}>
-              <h4 style={{
-                fontSize: '1rem',
-                fontWeight: 600,
-                color: 'white',
-                margin: '0 0 1rem 0'
-              }}>
-                💡 Study Tip
-              </h4>
-              <p style={{
-                fontSize: '0.8125rem',
-                color: 'rgba(255, 255, 255, 0.7)',
-                lineHeight: '1.6',
-                margin: 0
-              }}>
-                Take regular breaks every 45-50 minutes to maintain focus and retention. Your brain needs rest to consolidate information!
-              </p>
-            </div>
-          </motion.div>
+              }}
+            >
+              <SequentialTimers 
+                schedule={confirmedSchedule}
+                onComplete={handleTimersComplete}
+                onCancel={handleTimersCancel}
+              />
+            </motion.div>
+          )}
+          </div>
         </div>
-
-        {/* Sequential Timers Section - Full Width */}
-        {showTimers && confirmedSchedule.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            style={{
-              padding: '2rem',
-              background: 'rgba(255, 255, 255, 0.03)',
-              backdropFilter: 'blur(30px)',
-              WebkitBackdropFilter: 'blur(30px)',
-              borderRadius: '20px',
-              border: '1px solid rgba(255, 255, 255, 0.18)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
-            }}
-          >
-            <SequentialTimers 
-              schedule={confirmedSchedule}
-              onComplete={handleTimersComplete}
-              onCancel={handleTimersCancel}
-            />
-          </motion.div>
-        )}
       </div>
+
+      {/* Floating Music Player - Always visible during sessions */}
+      {showTimers && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8, y: 50 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          style={{
+            position: 'fixed',
+            bottom: 'max(1rem, env(safe-area-inset-bottom))',
+            right: 'max(1rem, env(safe-area-inset-right))',
+            zIndex: 1300,
+            width: '320px',
+            maxWidth: 'min(92vw, 400px)'
+          }}
+        >
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(20px)',
+            borderRadius: '16px',
+            border: '1px solid rgba(255, 255, 255, 0.18)',
+            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.4)',
+            overflow: 'hidden'
+          }}>
+            <MusicPlayer />
+          </div>
+        </motion.div>
+      )}
 
       {/* Schedule Editor Modal */}
       {showEditor && (
@@ -1005,6 +861,5 @@ const Dashboard = () => {
     </div>
   );
 };
-
 
 export default Dashboard;

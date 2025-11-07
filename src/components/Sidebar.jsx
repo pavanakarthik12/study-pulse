@@ -142,18 +142,14 @@ const Sidebar = ({
     <motion.div
       initial={{ x: -400, opacity: 0 }}
       animate={{ 
-        x: sidebarOpen ? 0 : -420, 
-        opacity: sidebarOpen ? 1 : 0 
+        x: 0, 
+        opacity: 1 
       }}
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       style={{
-        position: 'fixed',
-        left: 0,
-        top: '73px', // Below navbar
-        bottom: 0,
-        width: '420px',
+        height: '100%',
         background: 'rgba(10, 10, 15, 0.85)',
-        backdropFilter: 'blur(24px)',
+        backdropFilter: 'blur(20px)',
         borderRight: '1px solid rgba(139, 92, 246, 0.2)',
         boxShadow: '4px 0 24px rgba(0, 0, 0, 0.3), inset -1px 0 0 rgba(139, 92, 246, 0.1)',
         display: 'flex',
@@ -169,10 +165,10 @@ const Sidebar = ({
         top: '10%',
         left: '50%',
         transform: 'translateX(-50%)',
-        width: '300px',
-        height: '300px',
+        width: '250px',
+        height: '250px',
         background: 'radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, transparent 70%)',
-        filter: 'blur(60px)',
+        filter: 'blur(50px)',
         pointerEvents: 'none'
       }} />
 
@@ -181,10 +177,10 @@ const Sidebar = ({
         flex: 1,
         overflowY: 'auto',
         overflowX: 'hidden',
-        padding: '2rem',
+        padding: '1.5rem',
         display: 'flex',
         flexDirection: 'column',
-        gap: '1.5rem'
+        gap: '1.25rem'
       }}>
         {/* Greeting Card */}
         <motion.div
@@ -192,682 +188,524 @@ const Sidebar = ({
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
           style={{
-            padding: '1.5rem',
+            padding: '1.25rem',
             background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(168, 85, 247, 0.05))',
-            backdropFilter: 'blur(20px)',
-            borderRadius: '20px',
+            backdropFilter: 'blur(15px)',
+            borderRadius: '16px',
             border: '1px solid rgba(139, 92, 246, 0.3)',
             boxShadow: '0 4px 20px rgba(139, 92, 246, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
             <div style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: '14px',
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
               background: 'linear-gradient(135deg, #8b5cf6, #a78bfa)',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 16px rgba(139, 92, 246, 0.4)'
+              justifyContent: 'center'
             }}>
-              <User size={24} color="white" strokeWidth={2.5} />
+              <User size={20} color="white" />
             </div>
             <div>
-              <div style={{
-                fontSize: '1.25rem',
-                fontWeight: 700,
-                color: '#e9d5ff',
-                marginBottom: '0.25rem'
+              <h3 style={{
+                fontSize: '1rem',
+                fontWeight: 600,
+                color: 'white',
+                margin: 0
               }}>
-                Welcome back, {getUserName()}! 👋
+                Hello, {getUserName()}!
+              </h3>
+              <p style={{
+                fontSize: '0.75rem',
+                color: 'rgba(255, 255, 255, 0.7)',
+                margin: 0
+              }}>
+                Ready to study?
+              </p>
+            </div>
+          </div>
+          
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            marginTop: '0.75rem',
+            paddingTop: '0.75rem',
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                fontSize: '1rem',
+                fontWeight: 700,
+                color: 'white'
+              }}>
+                0
               </div>
               <div style={{
-                fontSize: '0.875rem',
-                color: 'rgba(255, 255, 255, 0.6)',
-                fontWeight: 500
+                fontSize: '0.7rem',
+                color: 'rgba(255, 255, 255, 0.6)'
               }}>
-                Let's plan your study session
+                Sessions
+              </div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                fontSize: '1rem',
+                fontWeight: 700,
+                color: 'white'
+              }}>
+                0
+              </div>
+              <div style={{
+                fontSize: '0.7rem',
+                color: 'rgba(255, 255, 255, 0.6)'
+              }}>
+                Hours
+              </div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                fontSize: '1rem',
+                fontWeight: 700,
+                color: 'white'
+              }}>
+                0
+              </div>
+              <div style={{
+                fontSize: '0.7rem',
+                color: 'rgba(255, 255, 255, 0.6)'
+              }}>
+                Streak
               </div>
             </div>
           </div>
         </motion.div>
 
-        {/* Add Subject Card */}
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          style={{
-            padding: '2rem',
-            background: 'rgba(255, 255, 255, 0.03)',
-            backdropFilter: 'blur(20px)',
-            borderRadius: '20px',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)'
-          }}
-        >
-          <div style={{
+        {/* Add Subject Form */}
+        <div style={{
+          padding: '1.25rem',
+          background: 'rgba(255, 255, 255, 0.03)',
+          backdropFilter: 'blur(15px)',
+          borderRadius: '16px',
+          border: '1px solid rgba(255, 255, 255, 0.18)'
+        }}>
+          <h3 style={{
+            fontSize: '1rem',
+            fontWeight: 600,
+            color: 'white',
+            margin: '0 0 1rem 0',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.75rem',
-            marginBottom: '1.5rem'
+            gap: '0.5rem'
           }}>
+            <Plus size={18} color="#8b5cf6" />
+            Add Subject
+          </h3>
+          
+          {error && (
             <div style={{
-              width: '36px',
-              height: '36px',
+              padding: '0.75rem',
+              background: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
               borderRadius: '10px',
-              background: 'linear-gradient(135deg, rgba(244, 114, 182, 0.2), rgba(168, 85, 247, 0.2))',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: '1px solid rgba(244, 114, 182, 0.3)'
+              color: '#fca5a5',
+              fontSize: '0.75rem',
+              marginBottom: '1rem'
             }}>
-              <Sparkles size={18} color="#f472b6" />
+              {error}
             </div>
-            <h3 style={{
-              margin: 0,
-              fontSize: '1.125rem',
-              fontWeight: 700,
-              color: '#e9d5ff',
-              letterSpacing: '-0.01em'
-            }}>
-              Add Study Subject
-            </h3>
-          </div>
-
-          {/* Subject Name Input */}
-          <div style={{ marginBottom: '1.25rem', position: 'relative' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              color: '#c4b5fd',
-              marginBottom: '0.625rem',
-              letterSpacing: '0.01em'
-            }}>
-              Subject Name
-            </label>
-            <input
-              type="text"
-              value={subjectName}
-              onChange={(e) => {
-                setSubjectName(e.target.value);
-                setShowSuggestions(e.target.value.length > 0);
-              }}
-              onFocus={(e) => {
-                setShowSuggestions(subjectName.length > 0);
-                e.target.style.borderColor = 'rgba(139, 92, 246, 0.5)';
-                e.target.style.boxShadow = '0 0 0 4px rgba(139, 92, 246, 0.1), inset 0 2px 4px rgba(0, 0, 0, 0.1)';
-              }}
-              onBlur={(e) => {
-                setTimeout(() => {
-                  setShowSuggestions(false);
-                  e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                  e.target.style.boxShadow = 'inset 0 2px 4px rgba(0, 0, 0, 0.1)';
-                }, 200);
-              }}
-              placeholder="e.g., Mathematics, Physics..."
-              style={{
-                width: '100%',
-                padding: '0.875rem 1rem',
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1.5px solid rgba(255, 255, 255, 0.1)',
-                borderRadius: '12px',
-                color: 'white',
-                fontSize: '1rem',
-                fontWeight: 500,
-                fontFamily: "'Outfit', sans-serif",
-                outline: 'none',
-                transition: 'all 0.2s ease',
-                boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.1)'
-              }}
-            />
-
-            {/* Suggestions Dropdown */}
-            <AnimatePresence>
-              {showSuggestions && filteredSuggestions.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
+          )}
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div>
+              <label style={{
+                display: 'block',
+                fontSize: '0.75rem',
+                color: 'rgba(255, 255, 255, 0.6)',
+                marginBottom: '0.5rem'
+              }}>
+                Subject Name
+              </label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="text"
+                  value={subjectName}
+                  onChange={(e) => setSubjectName(e.target.value)}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                  placeholder="e.g. Mathematics"
                   style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '10px',
+                    color: 'white',
+                    fontSize: '0.875rem'
+                  }}
+                />
+                {showSuggestions && filteredSuggestions.length > 0 && (
+                  <div style={{
                     position: 'absolute',
                     top: '100%',
                     left: 0,
                     right: 0,
-                    marginTop: '0.5rem',
-                    background: 'rgba(20, 20, 30, 0.95)',
-                    backdropFilter: 'blur(20px)',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(139, 92, 246, 0.3)',
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
-                    overflow: 'hidden',
-                    zIndex: 1000
-                  }}
-                >
-                  {filteredSuggestions.map((suggestion, index) => (
-                    <motion.div
-                      key={suggestion}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      onClick={() => {
-                        setSubjectName(suggestion);
-                        setShowSuggestions(false);
-                      }}
-                      style={{
-                        padding: '0.875rem 1rem',
-                        cursor: 'pointer',
-                        fontSize: '0.9375rem',
-                        fontWeight: 500,
-                        color: 'rgba(255, 255, 255, 0.8)',
-                        transition: 'all 0.2s ease',
-                        borderBottom: index < filteredSuggestions.length - 1 ? '1px solid rgba(255, 255, 255, 0.05)' : 'none'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'rgba(139, 92, 246, 0.15)';
-                        e.currentTarget.style.color = '#e9d5ff';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'transparent';
-                        e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
-                      }}
-                    >
-                      {suggestion}
-                    </motion.div>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Duration Input */}
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              color: '#c4b5fd',
-              marginBottom: '0.625rem',
-              letterSpacing: '0.01em'
-            }}>
-              Duration (minutes)
-            </label>
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
-              {[25, 45, 60, 90].map((mins) => (
-                <motion.button
-                  key={mins}
-                  onClick={() => setDuration(mins.toString())}
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  style={{
-                    flex: 1,
-                    padding: '0.75rem',
-                    background: duration === mins.toString()
-                      ? 'linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(168, 85, 247, 0.2))'
-                      : 'rgba(255, 255, 255, 0.05)',
-                    border: duration === mins.toString()
-                      ? '1.5px solid rgba(139, 92, 246, 0.6)'
-                      : '1.5px solid rgba(255, 255, 255, 0.1)',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    backdropFilter: 'blur(15px)',
                     borderRadius: '10px',
-                    color: duration === mins.toString() ? '#e9d5ff' : 'rgba(255, 255, 255, 0.7)',
-                    fontSize: '0.9375rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    fontFamily: "'Outfit', sans-serif",
-                    transition: 'all 0.2s ease',
-                    boxShadow: duration === mins.toString()
-                      ? '0 4px 12px rgba(139, 92, 246, 0.3)'
-                      : 'none'
-                  }}
-                >
-                  {mins}
-                </motion.button>
-              ))}
+                    marginTop: '0.25rem',
+                    zIndex: 100,
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    maxHeight: '150px',
+                    overflowY: 'auto'
+                  }}>
+                    {filteredSuggestions.map((subject, index) => (
+                      <div
+                        key={index}
+                        onClick={() => {
+                          setSubjectName(subject);
+                          setShowSuggestions(false);
+                        }}
+                        style={{
+                          padding: '0.75rem',
+                          cursor: 'pointer',
+                          fontSize: '0.875rem',
+                          color: 'white',
+                          borderBottom: index < filteredSuggestions.length - 1 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
+                        }}
+                        onMouseEnter={(e) => e.target.style.background = 'rgba(139, 92, 246, 0.2)'}
+                        onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                      >
+                        {subject}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-
-          {/* Add End Break Toggle */}
-          <div style={{ marginBottom: '1.5rem' }}>
-            <motion.button
-              onClick={() => setEndBreak(!endBreak)}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            
+            <div>
+              <label style={{
+                display: 'block',
+                fontSize: '0.75rem',
+                color: 'rgba(255, 255, 255, 0.6)',
+                marginBottom: '0.5rem'
+              }}>
+                Duration (minutes)
+              </label>
+              <input
+                type="number"
+                min="5"
+                max="180"
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+                placeholder="45"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '10px',
+                  color: 'white',
+                  fontSize: '0.875rem'
+                }}
+              />
+            </div>
+            
+            <button
+              onClick={handleAddSubject}
               style={{
-                width: '100%',
-                padding: '1rem',
-                background: endBreak
-                  ? 'rgba(34, 197, 94, 0.15)'
-                  : 'rgba(255, 255, 255, 0.05)',
-                border: endBreak
-                  ? '1.5px solid rgba(34, 197, 94, 0.5)'
-                  : '1.5px solid rgba(255, 255, 255, 0.1)',
+                padding: '0.75rem',
+                background: 'linear-gradient(135deg, #8b5cf6, #a78bfa)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
                 borderRadius: '10px',
+                color: 'white',
+                fontSize: '0.875rem',
+                fontWeight: 600,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'space-between',
-                transition: 'all 0.2s ease',
-                fontFamily: "'Outfit', sans-serif"
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                <Coffee size={20} color={endBreak ? '#4ade80' : 'rgba(255, 255, 255, 0.6)'} />
-                <span style={{
-                  fontSize: '0.9375rem',
-                  fontWeight: 600,
-                  color: endBreak ? '#4ade80' : 'rgba(255, 255, 255, 0.7)'
-                }}>
-                  Add final break after last subject
-                </span>
-              </div>
-              <div style={{
-                width: '20px',
-                height: '20px',
-                borderRadius: '6px',
-                background: endBreak ? '#22c55e' : 'rgba(255, 255, 255, 0.1)',
-                display: 'flex',
-                alignItems: 'center',
                 justifyContent: 'center',
-                transition: 'all 0.2s ease'
-              }}>
-                {endBreak && <CheckCircle2 size={14} color="white" />}
-              </div>
-            </motion.button>
-          </div>
-
-          {/* Add Button */}
-          <motion.button
-            onClick={handleAddSubject}
-            whileHover={{ scale: 1.02, y: -2 }}
-            whileTap={{ scale: 0.98 }}
-            style={{
-              width: '100%',
-              padding: '1rem',
-              background: 'linear-gradient(135deg, #8b5cf6, #a78bfa)',
-              border: 'none',
-              borderRadius: '12px',
-              color: 'white',
-              fontSize: '1rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              fontFamily: "'Outfit', sans-serif",
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.625rem',
-              boxShadow: '0 6px 20px rgba(139, 92, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            <Plus size={20} strokeWidth={2.5} />
-            Add Subject
-          </motion.button>
-        </motion.div>
-
-        {/* Error Message */}
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              style={{
-                padding: '1rem',
-                background: 'rgba(239, 68, 68, 0.1)',
-                border: '1px solid rgba(239, 68, 68, 0.3)',
-                borderRadius: '12px',
-                color: '#f87171',
-                fontSize: '0.875rem',
-                fontWeight: 600
+                gap: '0.5rem',
+                boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4)'
               }}
             >
-              {error}
-            </motion.div>
-          )}
-        </AnimatePresence>
+              <Plus size={16} />
+              Add to Queue
+            </button>
+          </div>
+        </div>
 
         {/* Subject Queue */}
-        {subjectQueue.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            style={{
+        <div style={{
+          padding: '1.25rem',
+          background: 'rgba(255, 255, 255, 0.03)',
+          backdropFilter: 'blur(15px)',
+          borderRadius: '16px',
+          border: '1px solid rgba(255, 255, 255, 0.18)'
+        }}>
+          <h3 style={{
+            fontSize: '1rem',
+            fontWeight: 600,
+            color: 'white',
+            margin: '0 0 1rem 0',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <Clock size={18} color="#8b5cf6" />
+            Study Queue ({subjectQueue.length})
+          </h3>
+          
+          {subjectQueue.length === 0 ? (
+            <div style={{
+              textAlign: 'center',
               padding: '1.5rem',
-              background: 'rgba(255, 255, 255, 0.02)',
-              borderRadius: '16px',
-              border: '1px solid rgba(255, 255, 255, 0.08)'
-            }}
-          >
+              color: 'rgba(255, 255, 255, 0.5)'
+            }}>
+              <Coffee size={32} color="rgba(255, 255, 255, 0.3)" style={{ marginBottom: '0.75rem' }} />
+              <p style={{ fontSize: '0.875rem', margin: 0 }}>
+                No subjects added yet
+              </p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {subjectQueue.map((subject, index) => (
+                <motion.div
+                  key={subject.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  style={{
+                    padding: '0.875rem',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: '10px',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}
+                >
+                  <div>
+                    <div style={{
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      color: 'white',
+                      marginBottom: '0.25rem'
+                    }}>
+                      {subject.subject}
+                    </div>
+                    <div style={{
+                      fontSize: '0.75rem',
+                      color: 'rgba(255, 255, 255, 0.6)'
+                    }}>
+                      {subject.duration} minutes
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleRemoveSubject(subject.id)}
+                    style={{
+                      padding: '0.5rem',
+                      background: 'rgba(239, 68, 68, 0.1)',
+                      border: '1px solid rgba(239, 68, 68, 0.3)',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <X size={16} color="#fca5a5" />
+                  </button>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Generate Schedule Button */}
+        <button
+          onClick={handleGenerateSchedule}
+          disabled={subjectQueue.length === 0 || loading}
+          style={{
+            padding: '0.875rem',
+            background: subjectQueue.length === 0 || loading
+              ? 'rgba(255, 255, 255, 0.05)'
+              : 'linear-gradient(135deg, #8b5cf6, #a78bfa)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            borderRadius: '12px',
+            color: subjectQueue.length === 0 || loading ? 'rgba(255, 255, 255, 0.5)' : 'white',
+            fontSize: '0.875rem',
+            fontWeight: 600,
+            cursor: subjectQueue.length === 0 || loading ? 'not-allowed' : 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            boxShadow: subjectQueue.length > 0 && !loading 
+              ? '0 4px 20px rgba(139, 92, 246, 0.4)' 
+              : 'none',
+            transition: 'all 0.3s ease'
+          }}
+        >
+          {loading ? (
+            <>
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                style={{
+                  width: '16px',
+                  height: '16px',
+                  border: '2px solid rgba(255, 255, 255, 0.3)',
+                  borderTop: '2px solid white',
+                  borderRadius: '50%'
+                }}
+              />
+              Generating...
+            </>
+          ) : (
+            <>
+              <Zap size={16} />
+              Generate Schedule
+            </>
+          )}
+        </button>
+
+        {/* ML Recommendations */}
+        {activeRecommendations?.recommended_schedule?.length > 0 && (
+          <div style={{
+            padding: '1.25rem',
+            background: 'rgba(255, 255, 255, 0.03)',
+            backdropFilter: 'blur(15px)',
+            borderRadius: '16px',
+            border: '1px solid rgba(255, 255, 255, 0.18)'
+          }}>
             <div style={{
               display: 'flex',
-              alignItems: 'center',
               justifyContent: 'space-between',
+              alignItems: 'center',
               marginBottom: '1rem'
             }}>
-              <h4 style={{
+              <h3 style={{
+                fontSize: '1rem',
+                fontWeight: 600,
+                color: 'white',
                 margin: 0,
-                fontSize: '0.9375rem',
-                fontWeight: 700,
-                color: '#c4b5fd',
-                letterSpacing: '0.05em',
-                textTransform: 'uppercase'
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
               }}>
-                Your Queue ({subjectQueue.length})
-              </h4>
+                <Sparkles size={18} color="#8b5cf6" />
+                AI Recommendations
+              </h3>
+              <div style={{
+                padding: '0.25rem 0.5rem',
+                background: 'rgba(139, 92, 246, 0.2)',
+                borderRadius: '20px',
+                fontSize: '0.7rem',
+                fontWeight: 600,
+                color: '#a78bfa'
+              }}>
+                {Math.round(activeRecommendations.confidence * 100)}% confident
+              </div>
             </div>
-
+            
             <div style={{
               display: 'flex',
               flexDirection: 'column',
               gap: '0.75rem',
-              maxHeight: '280px',
-              overflowY: subjectQueue.length > 4 ? 'auto' : 'visible',
-              paddingRight: subjectQueue.length > 4 ? '0.5rem' : '0'
+              marginBottom: '1rem'
             }}>
-              <AnimatePresence>
-                {subjectQueue.map((subject, index) => (
-                  <motion.div
-                    key={subject.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    transition={{ delay: index * 0.05 }}
-                    style={{
-                      padding: '1rem',
-                      background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03))',
-                      borderRadius: '12px',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: '0.75rem',
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    <div style={{ flex: 1 }}>
-                      <div style={{
-                        fontSize: '0.9375rem',
-                        fontWeight: 700,
-                        color: 'white',
-                        marginBottom: '0.25rem'
-                      }}>
-                        {subject.subject}
-                      </div>
-                      <div style={{
-                        fontSize: '0.8125rem',
-                        color: 'rgba(255, 255, 255, 0.6)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        fontWeight: 500
-                      }}>
-                        <Clock size={12} />
-                        {subject.duration} minutes
-                      </div>
+              {activeRecommendations.recommended_schedule.slice(0, 3).map((item, index) => (
+                <div
+                  key={index}
+                  style={{
+                    padding: '0.75rem',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: '10px',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    display: 'flex',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <div>
+                    <div style={{
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      color: 'white',
+                      marginBottom: '0.125rem'
+                    }}>
+                      {item.subject || 'Break'}
                     </div>
-                    <motion.button
-                      onClick={() => handleRemoveSubject(subject.id)}
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      style={{
-                        width: '28px',
-                        height: '28px',
-                        borderRadius: '8px',
-                        background: 'rgba(239, 68, 68, 0.15)',
-                        border: '1px solid rgba(239, 68, 68, 0.3)',
-                        color: '#f87171',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'all 0.2s ease'
-                      }}
-                    >
-                      <X size={14} strokeWidth={2.5} />
-                    </motion.button>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Action Buttons */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {/* Generate Schedule Button */}
-          {subjectQueue.length > 0 && !scheduleGenerated && (
-            <motion.button
-              onClick={handleGenerateSchedule}
-              disabled={loading}
-              whileHover={!loading ? { scale: 1.02, y: -2 } : {}}
-              whileTap={!loading ? { scale: 0.98 } : {}}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              style={{
-                width: '100%',
-                padding: '1.25rem',
-                background: loading
-                  ? 'rgba(139, 92, 246, 0.4)'
-                  : 'linear-gradient(135deg, rgba(244, 114, 182, 0.95), rgba(168, 85, 247, 0.95))',
-                border: 'none',
-                borderRadius: '14px',
-                color: 'white',
-                fontSize: '1.0625rem',
-                fontWeight: 700,
-                cursor: loading ? 'not-allowed' : 'pointer',
-                fontFamily: "'Outfit', sans-serif",
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.75rem',
-                boxShadow: loading
-                  ? 'none'
-                  : '0 8px 28px rgba(244, 114, 182, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              {loading ? (
-                <>
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                    style={{
-                      width: '20px',
-                      height: '20px',
-                      border: '2px solid rgba(255, 255, 255, 0.3)',
-                      borderTop: '2px solid white',
-                      borderRadius: '50%'
-                    }}
-                  />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Zap size={22} />
-                  🧠 Generate Schedule
-                </>
-              )}
-            </motion.button>
-          )}
-
-          {/* Schedule Generated - Action Buttons */}
-          {scheduleGenerated && activeRecommendations && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              style={{
-                padding: '1.5rem',
-                background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.05))',
-                borderRadius: '16px',
-                border: '1px solid rgba(34, 197, 94, 0.3)',
-                boxShadow: '0 4px 20px rgba(34, 197, 94, 0.15)'
-              }}
-            >
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                marginBottom: '1rem'
-              }}>
-                <CheckCircle2 size={24} color="#22c55e" strokeWidth={2.5} />
-                <div>
-                  <div style={{
-                    fontSize: '1.0625rem',
-                    fontWeight: 700,
-                    color: '#86efac',
-                    marginBottom: '0.125rem'
-                  }}>
-                    Schedule Ready!
+                    <div style={{
+                      fontSize: '0.7rem',
+                      color: 'rgba(255, 255, 255, 0.6)'
+                    }}>
+                      {item.start} - {item.end}
+                    </div>
                   </div>
                   <div style={{
-                    fontSize: '0.8125rem',
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    fontWeight: 500
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    display: 'flex',
+                    alignItems: 'center'
                   }}>
-                    {activeRecommendations.recommended_schedule?.filter(s => s.subject).length || 0} subjects • {activeRecommendations.recommended_schedule?.filter(s => s.break).length || 0} breaks
+                    {item.duration || item.break} min
                   </div>
                 </div>
-              </div>
-
-              {/* Schedule Preview */}
-              <div style={{
-                marginBottom: '1rem',
-                maxHeight: '200px',
-                overflowY: 'auto',
-                background: 'rgba(0, 0, 0, 0.2)',
-                borderRadius: '10px',
-                padding: '0.75rem'
-              }}>
-                {activeRecommendations.recommended_schedule?.map((item, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      padding: '0.625rem',
-                      marginBottom: index < activeRecommendations.recommended_schedule.length - 1 ? '0.5rem' : '0',
-                      background: item.subject 
-                        ? 'rgba(139, 92, 246, 0.1)' 
-                        : 'rgba(34, 197, 94, 0.1)',
-                      borderRadius: '8px',
-                      border: `1px solid ${item.subject ? 'rgba(139, 92, 246, 0.2)' : 'rgba(34, 197, 94, 0.2)'}`,
-                      fontSize: '0.8125rem'
-                    }}
-                  >
-                    {item.subject ? (
-                      <>
-                        <div style={{
-                          fontWeight: 700,
-                          color: '#e9d5ff',
-                          marginBottom: '0.25rem'
-                        }}>
-                          {item.subject}
-                        </div>
-                        <div style={{
-                          color: 'rgba(255, 255, 255, 0.6)',
-                          fontSize: '0.75rem',
-                          fontWeight: 500
-                        }}>
-                          {item.start} - {item.end} ({item.duration} min)
-                        </div>
-                      </>
-                    ) : (
-                      <div style={{
-                        fontWeight: 600,
-                        color: '#86efac',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem'
-                      }}>
-                        ☕ Break • {item.break} min
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {/* Start Session Button */}
-              {!showTimers && (
-                <>
-                  <motion.button
-                    onClick={handleStartSession}
-                    whileHover={{ scale: 1.02, y: -2 }}
-                    whileTap={{ scale: 0.98 }}
-                    style={{
-                      width: '100%',
-                      padding: '1.125rem',
-                      background: 'linear-gradient(135deg, #22c55e, #10b981)',
-                      border: 'none',
-                      borderRadius: '12px',
-                      color: 'white',
-                      fontSize: '1.0625rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      fontFamily: "'Outfit', sans-serif",
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '0.75rem',
-                      boxShadow: '0 6px 24px rgba(34, 197, 94, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
-                      transition: 'all 0.2s ease',
-                      marginBottom: '0.75rem'
-                    }}
-                  >
-                    <Play size={20} strokeWidth={2.5} />
-                    Start Study Session
-                  </motion.button>
-
-                  {/* Adjust Button */}
-                  <motion.button
-                    onClick={handleAdjustSchedule}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    style={{
-                      width: '100%',
-                      padding: '0.875rem',
-                      background: 'rgba(255, 255, 255, 0.06)',
-                      border: '1.5px solid rgba(255, 255, 255, 0.15)',
-                      borderRadius: '12px',
-                      color: 'rgba(255, 255, 255, 0.9)',
-                      fontSize: '0.9375rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      fontFamily: "'Outfit', sans-serif",
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '0.625rem',
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    <Edit3 size={16} />
-                    Adjust Schedule
-                  </motion.button>
-                </>
-              )}
-            </motion.div>
-          )}
-        </div>
+              ))}
+            </div>
+            
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <button
+                onClick={handleStartSession}
+                style={{
+                  flex: 1,
+                  padding: '0.75rem',
+                  background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.9), rgba(16, 185, 129, 0.9))',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '10px',
+                  color: 'white',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  boxShadow: '0 4px 20px rgba(34, 197, 94, 0.4)'
+                }}
+              >
+                <Play size={14} />
+                Start
+              </button>
+              
+              <button
+                onClick={handleAdjustSchedule}
+                style={{
+                  padding: '0.75rem',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '10px',
+                  color: 'white',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem'
+                }}
+              >
+                <Edit3 size={14} />
+                Edit
+              </button>
+            </div>
+          </div>
+        )}
       </div>
-
-      {/* Custom Scrollbar Styles */}
-      <style>{`
-        div::-webkit-scrollbar {
-          width: 6px;
-        }
-        div::-webkit-scrollbar-track {
-          background: rgba(255, 255, 255, 0.02);
-          border-radius: 10px;
-        }
-        div::-webkit-scrollbar-thumb {
-          background: rgba(139, 92, 246, 0.4);
-          border-radius: 10px;
-        }
-        div::-webkit-scrollbar-thumb:hover {
-          background: rgba(139, 92, 246, 0.6);
-        }
-      `}</style>
     </motion.div>
   );
 };
