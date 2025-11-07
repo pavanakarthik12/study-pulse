@@ -250,13 +250,13 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
           position: 'sticky',
           top: '1rem',
           zIndex: 100,
-          marginBottom: '1.5rem',
-          padding: '1.25rem',
+          marginBottom: '2rem',
+          padding: '1.5rem',
           background: 'rgba(255, 255, 255, 0.05)',
-          backdropFilter: 'blur(20px)',
-          borderRadius: '16px',
-          border: '1px solid rgba(139, 92, 246, 0.3)',
-          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)'
+          backdropFilter: 'blur(22px)',
+          borderRadius: '18px',
+          border: '1px solid rgba(139, 92, 246, 0.32)',
+          boxShadow: '0 14px 36px rgba(0, 0, 0, 0.35)'
         }}
       >
         <div style={{
@@ -346,12 +346,12 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          margin: '1rem 0'
+          margin: '1.25rem 0'
         }}>
           <div style={{
             position: 'relative',
-            width: '200px',
-            height: '200px'
+            width: '240px',
+            height: '240px'
           }}>
             {/* Background Circle */}
             <div style={{
@@ -387,7 +387,7 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
               textAlign: 'center'
             }}>
               <div style={{
-                fontSize: '2rem',
+                fontSize: '2.25rem',
                 fontWeight: 700,
                 color: 'white',
                 marginBottom: '0.25rem',
@@ -396,7 +396,7 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
                 {formatTime(timeRemaining)}
               </div>
               <div style={{
-                fontSize: '0.875rem',
+                fontSize: '1rem',
                 color: 'rgba(255, 255, 255, 0.6)'
               }}>
                 {isCurrentBreak ? 'Break Remaining' : 'Time Remaining'}
@@ -409,24 +409,24 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
         <div style={{
           display: 'flex',
           justifyContent: 'center',
-          gap: '1rem'
+          gap: '1.25rem'
         }}>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={isRunning && !isPaused ? pauseTimer : isPaused ? resumeTimer : startTimer}
             style={{
-              padding: '0.75rem 1.5rem',
+              padding: '0.9rem 1.6rem',
               background: 'linear-gradient(135deg, #8b5cf6, #a78bfa)',
               border: 'none',
-              borderRadius: '12px',
+              borderRadius: '14px',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
               color: 'white',
               fontWeight: 600,
-              boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4)'
+              boxShadow: '0 6px 22px rgba(139, 92, 246, 0.42)'
             }}
           >
             {isRunning && !isPaused ? (
@@ -447,12 +447,12 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
             whileTap={{ scale: 0.95 }}
             onClick={skipSubject}
             style={{
-              padding: '0.75rem 1.5rem',
+              padding: '0.9rem 1.6rem',
               background: 'rgba(255, 255, 255, 0.05)',
               border: '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: '12px',
+              borderRadius: '14px',
               color: 'white',
-              fontSize: '0.875rem',
+              fontSize: '0.95rem',
               fontWeight: 600,
               cursor: 'pointer',
               display: 'flex',
@@ -469,12 +469,12 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
             whileTap={{ scale: 0.95 }}
             onClick={cancelAll}
             style={{
-              padding: '0.75rem 1.5rem',
+              padding: '0.9rem 1.6rem',
               background: 'rgba(239, 68, 68, 0.1)',
               border: '1px solid rgba(239, 68, 68, 0.3)',
-              borderRadius: '12px',
+              borderRadius: '14px',
               color: '#fca5a5',
-              fontSize: '0.875rem',
+              fontSize: '0.95rem',
               fontWeight: 600,
               cursor: 'pointer',
               display: 'flex',
@@ -490,18 +490,18 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
       
       {/* Schedule Overview */}
       <div style={{
-        padding: '1.25rem',
+        padding: '1.5rem',
         background: 'rgba(255, 255, 255, 0.03)',
-        backdropFilter: 'blur(20px)',
-        borderRadius: '16px',
+        backdropFilter: 'blur(22px)',
+        borderRadius: '18px',
         border: '1px solid rgba(255, 255, 255, 0.18)',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
+        boxShadow: '0 10px 34px rgba(0, 0, 0, 0.32)'
       }}>
         <h3 style={{
-          fontSize: '1rem',
+          fontSize: '1.05rem',
           fontWeight: 700,
           color: 'white',
-          margin: '0 0 1rem 0',
+          margin: '0 0 1.1rem 0',
           display: 'flex',
           alignItems: 'center',
           gap: '0.5rem'
@@ -513,8 +513,8 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
         <div style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '0.75rem',
-          maxHeight: '300px',
+          gap: '0.9rem',
+          maxHeight: '340px',
           overflowY: 'auto'
         }}>
           {schedule.map((item, index) => (
@@ -523,8 +523,8 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                padding: '0.875rem',
-                borderRadius: '12px',
+                padding: '1rem',
+                borderRadius: '14px',
                 background: index === currentIndex 
                   ? 'rgba(139, 92, 246, 0.2)' 
                   : index < currentIndex

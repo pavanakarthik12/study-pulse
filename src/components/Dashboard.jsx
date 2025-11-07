@@ -869,7 +869,7 @@ const Dashboard = () => {
           style={{
             position: 'fixed',
             bottom: 'max(1rem, env(safe-area-inset-bottom))',
-            right: 'max(1rem, env(safe-area-inset-right))',
+            left: focusMode ? 'max(1rem, env(safe-area-inset-left))' : (sidebarOpen && !isNarrow ? '356px' : 'max(1rem, env(safe-area-inset-left))'),
             zIndex: 1300,
             width: focusMode ? '360px' : '320px',
             maxWidth: 'min(92vw, 400px)'
