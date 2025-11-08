@@ -148,6 +148,7 @@ const Sidebar = ({
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       style={{
         height: '100%',
+        maxHeight: 'calc(100vh - 80px)', // Ensure it doesn't exceed viewport height
         background: 'rgba(10, 10, 15, 0.85)',
         backdropFilter: 'blur(20px)',
         borderRight: '1px solid rgba(139, 92, 246, 0.2)',
@@ -184,6 +185,8 @@ const Sidebar = ({
         // Custom scrollbar styling
         scrollbarWidth: 'thin',
         scrollbarColor: 'rgba(139, 92, 246, 0.3) transparent',
+        // Ensure content doesn't get cut off
+        paddingBottom: '2rem'
       }}>
         {/* Custom scrollbar for Webkit browsers */}
         <style>

@@ -618,6 +618,7 @@ const Dashboard = () => {
           position: isNarrow ? 'relative' : 'sticky',
           top: isNarrow ? undefined : '80px',
           height: isNarrow ? 'auto' : 'calc(100vh - 80px)',
+          maxHeight: isNarrow ? 'none' : 'calc(100vh - 80px)',
           zIndex: 900,
           overflow: 'hidden',
           width: isNarrow ? '100%' : (sidebarOpen ? '340px' : '0px')
@@ -655,7 +656,8 @@ const Dashboard = () => {
         {/* Main Content Area */}
         <div style={{
           padding: '1.5rem',
-          width: '100%'
+          width: '100%',
+          minHeight: sessionReview ? 'auto' : 'calc(100vh - 160px)' // Adjust height when session summary is shown
         }}
         className="main-content">
           <div style={{
