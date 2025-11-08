@@ -9,16 +9,16 @@ const SequentialTimers = ({ schedule, onComplete, onCancel, onEditSchedule, hand
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [completedSubjects, setCompletedSubjects] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [skippedSubjects, setSkippedSubjects] = useState([]);
-  const [pausedSubjects, setPausedSubjects] = useState([]);
   const [showSkipConfirmModal, setShowSkipConfirmModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
-  const [showMotivationModal, setShowMotivationModal] = useState(false);
+  const [showMotivationToast, setShowMotivationToast] = useState(false);
+  const [motivationalQuote, setMotivationalQuote] = useState("");
   const [showSessionSummary, setShowSessionSummary] = useState(false);
   const [sessionResult, setSessionResult] = useState(null);
-  
+  const [sessionProgress, setSessionProgress] = useState([]);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
   console.log('🎬 SequentialTimers initialized with schedule:', schedule);
   
   // Get current item (handles both subjects and breaks)
@@ -27,6 +27,15 @@ const SequentialTimers = ({ schedule, onComplete, onCancel, onEditSchedule, hand
   
   // Calculate subject-only items for progress tracking
   const subjectItems = schedule.filter(item => item.subject);
+  
+  // Initialize session progress tracking
+  useEffect(() => {
+    const initialProgress = subjectItems.map(item => ({
+      subject: item.subject,
+      status: 'incomplete' // 'completed' | 'skipped' | 'incomplete'
+    }));
+    setSessionProgress(initialProgress);
+  }, [subjectItems]);
   
   // Initialize timer with current item duration
   useEffect(() => {
@@ -45,36 +54,59 @@ const SequentialTimers = ({ schedule, onComplete, onCancel, onEditSchedule, hand
   }, [currentIndex, currentItem, isRunning, isCurrentBreak]);
   
   const handleTimerComplete = useCallback(() => {
+    // Only proceed if we're not already handling a skip or transition
+    if (showMotivationToast || isTransitioning) return;
+    
     if (!currentItem) return;
     
-    // If it was a subject, mark as completed
+    // Update session progress for subjects
     if (currentItem.subject) {
       console.log(`✅ Completed: ${currentItem.subject}`);
-      setCompletedSubjects(prev => [...prev, currentItem.subject]);
+      setSessionProgress(prev => 
+        prev.map(item => 
+          item.subject === currentItem.subject 
+            ? { ...item, status: 'completed' } 
+            : item
+        )
+      );
     }
     
     // Check if there are more items
     if (currentIndex < schedule.length - 1) {
       console.log(`➡️ Moving to next item (${currentIndex + 1}/${schedule.length})`);
+      setIsTransitioning(true);
       setCurrentIndex(prev => prev + 1);
       setIsRunning(false);
       setIsPaused(false);
+      // Reset transitioning state after a short delay
+      setTimeout(() => setIsTransitioning(false), 500);
     } else {
       // All sessions completed - CONFETTI TIME!
       console.log('🎉 All sessions completed!');
       setIsRunning(false);
       
+      // Calculate final results
+      const completedSubjects = sessionProgress
+        .filter(item => item.status === 'completed')
+        .map(item => item.subject);
+        
+      const skippedSubjects = sessionProgress
+        .filter(item => item.status === 'skipped')
+        .map(item => item.subject);
+        
       const result = {
         completedSubjects,
         skippedSubjects,
-        pausedSubjects
+        incompleteSubjects: sessionProgress
+          .filter(item => item.status === 'incomplete')
+          .map(item => item.subject)
       };
       
       setSessionResult(result);
       setShowSessionSummary(true);
       triggerConfetti();
     }
-  }, [currentIndex, currentItem, schedule, completedSubjects, skippedSubjects, pausedSubjects]);
+  }, [currentIndex, currentItem, schedule, sessionProgress, showMotivationToast, isTransitioning]);
 
   const triggerConfetti = () => {
     const duration = 3000;
@@ -108,7 +140,7 @@ const SequentialTimers = ({ schedule, onComplete, onCancel, onEditSchedule, hand
   useEffect(() => {
     let interval = null;
     
-    if (isRunning && !isPaused && timeRemaining > 0) {
+    if (isRunning && !isPaused && timeRemaining > 0 && !isTransitioning) {
       interval = setInterval(() => {
         setTimeRemaining(prev => {
           if (prev <= 1) {
@@ -124,7 +156,7 @@ const SequentialTimers = ({ schedule, onComplete, onCancel, onEditSchedule, hand
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isRunning, isPaused, timeRemaining, handleTimerComplete]);
+  }, [isRunning, isPaused, timeRemaining, handleTimerComplete, isTransitioning]);
   
   const startTimer = () => {
     setIsRunning(true);
@@ -133,8 +165,10 @@ const SequentialTimers = ({ schedule, onComplete, onCancel, onEditSchedule, hand
   
   const pauseTimer = () => {
     setIsPaused(true);
-    if (currentItem?.subject && !pausedSubjects.includes(currentItem.subject)) {
-      setPausedSubjects(prev => [...prev, currentItem.subject]);
+    if (currentItem?.subject) {
+      setSessionProgress(prev => prev.map(item => 
+        item.subject === currentItem.subject ? { ...item, status: 'paused' } : item
+      ));
     }
   };
   
@@ -148,20 +182,39 @@ const SequentialTimers = ({ schedule, onComplete, onCancel, onEditSchedule, hand
   
   const confirmSkip = () => {
     setShowSkipConfirmModal(false);
+    
+    // Update session progress for skipped subjects
     if (currentItem?.subject) {
-      setSkippedSubjects(prev => [...prev, currentItem.subject]);
+      setSessionProgress(prev => 
+        prev.map(item => 
+          item.subject === currentItem.subject 
+            ? { ...item, status: 'skipped' } 
+            : item
+        )
+      );
     }
-    handleTimerComplete();
+    
+    // Set a random motivational quote
+    const quote = getMotivationalQuote();
+    setMotivationalQuote(quote);
+    
+    // Show motivation toast
+    setShowMotivationToast(true);
+    setIsTransitioning(true);
+    
+    // Hide toast after 2 seconds and then move to next timer
+    setTimeout(() => {
+      setShowMotivationToast(false);
+      // Use a small delay to ensure the toast is hidden before moving to next timer
+      setTimeout(() => {
+        setIsTransitioning(false);
+        handleTimerComplete();
+      }, 100);
+    }, 2000);
   };
   
   const cancelSkip = () => {
     setShowSkipConfirmModal(false);
-    // Show motivation message
-    setShowMotivationModal(true);
-    // Auto-hide motivation modal after 3 seconds
-    setTimeout(() => {
-      setShowMotivationModal(false);
-    }, 3000);
   };
   
   const cancelAll = () => {
@@ -172,12 +225,48 @@ const SequentialTimers = ({ schedule, onComplete, onCancel, onEditSchedule, hand
     setShowCancelModal(false);
     setIsRunning(false);
     setIsPaused(false);
+    
+    // Mark remaining subjects as incomplete
+    const remainingSubjects = schedule
+      .slice(currentIndex)
+      .filter(item => item.subject)
+      .map(item => item.subject);
+      
+    setSessionProgress(prev => 
+      prev.map(item => 
+        remainingSubjects.includes(item.subject) 
+          ? { ...item, status: 'incomplete' } 
+          : item
+      )
+    );
+    
+    // Calculate final results using the updated sessionProgress
+    const updatedProgress = sessionProgress.map(item => 
+      remainingSubjects.includes(item.subject) 
+        ? { ...item, status: 'incomplete' } 
+        : item
+    );
+    
+    const completedSubjects = updatedProgress
+      .filter(item => item.status === 'completed')
+      .map(item => item.subject);
+      
+    const skippedSubjects = updatedProgress
+      .filter(item => item.status === 'skipped')
+      .map(item => item.subject);
+      
+    const incompleteSubjects = updatedProgress
+      .filter(item => item.status === 'incomplete')
+      .map(item => item.subject);
+    
+    const result = {
+      completedSubjects,
+      skippedSubjects,
+      incompleteSubjects
+    };
+    
     if (onCancel) {
-      onCancel({
-        completedSubjects,
-        skippedSubjects,
-        pausedSubjects
-      });
+      onCancel(result);
     }
   };
 
@@ -195,16 +284,30 @@ const SequentialTimers = ({ schedule, onComplete, onCancel, onEditSchedule, hand
     return ((totalSeconds - timeRemaining) / totalSeconds) * 100;
   };
   
+  const getMotivationalQuote = () => {
+    const quotes = [
+      "You're closer than you think — stay focused!",
+      "Push through just a bit more!",
+      "Every minute you continue is a victory!",
+      "Stay strong — you've got this!",
+      "Keep going, champion!"
+    ];
+    return quotes[Math.floor(Math.random() * quotes.length)];
+  };
+
   const getSessionSummaryMessage = () => {
     const totalSubjects = subjectItems.length;
     const completedCount = sessionResult?.completedSubjects?.length || 0;
     const skippedCount = sessionResult?.skippedSubjects?.length || 0;
+    const incompleteCount = sessionResult?.incompleteSubjects?.length || 0;
     
-    // Calculate completion percentage
-    const completionPercentage = totalSubjects > 0 ? (completedCount / totalSubjects) * 100 : 0;
+    // Calculate completion percentage (completed + skipped counts as attempted)
+    const attemptedCount = completedCount + skippedCount;
+    const completionPercentage = totalSubjects > 0 ? (attemptedCount / totalSubjects) * 100 : 0;
+    const finishedPercentage = totalSubjects > 0 ? (completedCount / totalSubjects) * 100 : 0;
     
     // Determine message based on user behavior
-    if (completionPercentage >= 80) {
+    if (finishedPercentage >= 80) {
       return (
         <div>
           <p style={{
@@ -895,83 +998,36 @@ const SequentialTimers = ({ schedule, onComplete, onCancel, onEditSchedule, hand
         )}
       </AnimatePresence>
       
-      {/* Motivation Modal */}
+      {/* Motivation Toast */}
       <AnimatePresence>
-        {showMotivationModal && (
+        {showMotivationToast && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
             style={{
               position: 'fixed',
-              inset: 0,
-              background: 'rgba(0, 0, 0, 0.7)',
-              backdropFilter: 'blur(10px)',
-              zIndex: 2000,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '1rem'
+              bottom: '20px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 3000,
+              background: 'rgba(10, 10, 15, 0.95)',
+              border: '1px solid rgba(139, 92, 246, 0.3)',
+              borderRadius: '12px',
+              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
+              padding: '1rem 1.5rem',
+              textAlign: 'center',
+              backdropFilter: 'blur(10px)'
             }}
           >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              style={{
-                width: '100%',
-                maxWidth: '400px',
-                background: 'rgba(10, 10, 15, 0.95)',
-                border: '1px solid rgba(139, 92, 246, 0.3)',
-                borderRadius: '16px',
-                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
-                padding: '1.5rem',
-                textAlign: 'center'
-              }}
-            >
-              <h3 style={{
-                margin: 0,
-                marginBottom: '1rem',
-                color: 'white',
-                fontSize: '1.25rem',
-                fontWeight: 700
-              }}>
-                Keep Going!
-              </h3>
-              <p style={{
-                color: 'rgba(255, 255, 255, 0.8)',
-                fontSize: '1rem',
-                lineHeight: 1.5,
-                marginBottom: '1.5rem'
-              }}>
-                Great things take time — stay focused!
-              </p>
-              <button
-                onClick={() => setShowMotivationModal(false)}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  background: 'linear-gradient(135deg, #7c3aed, #581c87)',
-                  border: 'none',
-                  borderRadius: '12px',
-                  color: 'white',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                  transition: 'all 0.2s ease',
-                  boxShadow: '0 4px 15px rgba(124, 58, 237, 0.4)'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = '0 6px 20px rgba(124, 58, 237, 0.5)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = '0 4px 15px rgba(124, 58, 237, 0.4)';
-                }}
-              >
-                Back to Studying
-              </button>
-            </motion.div>
+            <p style={{
+              color: 'white',
+              fontSize: '0.9rem',
+              fontWeight: 500,
+              margin: 0
+            }}>
+              {motivationalQuote || "You're closer than you think — stay focused!"}
+            </p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -1066,28 +1122,6 @@ const SequentialTimers = ({ schedule, onComplete, onCancel, onEditSchedule, hand
                 </div>
                 <div style={{ 
                   padding: '1rem', 
-                  background: 'rgba(234, 179, 8, 0.1)', 
-                  border: '1px solid rgba(234, 179, 8, 0.3)', 
-                  borderRadius: '12px',
-                  textAlign: 'center'
-                }}>
-                  <div style={{ 
-                    color: '#fbbf24', 
-                    fontWeight: 700, 
-                    marginBottom: '0.25rem',
-                    fontSize: '1.25rem'
-                  }}>
-                    {sessionResult?.pausedSubjects?.length || 0}
-                  </div>
-                  <div style={{ 
-                    color: 'rgba(255, 255, 255, 0.7)',
-                    fontSize: '0.875rem'
-                  }}>
-                    Paused
-                  </div>
-                </div>
-                <div style={{ 
-                  padding: '1rem', 
                   background: 'rgba(239, 68, 68, 0.1)', 
                   border: '1px solid rgba(239, 68, 68, 0.3)', 
                   borderRadius: '12px',
@@ -1106,6 +1140,28 @@ const SequentialTimers = ({ schedule, onComplete, onCancel, onEditSchedule, hand
                     fontSize: '0.875rem'
                   }}>
                     Skipped
+                  </div>
+                </div>
+                <div style={{ 
+                  padding: '1rem', 
+                  background: 'rgba(139, 92, 246, 0.1)', 
+                  border: '1px solid rgba(139, 92, 246, 0.3)', 
+                  borderRadius: '12px',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ 
+                    color: '#a78bfa', 
+                    fontWeight: 700, 
+                    marginBottom: '0.25rem',
+                    fontSize: '1.25rem'
+                  }}>
+                    {sessionResult?.incompleteSubjects?.length || 0}
+                  </div>
+                  <div style={{ 
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    fontSize: '0.875rem'
+                  }}>
+                    Incomplete
                   </div>
                 </div>
               </div>
