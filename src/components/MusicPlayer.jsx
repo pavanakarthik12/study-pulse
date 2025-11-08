@@ -156,24 +156,24 @@ const MusicPlayer = () => {
 
   return (
     <div style={{
-      padding: 0,
+      padding: 20,
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      minHeight: '100vh'
+      minHeight: 'auto'
     }}>
       <audio ref={audioRef} onEnded={nextTrack} />
       
       <div style={{
-        maxWidth: '420px',
-        width: '90%',
-        padding: '18px',
-        borderRadius: '35px',
+        maxWidth: '1200px',
+        width: '1200px',
+        padding: '24px',
+        borderRadius: '225px',
         background: '#000',
         boxShadow: '0 8px 20px rgba(0, 0, 0, 0.4)',
         display: 'flex',
         flexDirection: 'column',
-        gap: '14px',
+        gap: '16px',
         fontFamily: '-apple-system, system-ui, sans-serif',
         color: 'white',
         transition: 'all 0.3s ease'
@@ -190,8 +190,8 @@ const MusicPlayer = () => {
             width: '64px',
             height: '64px',
             borderRadius: '16px',
-            background: 'linear-gradient(135deg, #7c3aed, #581c87)',
-            boxShadow: '0 4px 10px rgba(0, 0, 0, 0.5)',
+            background: 'linear-gradient(135deg, #7c3aed, #4c1d95)',
+            boxShadow: '0 4px 10px rgba(124, 58, 237, 0.5)',
             flexShrink: 0,
             transition: 'transform 0.3s ease',
             cursor: 'pointer'
@@ -259,7 +259,7 @@ const MusicPlayer = () => {
             <div style={{
               height: '100%',
               width: `${duration ? (currentTime / duration) * 100 : 0}%`,
-              background: 'linear-gradient(90deg, #7c3aed, #9333ea)',
+              background: 'linear-gradient(90deg, #7c3aed, #a78bfa)',
               borderRadius: '2px',
               transition: 'width 0.1s linear'
             }} />
@@ -524,7 +524,7 @@ const MusicPlayer = () => {
                       cursor: 'pointer',
                       border: 'none',
                       background: currentPlaylistIndex === index
-                        ? 'rgba(124, 58, 237, 0.3)'
+                        ? 'rgba(0, 198, 255, 0.3)'
                         : 'rgba(255, 255, 255, 0.05)',
                       fontFamily: '-apple-system, system-ui, sans-serif'
                     }}
@@ -577,7 +577,7 @@ const MusicPlayer = () => {
                         cursor: 'pointer',
                         border: 'none',
                         background: currentTrack === index
-                          ? 'rgba(124, 58, 237, 0.3)'
+                          ? 'rgba(0, 198, 255, 0.3)'
                           : 'rgba(255, 255, 255, 0.05)'
                       }}
                     >
@@ -690,7 +690,7 @@ const MusicPlayer = () => {
                 style={{
                   width: '100%',
                   padding: '0.75rem',
-                  background: 'linear-gradient(135deg, #7c3aed, #581c87)',
+                  background: 'linear-gradient(135deg, #00c6ff, #0072ff)',
                   borderRadius: '12px',
                   color: 'white',
                   fontWeight: '600',
@@ -770,7 +770,7 @@ const MusicPlayer = () => {
                 style={{
                   width: '100%',
                   padding: '0.75rem',
-                  background: 'linear-gradient(135deg, #7c3aed, #581c87)',
+                  background: 'linear-gradient(135deg, #00c6ff, #0072ff)',
                   borderRadius: '12px',
                   color: 'white',
                   fontWeight: '600',
@@ -815,7 +815,7 @@ const MusicPlayer = () => {
         
         .volume-bars .bar {
           width: 3px;
-          background: linear-gradient(180deg, #7c3aed, #581c87);
+          background: linear-gradient(180deg, #00c6ff, #0072ff);
           border-radius: 2px;
           animation: bounce 0.8s infinite ease-in-out;
           animation-delay: var(--delay);

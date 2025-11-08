@@ -863,20 +863,20 @@ const Dashboard = () => {
       {/* Floating Music Player - Always visible during sessions */}
       {showTimers && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.8, y: 50 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
           style={{
             position: 'fixed',
-            bottom: 'max(1rem, env(safe-area-inset-bottom))',
-            left: focusMode ? 'max(1rem, env(safe-area-inset-left))' : (sidebarOpen && !isNarrow ? '356px' : 'max(1rem, env(safe-area-inset-left))'),
-            zIndex: 1300,
-            width: focusMode ? '360px' : '320px',
-            maxWidth: 'min(92vw, 400px)'
+            top: '100px', // Below navbar
+            left: '20px', // Left corner
+            zIndex: 1100,
+            width: '420px', // Original size
+            maxWidth: '90vw'
           }}
         >
           <div style={{
-            background: 'rgba(255, 255, 255, 0.05)',
+            background: 'rgba(0, 0, 0, 0.7)',
             backdropFilter: 'blur(20px)',
             borderRadius: '16px',
             border: '1px solid rgba(255, 255, 255, 0.18)',
