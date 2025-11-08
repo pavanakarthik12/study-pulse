@@ -14,7 +14,10 @@ const MusicPlayer = () => {
   const [newSongTitle, setNewSongTitle] = useState('');
   const [newSongUrl, setNewSongUrl] = useState('');
   const [newPlaylistName, setNewPlaylistName] = useState('');
+  const [youTubePlayer, setYouTubePlayer] = useState(null);
+  const [youTubeReady, setYouTubeReady] = useState(false);
   const audioRef = useRef(null);
+  const youTubeIframeRef = useRef(null);
 
   const [playlists, setPlaylists] = useState([
     {
@@ -46,6 +49,23 @@ const MusicPlayer = () => {
           url: "https://www.bensound.com/bensound-music/bensound-jazzyfrenchy.mp3"
         }
       ]
+    },
+    {
+      name: "YouTube Examples",
+      songs: [
+        {
+          title: "Lo-Fi Hip Hop",
+          artist: "YouTube",
+          url: "https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=0&controls=1&disablekb=1&fs=0&loop=1&playlist=jfKfPfyJRdk&modestbranding=1",
+          videoId: "jfKfPfyJRdk"
+        },
+        {
+          title: "Deep Focus",
+          artist: "YouTube",
+          url: "https://www.youtube.com/embed/5qap5aO4i9A?autoplay=0&controls=1&disablekb=1&fs=0&loop=1&playlist=5qap5aO4i9A&modestbranding=1",
+          videoId: "5qap5aO4i9A"
+        }
+      ]
     }
   ]);
 
@@ -55,16 +75,43 @@ const MusicPlayer = () => {
     if (audioRef.current) {
       audioRef.current.volume = volume;
     }
-  }, [volume]);
+    
+    // Also set YouTube player volume if ready
+    if (youTubePlayer && youTubeReady) {
+      try {
+        youTubePlayer.setVolume(volume * 100);
+      } catch (error) {
+        console.error('Error setting YouTube volume:', error);
+      }
+    }
+  }, [volume, youTubePlayer, youTubeReady]);
 
   useEffect(() => {
     if (audioRef.current && currentPlaylist.songs[currentTrack]) {
-      audioRef.current.src = currentPlaylist.songs[currentTrack].url;
-      if (isPlaying) {
-        audioRef.current.play();
+      const currentSong = currentPlaylist.songs[currentTrack];
+      
+      // Check if it's a YouTube video
+      if (currentSong.videoId) {
+        // For YouTube, load the video in the YouTube player
+        if (youTubePlayer && youTubeReady) {
+          try {
+            youTubePlayer.loadVideoById(currentSong.videoId);
+            youTubePlayer.setVolume(volume * 100);
+            // Pause initially until user presses play
+            youTubePlayer.pauseVideo();
+          } catch (error) {
+            console.error('Error loading YouTube video:', error);
+          }
+        }
+        setIsPlaying(false); // Reset playing state for YouTube
+      } else {
+        audioRef.current.src = currentSong.url;
+        if (isPlaying) {
+          audioRef.current.play();
+        }
       }
     }
-  }, [currentTrack, currentPlaylistIndex]);
+  }, [currentTrack, currentPlaylistIndex, youTubePlayer, youTubeReady, volume]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -82,30 +129,166 @@ const MusicPlayer = () => {
     };
   }, []);
 
-  const togglePlay = () => {
-    if (isPlaying) {
-      audioRef.current.pause();
+  // Initialize YouTube IFrame API
+  useEffect(() => {
+    // Check if YouTube API is already loaded
+    if (window.YT && window.YT.Player) {
+      initializeYouTubePlayer();
     } else {
-      audioRef.current.play();
+      // Create script tag to load YouTube IFrame API
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      
+      // Set up global callback
+      window.onYouTubeIframeAPIReady = initializeYouTubePlayer;
     }
-    setIsPlaying(!isPlaying);
+    
+    // Cleanup function
+    return () => {
+      if (youTubePlayer) {
+        try {
+          youTubePlayer.destroy();
+        } catch (error) {
+          console.error('Error destroying YouTube player:', error);
+        }
+      }
+      
+      // Remove the player div
+      const playerDiv = document.getElementById('youtube-audio-player');
+      if (playerDiv) {
+        playerDiv.remove();
+      }
+    };
+  }, []);
+
+  const initializeYouTubePlayer = () => {
+    // Create a hidden div for the YouTube player
+    const playerDiv = document.createElement('div');
+    playerDiv.id = 'youtube-audio-player';
+    playerDiv.style.position = 'absolute';
+    playerDiv.style.left = '-9999px';
+    playerDiv.style.width = '0';
+    playerDiv.style.height = '0';
+    document.body.appendChild(playerDiv);
+    
+    try {
+      // Initialize YouTube player
+      const player = new window.YT.Player('youtube-audio-player', {
+        height: '0',
+        width: '0',
+        videoId: '',
+        playerVars: {
+          'autoplay': 0,
+          'controls': 0,
+          'disablekb': 1,
+          'fs': 0,
+          'loop': 1,
+          'modestbranding': 1,
+          'iv_load_policy': 3,
+          'cc_load_policy': 0,
+          'disable_polymer': 1
+        },
+        events: {
+          'onReady': () => {
+            setYouTubePlayer(player);
+            setYouTubeReady(true);
+          },
+          'onStateChange': onYouTubePlayerStateChange
+        }
+      });
+    } catch (error) {
+      console.error('Error initializing YouTube player:', error);
+    }
+  };
+
+  const onYouTubePlayerStateChange = (event) => {
+    // Handle state changes
+    if (event.data === window.YT.PlayerState.ENDED) {
+      nextTrack();
+    }
+  };
+
+  const togglePlay = () => {
+    const currentSong = currentPlaylist.songs[currentTrack];
+    
+    // Check if it's a YouTube video
+    if (currentSong && currentSong.videoId) {
+      // For YouTube videos, use the YouTube player
+      if (youTubePlayer && youTubeReady) {
+        try {
+          if (isPlaying) {
+            youTubePlayer.pauseVideo();
+          } else {
+            youTubePlayer.playVideo();
+          }
+          setIsPlaying(!isPlaying);
+        } catch (error) {
+          console.error('Error controlling YouTube player:', error);
+        }
+      }
+    } else {
+      // For regular audio files
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
   };
 
   const nextTrack = () => {
+    // Stop current YouTube video if playing
+    if (youTubePlayer && youTubeReady && currentPlaylist.songs[currentTrack]?.videoId) {
+      try {
+        youTubePlayer.stopVideo();
+      } catch (error) {
+        console.error('Error stopping YouTube video:', error);
+      }
+    }
+    
     setCurrentTrack((prev) => (prev + 1) % currentPlaylist.songs.length);
+    setIsPlaying(false);
   };
 
   const prevTrack = () => {
+    // Stop current YouTube video if playing
+    if (youTubePlayer && youTubeReady && currentPlaylist.songs[currentTrack]?.videoId) {
+      try {
+        youTubePlayer.stopVideo();
+      } catch (error) {
+        console.error('Error stopping YouTube video:', error);
+      }
+    }
+    
     setCurrentTrack((prev) => (prev - 1 + currentPlaylist.songs.length) % currentPlaylist.songs.length);
+    setIsPlaying(false);
   };
 
   const addSong = () => {
     if (newSongTitle && newSongUrl) {
+      // Check if it's a YouTube URL and extract the video ID
+      let finalUrl = newSongUrl;
+      let videoId = null;
+      
+      // Parse YouTube URL to extract video ID
+      const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+      const match = newSongUrl.match(youtubeRegex);
+      
+      if (match && match[1]) {
+        videoId = match[1];
+        // Create YouTube embed URL optimized for audio-only playback
+        finalUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&controls=0&disablekb=1&fs=0&loop=1&playlist=${videoId}&modestbranding=1&iv_load_policy=3&cc_load_policy=0&disable_polymer=1`;
+      }
+      
       const updatedPlaylists = [...playlists];
       updatedPlaylists[currentPlaylistIndex].songs.push({
         title: newSongTitle,
-        artist: "Custom Track",
-        url: newSongUrl
+        artist: videoId ? "YouTube Audio" : "Custom Track",
+        url: finalUrl,
+        videoId: videoId // Store video ID for reference
       });
       setPlaylists(updatedPlaylists);
       setNewSongTitle('');
@@ -126,11 +309,42 @@ const MusicPlayer = () => {
   };
 
   const selectTrack = (index) => {
+    // Stop current YouTube video if playing
+    if (youTubePlayer && youTubeReady && currentPlaylist.songs[currentTrack]?.videoId) {
+      try {
+        youTubePlayer.stopVideo();
+      } catch (error) {
+        console.error('Error stopping YouTube video:', error);
+      }
+    }
+    
     setCurrentTrack(index);
     setShowPlaylistModal(false);
-    if (!isPlaying) {
-      setIsPlaying(true);
-      setTimeout(() => audioRef.current.play(), 100);
+    
+    const selectedSong = currentPlaylist.songs[index];
+    
+    // Check if it's a YouTube video
+    if (selectedSong && selectedSong.videoId) {
+      // For YouTube videos, load the video
+      if (youTubePlayer && youTubeReady) {
+        try {
+          youTubePlayer.loadVideoById(selectedSong.videoId);
+          youTubePlayer.setVolume(volume * 100);
+        } catch (error) {
+          console.error('Error loading YouTube video:', error);
+        }
+      }
+      setIsPlaying(false); // Reset playing state for YouTube
+    } else {
+      // For regular audio files
+      if (!isPlaying) {
+        setIsPlaying(true);
+        setTimeout(() => {
+          if (audioRef.current) {
+            audioRef.current.play();
+          }
+        }, 100);
+      }
     }
   };
 
@@ -228,7 +442,10 @@ const MusicPlayer = () => {
               fontSize: '0.8em',
               color: '#d1d1d6',
               marginTop: '2px'
-            }}>{currentPlaylist.songs[currentTrack]?.artist || 'Unknown Artist'}</div>
+            }}>
+              {currentPlaylist.songs[currentTrack]?.artist || 'Unknown Artist'} 
+              {currentPlaylist.songs[currentTrack]?.videoId ? ' (YouTube)' : ''}
+            </div>
           </div>
           
           {/* Volume Bars */}
@@ -238,6 +455,24 @@ const MusicPlayer = () => {
             ))}
           </div>
         </div>
+
+        {/* YouTube Audio Player (hidden video) */}
+        {currentPlaylist.songs[currentTrack]?.videoId && (
+          <div style={{
+            width: '100%',
+            height: '60px',
+            borderRadius: '12px',
+            background: 'rgba(0, 0, 0, 0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#d1d1d6',
+            fontSize: '0.9em'
+          }}>
+            <Music style={{ marginRight: '8px' }} size={16} />
+            YouTube Audio: {currentPlaylist.songs[currentTrack]?.title}
+          </div>
+        )}
 
         {/* Playback Controls */}
         <div style={{
@@ -687,8 +922,8 @@ const MusicPlayer = () => {
                         onClick={() => selectTrack(index)}
                         style={{
                           width: '100%',
-                          padding: '0.4rem',
-                          borderRadius: '8px',
+                          padding: '0.5rem',
+                          borderRadius: '10px',
                           textAlign: 'left',
                           transition: 'all 0.2s ease',
                           cursor: 'pointer',
@@ -696,7 +931,7 @@ const MusicPlayer = () => {
                           background: currentTrack === index
                             ? 'rgba(0, 198, 255, 0.3)'
                             : 'rgba(255, 255, 255, 0.05)',
-                          fontSize: '0.6rem'
+                          fontSize: '0.75rem'
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.background = currentTrack === index
@@ -712,16 +947,18 @@ const MusicPlayer = () => {
                         <div style={{
                           fontWeight: '600',
                           color: 'white',
-                          fontSize: '0.6rem',
-                          fontFamily: '-apple-system, system-ui, sans-serif'
+                          fontSize: '0.75rem'
                         }}>{track.title}</div>
                         <div style={{
-                          fontSize: '0.5rem',
+                          fontSize: '0.6rem',
                           color: '#d1d1d6',
-                          marginTop: '0.05rem',
+                          marginTop: '0.1rem',
                           fontFamily: '-apple-system, system-ui, sans-serif'
-                        }}>{track.artist}</div>
+                        }}>
+                          {track.artist} {track.videoId ? '(YouTube)' : ''}
+                        </div>
                       </button>
+
                     ))
                   )}
                 </div>
