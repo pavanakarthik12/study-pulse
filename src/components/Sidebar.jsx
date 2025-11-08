@@ -32,7 +32,6 @@ const Sidebar = ({
 }) => {
   // State management
   const [subjectName, setSubjectName] = useState('');
-  const [duration, setDuration] = useState('45');
   const [endBreak, setEndBreak] = useState(false); // NEW: Add end break option
   const [loading, setLoading] = useState(false);
   const [scheduleGenerated, setScheduleGenerated] = useState(false);
@@ -54,21 +53,20 @@ const Sidebar = ({
 
   // Add subject to queue
   const handleAddSubject = () => {
-    if (!subjectName.trim() || !duration) {
-      setError('Please enter both subject name and duration');
+    if (!subjectName.trim()) {
+      setError('Please enter a subject name');
       return;
     }
 
     const newSubject = {
       id: Date.now(),
       subject: subjectName.trim(),
-      duration: parseInt(duration),
+      duration: 45, // Default duration of 45 minutes
       hasBreak: false
     };
 
     setSubjectQueue([...subjectQueue, newSubject]);
     setSubjectName('');
-    setDuration('45');
     setError(null);
     setShowSuggestions(false);
   };
@@ -389,15 +387,16 @@ const Sidebar = ({
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
                   style={{
-                    width: '100%',
-                    padding: '0.75rem',
+                    width: '80%',
+                    padding: '0.5rem',
                     background: 'rgba(255, 255, 255, 0.05)',
                     border: '1px solid rgba(255, 255, 255, 0.2)',
                     borderRadius: '10px',
                     color: 'white',
                     fontSize: '0.875rem',
                     fontFamily: "'Outfit', sans-serif",
-                    boxSizing: 'border-box'
+                    boxSizing: 'border-box',
+                    minWidth: '0' // Prevents flexbox from expanding beyond container
                   }}
                 />
               </div>
@@ -415,15 +414,16 @@ const Sidebar = ({
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
                   style={{
-                    width: '100%',
-                    padding: '0.75rem',
+                    width: '80%',
+                    padding: '0.5rem',
                     background: 'rgba(255, 255, 255, 0.05)',
                     border: '1px solid rgba(255, 255, 255, 0.2)',
                     borderRadius: '10px',
                     color: 'white',
                     fontSize: '0.875rem',
                     fontFamily: "'Outfit', sans-serif",
-                    boxSizing: 'border-box'
+                    boxSizing: 'border-box',
+                    minWidth: '0' // Prevents flexbox from expanding beyond container
                   }}
                 />
               </div>
@@ -457,7 +457,8 @@ const Sidebar = ({
                     color: 'white',
                     fontSize: '0.875rem',
                     fontFamily: "'Outfit', sans-serif",
-                    boxSizing: 'border-box'
+                    boxSizing: 'border-box',
+                    minWidth: '0' // Prevents flexbox from expanding beyond container
                   }}
                 />
                 {showSuggestions && filteredSuggestions.length > 0 && (
@@ -500,36 +501,6 @@ const Sidebar = ({
               </div>
             </div>
             
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '0.75rem',
-                color: 'rgba(255, 255, 255, 0.6)',
-                marginBottom: '0.5rem'
-              }}>
-                Duration (minutes)
-              </label>
-              <input
-                type="number"
-                value={duration}
-                onChange={(e) => setDuration(e.target.value)}
-                min="1"
-                max="120"
-                placeholder="45"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  borderRadius: '10px',
-                  color: 'white',
-                  fontSize: '0.875rem',
-                  fontFamily: "'Outfit', sans-serif",
-                  boxSizing: 'border-box'
-                }}
-              />
-            </div>
-            
             <button
               onClick={handleAddSubject}
               style={{
@@ -548,7 +519,8 @@ const Sidebar = ({
                 boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4)',
                 fontFamily: "'Outfit', sans-serif",
                 transition: 'all 0.2s ease',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
+                width: '100%' // Ensure button takes full width
               }}
               onMouseEnter={(e) => {
                 e.target.style.transform = 'translateY(-2px)';
