@@ -94,9 +94,14 @@ const SequentialTimers = ({ schedule, onComplete, onCancel, onEditSchedule, hand
         .filter(item => item.status === 'skipped')
         .map(item => item.subject);
         
+      const pausedSubjects = sessionProgress
+        .filter(item => item.status === 'paused')
+        .map(item => item.subject);
+        
       const result = {
         completedSubjects,
         skippedSubjects,
+        pausedSubjects,
         incompleteSubjects: sessionProgress
           .filter(item => item.status === 'incomplete')
           .map(item => item.subject)
@@ -255,6 +260,10 @@ const SequentialTimers = ({ schedule, onComplete, onCancel, onEditSchedule, hand
       .filter(item => item.status === 'skipped')
       .map(item => item.subject);
       
+    const pausedSubjects = updatedProgress
+      .filter(item => item.status === 'paused')
+      .map(item => item.subject);
+      
     const incompleteSubjects = updatedProgress
       .filter(item => item.status === 'incomplete')
       .map(item => item.subject);
@@ -262,6 +271,7 @@ const SequentialTimers = ({ schedule, onComplete, onCancel, onEditSchedule, hand
     const result = {
       completedSubjects,
       skippedSubjects,
+      pausedSubjects,
       incompleteSubjects
     };
     
