@@ -412,15 +412,35 @@ const Dashboard = () => {
     setShowTimers(false);
     setFocusMode(false);
     setError(null);
+    
+    // Calculate session statistics
+    const completedCount = result?.completedSubjects?.length || 0;
+    const skippedCount = result?.skippedSubjects?.length || 0;
+    const incompleteCount = result?.incompleteSubjects?.length || 0;
+    const totalCount = completedCount + skippedCount + incompleteCount;
+    
+    // Determine performance level
+    let performanceLevel = 'red'; // Default to red
+    if (totalCount > 0) {
+      const completionRate = completedCount / totalCount;
+      if (completionRate >= 0.8) {
+        performanceLevel = 'green';
+      } else if (completionRate >= 0.4) {
+        performanceLevel = 'yellow';
+      }
+    }
+    
     const review = {
       completed: result?.completedSubjects || [],
       skipped: result?.skippedSubjects || [],
       incomplete: result?.incompleteSubjects || [],
       paused: result?.pausedSubjects || [],
       timestamp: Date.now(),
-      faithful: result?.completedSubjects?.length >= (result?.completedSubjects?.length + result?.skippedSubjects?.length) * 0.8
+      performanceLevel: performanceLevel
     };
+    
     setSessionReview(review);
+    
     // Save to local history and preferences
     try {
       const existing = JSON.parse(localStorage.getItem('study_history') || '[]');
@@ -429,6 +449,7 @@ const Dashboard = () => {
     } catch (e) {
       console.warn('Failed to persist local history', e);
     }
+    
     setPreferences(prev => ({
       ...prev,
       pastSessions: [...(prev.pastSessions || []), review]
@@ -440,6 +461,24 @@ const Dashboard = () => {
     console.log('Cancelled after partial completion:', result);
     setShowTimers(false);
     setFocusMode(false);
+    
+    // Calculate session statistics
+    const completedCount = result?.completedSubjects?.length || 0;
+    const skippedCount = result?.skippedSubjects?.length || 0;
+    const incompleteCount = result?.incompleteSubjects?.length || 0;
+    const totalCount = completedCount + skippedCount + incompleteCount;
+    
+    // Determine performance level
+    let performanceLevel = 'red'; // Default to red
+    if (totalCount > 0) {
+      const completionRate = completedCount / totalCount;
+      if (completionRate >= 0.8) {
+        performanceLevel = 'green';
+      } else if (completionRate >= 0.4) {
+        performanceLevel = 'yellow';
+      }
+    }
+    
     const review = {
       completed: result?.completedSubjects || [],
       skipped: result?.skippedSubjects || [],
@@ -447,8 +486,9 @@ const Dashboard = () => {
       paused: result?.pausedSubjects || [],
       timestamp: Date.now(),
       cancelled: true,
-      faithful: result?.completedSubjects?.length >= (result?.completedSubjects?.length + result?.skippedSubjects?.length) * 0.8
+      performanceLevel: performanceLevel
     };
+    
     setSessionReview(review);
   };
 
@@ -949,47 +989,128 @@ const Dashboard = () => {
               fontWeight: 700
             }}>Session Review</h3>
             
-            {/* Motivational Message */}
+            {/* Performance-based Motivational Message */}
             <div style={{
-              padding: '0.75rem',
-              background: sessionReview.faithful ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
-              border: sessionReview.faithful ? '1px solid rgba(34,197,94,0.3)' : '1px solid rgba(239,68,68,0.3)',
+              padding: '1rem',
+              background: sessionReview.performanceLevel === 'green' 
+                ? 'rgba(34, 197, 94, 0.1)' 
+                : sessionReview.performanceLevel === 'yellow' 
+                  ? 'rgba(250, 204, 21, 0.1)' 
+                  : 'rgba(239, 68, 68, 0.1)',
+              border: sessionReview.performanceLevel === 'green' 
+                ? '1px solid rgba(34, 197, 94, 0.3)' 
+                : sessionReview.performanceLevel === 'yellow' 
+                  ? '1px solid rgba(250, 204, 21, 0.3)' 
+                  : '1px solid rgba(239, 68, 68, 0.3)',
               borderRadius: '12px',
-              marginBottom: '1rem'
+              marginBottom: '1rem',
+              boxShadow: sessionReview.performanceLevel === 'green' 
+                ? '0 0 15px rgba(34, 197, 94, 0.2)' 
+                : sessionReview.performanceLevel === 'yellow' 
+                  ? '0 0 15px rgba(250, 204, 21, 0.2)' 
+                  : '0 0 15px rgba(239, 68, 68, 0.2)'
             }}>
               <p style={{
-                color: sessionReview.faithful ? '#4ade80' : '#f87171',
-                fontSize: '0.95rem',
+                color: sessionReview.performanceLevel === 'green' 
+                  ? '#22C55E' 
+                  : sessionReview.performanceLevel === 'yellow' 
+                    ? '#FACC15' 
+                    : '#EF4444',
+                fontSize: '1.1rem',
                 fontWeight: 600,
-                margin: 0
+                margin: 0,
+                marginBottom: '0.5rem'
               }}>
-                {sessionReview.faithful 
-                  ? "🎉 Great job! You stayed faithful to your study plan!" 
-                  : "💪 Keep going! Consistency is key to success!"}
+                {sessionReview.performanceLevel === 'green' 
+                  ? "🟢 Excellent work — consistency builds success!" 
+                  : sessionReview.performanceLevel === 'yellow' 
+                    ? "🟡 Good effort! A bit more focus next time and you'll ace it." 
+                    : "🔴 Don't give up — progress starts when you keep trying."}
               </p>
               <p style={{
-                color: 'rgba(255,255,255,0.7)',
-                fontSize: '0.85rem',
-                margin: '0.25rem 0 0 0'
+                color: 'rgba(255,255,255,0.8)',
+                fontSize: '0.9rem',
+                margin: 0
               }}>
-                {sessionReview.faithful
-                  ? "Your dedication is paying off. Keep up the excellent work!"
-                  : "Every session counts. You're building momentum with each study block!"}
+                {sessionReview.performanceLevel === 'green' 
+                  ? "Your dedication and consistency are truly paying off. Keep up the excellent work!" 
+                  : sessionReview.performanceLevel === 'yellow' 
+                    ? "You're making progress! With a bit more focus, you'll achieve even greater results." 
+                    : "Every attempt counts! Your persistence is the key to unlocking your potential."}
               </p>
             </div>
             
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
-              <div style={{ padding: '0.75rem', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: '12px' }}>
-                <div style={{ color: '#4ade80', fontWeight: 700, marginBottom: '0.25rem' }}>Completed</div>
-                <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>{sessionReview.completed.length}</div>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: '1fr 1fr 1fr', 
+              gap: '0.75rem', 
+              marginBottom: '1rem' 
+            }}>
+              <div style={{ 
+                padding: '0.75rem', 
+                background: 'rgba(34,197,94,0.08)', 
+                border: '1px solid rgba(34,197,94,0.25)', 
+                borderRadius: '12px',
+                textAlign: 'center'
+              }}>
+                <div style={{ 
+                  color: '#4ade80', 
+                  fontWeight: 700, 
+                  marginBottom: '0.25rem',
+                  fontSize: '1.25rem'
+                }}>
+                  {sessionReview.completed.length}
+                </div>
+                <div style={{ 
+                  color: 'rgba(255,255,255,0.8)', 
+                  fontSize: '0.85rem' 
+                }}>
+                  Completed
+                </div>
               </div>
-              <div style={{ padding: '0.75rem', background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.25)', borderRadius: '12px' }}>
-                <div style={{ color: '#fbbf24', fontWeight: 700, marginBottom: '0.25rem' }}>Paused</div>
-                <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>{sessionReview.paused.length}</div>
+              <div style={{ 
+                padding: '0.75rem', 
+                background: 'rgba(234,179,8,0.08)', 
+                border: '1px solid rgba(234,179,8,0.25)', 
+                borderRadius: '12px',
+                textAlign: 'center'
+              }}>
+                <div style={{ 
+                  color: '#fbbf24', 
+                  fontWeight: 700, 
+                  marginBottom: '0.25rem',
+                  fontSize: '1.25rem'
+                }}>
+                  {sessionReview.paused.length}
+                </div>
+                <div style={{ 
+                  color: 'rgba(255,255,255,0.8)', 
+                  fontSize: '0.85rem' 
+                }}>
+                  Paused
+                </div>
               </div>
-              <div style={{ padding: '0.75rem', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: '12px' }}>
-                <div style={{ color: '#f87171', fontWeight: 700, marginBottom: '0.25rem' }}>Skipped</div>
-                <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>{sessionReview.skipped.length}</div>
+              <div style={{ 
+                padding: '0.75rem', 
+                background: 'rgba(239,68,68,0.08)', 
+                border: '1px solid rgba(239,68,68,0.25)', 
+                borderRadius: '12px',
+                textAlign: 'center'
+              }}>
+                <div style={{ 
+                  color: '#f87171', 
+                  fontWeight: 700, 
+                  marginBottom: '0.25rem',
+                  fontSize: '1.25rem'
+                }}>
+                  {sessionReview.skipped.length}
+                </div>
+                <div style={{ 
+                  color: 'rgba(255,255,255,0.8)', 
+                  fontSize: '0.85rem' 
+                }}>
+                  Skipped
+                </div>
               </div>
             </div>
             
@@ -1078,9 +1199,20 @@ const Dashboard = () => {
                   border: '1px solid rgba(255,255,255,0.18)',
                   borderRadius: '10px',
                   color: 'white',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  fontFamily: "'Outfit', sans-serif",
+                  fontWeight: 500,
+                  transition: 'all 0.2s ease'
                 }}
-              >Close</button>
+                onMouseEnter={(e) => {
+                  e.target.style.background = 'rgba(255,255,255,0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'rgba(255,255,255,0.06)';
+                }}
+              >
+                Close
+              </button>
             </div>
           </motion.div>
         </motion.div>

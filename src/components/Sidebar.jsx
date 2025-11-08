@@ -172,7 +172,7 @@ const Sidebar = ({
         pointerEvents: 'none'
       }} />
 
-      {/* Scrollable Content */}
+      {/* Scrollable Content with Custom Scrollbar */}
       <div style={{
         flex: 1,
         overflowY: 'auto',
@@ -180,8 +180,30 @@ const Sidebar = ({
         padding: '1.5rem',
         display: 'flex',
         flexDirection: 'column',
-        gap: '1.25rem'
+        gap: '1.25rem',
+        // Custom scrollbar styling
+        scrollbarWidth: 'thin',
+        scrollbarColor: 'rgba(139, 92, 246, 0.3) transparent',
       }}>
+        {/* Custom scrollbar for Webkit browsers */}
+        <style>
+          {`
+            ::-webkit-scrollbar {
+              width: 6px;
+            }
+            ::-webkit-scrollbar-track {
+              background: transparent;
+            }
+            ::-webkit-scrollbar-thumb {
+              background: rgba(139, 92, 246, 0.3);
+              border-radius: 3px;
+            }
+            ::-webkit-scrollbar-thumb:hover {
+              background: rgba(139, 92, 246, 0.5);
+            }
+          `}
+        </style>
+
         {/* Greeting Card */}
         <motion.div
           initial={{ y: -20, opacity: 0 }}
@@ -342,7 +364,9 @@ const Sidebar = ({
                     border: '1px solid rgba(255, 255, 255, 0.2)',
                     borderRadius: '10px',
                     color: 'white',
-                    fontSize: '0.875rem'
+                    fontSize: '0.875rem',
+                    fontFamily: "'Outfit', sans-serif",
+                    boxSizing: 'border-box'
                   }}
                 />
                 {showSuggestions && filteredSuggestions.length > 0 && (
@@ -372,7 +396,8 @@ const Sidebar = ({
                           cursor: 'pointer',
                           fontSize: '0.875rem',
                           color: 'white',
-                          borderBottom: index < filteredSuggestions.length - 1 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
+                          borderBottom: index < filteredSuggestions.length - 1 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+                          fontFamily: "'Outfit', sans-serif"
                         }}
                         onMouseEnter={(e) => e.target.style.background = 'rgba(139, 92, 246, 0.2)'}
                         onMouseLeave={(e) => e.target.style.background = 'transparent'}
@@ -408,7 +433,9 @@ const Sidebar = ({
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                   borderRadius: '10px',
                   color: 'white',
-                  fontSize: '0.875rem'
+                  fontSize: '0.875rem',
+                  fontFamily: "'Outfit', sans-serif",
+                  boxSizing: 'border-box'
                 }}
               />
             </div>
@@ -428,7 +455,17 @@ const Sidebar = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0.5rem',
-                boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4)'
+                boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4)',
+                fontFamily: "'Outfit', sans-serif",
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 6px 25px rgba(139, 92, 246, 0.5)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 4px 20px rgba(139, 92, 246, 0.4)';
               }}
             >
               <Plus size={16} />
@@ -546,7 +583,8 @@ const Sidebar = ({
             boxShadow: subjectQueue.length > 0 && !loading 
               ? '0 4px 20px rgba(139, 92, 246, 0.4)' 
               : 'none',
-            transition: 'all 0.3s ease'
+            transition: 'all 0.3s ease',
+            fontFamily: "'Outfit', sans-serif"
           }}
         >
           {loading ? (
@@ -675,7 +713,17 @@ const Sidebar = ({
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '0.5rem',
-                  boxShadow: '0 4px 20px rgba(34, 197, 94, 0.4)'
+                  boxShadow: '0 4px 20px rgba(34, 197, 94, 0.4)',
+                  fontFamily: "'Outfit', sans-serif",
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 6px 25px rgba(34, 197, 94, 0.5)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 4px 20px rgba(34, 197, 94, 0.4)';
                 }}
               >
                 <Play size={14} />
@@ -696,7 +744,17 @@ const Sidebar = ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '0.5rem'
+                  gap: '0.5rem',
+                  fontFamily: "'Outfit', sans-serif",
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.background = 'rgba(255, 255, 255, 0.08)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.background = 'rgba(255, 255, 255, 0.05)';
                 }}
               >
                 <Edit3 size={14} />
