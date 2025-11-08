@@ -285,14 +285,30 @@ const SequentialTimers = ({ schedule, onComplete, onCancel, onEditSchedule, hand
   };
   
   const getMotivationalQuote = () => {
-    const quotes = [
-      "You're closer than you think — stay focused!",
-      "Push through just a bit more!",
-      "Every minute you continue is a victory!",
-      "Stay strong — you've got this!",
-      "Keep going, champion!"
-    ];
-    return quotes[Math.floor(Math.random() * quotes.length)];
+    // Get current session progress
+    const currentSubjectProgress = sessionProgress.find(item => item.subject === currentItem?.subject);
+    const isCurrentSubjectSkipped = currentSubjectProgress?.status === 'skipped';
+    
+    // Different quotes based on user behavior
+    if (isCurrentSubjectSkipped) {
+      const skipQuotes = [
+        "Skipping is okay, but consistency builds champions!",
+        "You can do this! Every subject you complete brings you closer to your goals.",
+        "Don't let one skip derail your entire journey. Keep going!",
+        "Champions aren't made by skipping, but by pushing through!",
+        "Your future self will thank you for staying focused now."
+      ];
+      return skipQuotes[Math.floor(Math.random() * skipQuotes.length)];
+    } else {
+      const generalQuotes = [
+        "You're closer than you think — stay focused!",
+        "Push through just a bit more!",
+        "Every minute you continue is a victory!",
+        "Stay strong — you've got this!",
+        "Keep going, champion!"
+      ];
+      return generalQuotes[Math.floor(Math.random() * generalQuotes.length)];
+    }
   };
 
   const getSessionSummaryMessage = () => {
@@ -328,7 +344,7 @@ const SequentialTimers = ({ schedule, onComplete, onCancel, onEditSchedule, hand
           </p>
         </div>
       );
-    } else if (completionPercentage >= 50) {
+    } else if (finishedPercentage >= 50) {
       return (
         <div>
           <p style={{
@@ -1090,6 +1106,69 @@ const SequentialTimers = ({ schedule, onComplete, onCancel, onEditSchedule, hand
                   Session Complete!
                 </h3>
                 {getSessionSummaryMessage()}
+              </div>
+              
+              {/* Detailed Session Summary */}
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '12px',
+                padding: '1rem',
+                marginBottom: '1.5rem'
+              }}>
+                <h4 style={{
+                  color: 'white',
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  margin: '0 0 0.75rem 0'
+                }}>
+                  Session Details
+                </h4>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.5rem'
+                }}>
+                  {sessionResult?.completedSubjects?.length > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <div style={{
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '50%',
+                        background: '#4ade80'
+                      }}></div>
+                      <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.875rem' }}>
+                        Completed: {sessionResult.completedSubjects.join(', ')}
+                      </span>
+                    </div>
+                  )}
+                  {sessionResult?.skippedSubjects?.length > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <div style={{
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '50%',
+                        background: '#f87171'
+                      }}></div>
+                      <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.875rem' }}>
+                        Skipped: {sessionResult.skippedSubjects.join(', ')}
+                      </span>
+                    </div>
+                  )}
+                  {sessionResult?.incompleteSubjects?.length > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <div style={{
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '50%',
+                        background: '#a78bfa'
+                      }}></div>
+                      <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.875rem' }}>
+                        Incomplete: {sessionResult.incompleteSubjects.join(', ')}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
               
               <div style={{ 

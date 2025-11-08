@@ -415,8 +415,10 @@ const Dashboard = () => {
     const review = {
       completed: result?.completedSubjects || [],
       skipped: result?.skippedSubjects || [],
+      incomplete: result?.incompleteSubjects || [],
       paused: result?.pausedSubjects || [],
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      faithful: result?.completedSubjects?.length >= (result?.completedSubjects?.length + result?.skippedSubjects?.length) * 0.8
     };
     setSessionReview(review);
     // Save to local history and preferences
@@ -441,9 +443,11 @@ const Dashboard = () => {
     const review = {
       completed: result?.completedSubjects || [],
       skipped: result?.skippedSubjects || [],
+      incomplete: result?.incompleteSubjects || [],
       paused: result?.pausedSubjects || [],
       timestamp: Date.now(),
-      cancelled: true
+      cancelled: true,
+      faithful: result?.completedSubjects?.length >= (result?.completedSubjects?.length + result?.skippedSubjects?.length) * 0.8
     };
     setSessionReview(review);
   };
@@ -944,20 +948,127 @@ const Dashboard = () => {
               fontSize: '1.25rem',
               fontWeight: 700
             }}>Session Review</h3>
+            
+            {/* Motivational Message */}
+            <div style={{
+              padding: '0.75rem',
+              background: sessionReview.faithful ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
+              border: sessionReview.faithful ? '1px solid rgba(34,197,94,0.3)' : '1px solid rgba(239,68,68,0.3)',
+              borderRadius: '12px',
+              marginBottom: '1rem'
+            }}>
+              <p style={{
+                color: sessionReview.faithful ? '#4ade80' : '#f87171',
+                fontSize: '0.95rem',
+                fontWeight: 600,
+                margin: 0
+              }}>
+                {sessionReview.faithful 
+                  ? "🎉 Great job! You stayed faithful to your study plan!" 
+                  : "💪 Keep going! Consistency is key to success!"}
+              </p>
+              <p style={{
+                color: 'rgba(255,255,255,0.7)',
+                fontSize: '0.85rem',
+                margin: '0.25rem 0 0 0'
+              }}>
+                {sessionReview.faithful
+                  ? "Your dedication is paying off. Keep up the excellent work!"
+                  : "Every session counts. You're building momentum with each study block!"}
+              </p>
+            </div>
+            
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
               <div style={{ padding: '0.75rem', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: '12px' }}>
                 <div style={{ color: '#4ade80', fontWeight: 700, marginBottom: '0.25rem' }}>Completed</div>
-                <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>{sessionReview.completed.join(', ') || '—'}</div>
+                <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>{sessionReview.completed.length}</div>
               </div>
               <div style={{ padding: '0.75rem', background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.25)', borderRadius: '12px' }}>
                 <div style={{ color: '#fbbf24', fontWeight: 700, marginBottom: '0.25rem' }}>Paused</div>
-                <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>{sessionReview.paused.join(', ') || '—'}</div>
+                <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>{sessionReview.paused.length}</div>
               </div>
               <div style={{ padding: '0.75rem', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: '12px' }}>
                 <div style={{ color: '#f87171', fontWeight: 700, marginBottom: '0.25rem' }}>Skipped</div>
-                <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>{sessionReview.skipped.join(', ') || '—'}</div>
+                <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>{sessionReview.skipped.length}</div>
               </div>
             </div>
+            
+            {/* Detailed Session Summary */}
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '12px',
+              padding: '1rem',
+              marginBottom: '1rem'
+            }}>
+              <h4 style={{
+                color: 'white',
+                fontSize: '1rem',
+                fontWeight: 600,
+                margin: '0 0 0.75rem 0'
+              }}>
+                Session Details
+              </h4>
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.5rem'
+              }}>
+                {sessionReview.completed.length > 0 && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      background: '#4ade80'
+                    }}></div>
+                    <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.875rem' }}>
+                      Completed: {sessionReview.completed.join(', ')}
+                    </span>
+                  </div>
+                )}
+                {sessionReview.paused.length > 0 && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      background: '#fbbf24'
+                    }}></div>
+                    <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.875rem' }}>
+                      Paused: {sessionReview.paused.join(', ')}
+                    </span>
+                  </div>
+                )}
+                {sessionReview.skipped.length > 0 && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      background: '#f87171'
+                    }}></div>
+                    <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.875rem' }}>
+                      Skipped: {sessionReview.skipped.join(', ')}
+                    </span>
+                  </div>
+                )}
+                {sessionReview.incomplete && sessionReview.incomplete.length > 0 && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      background: '#a78bfa'
+                    }}></div>
+                    <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.875rem' }}>
+                      Incomplete: {sessionReview.incomplete.join(', ')}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+            
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
               <button
                 onClick={() => setSessionReview(null)}
