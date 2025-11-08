@@ -166,16 +166,16 @@ const MusicPlayer = () => {
       <audio ref={audioRef} onEnded={nextTrack} />
       
       <div style={{
-        maxWidth: '1200px',
-        width: '1200px',
-        padding: '30px',
-        borderRadius: '30px',
+        maxWidth: '350px',
+        width: '350px',
+        padding: '20px',
+        borderRadius: '20px',
         background: 'rgba(0, 0, 0, 0.7)',
         backdropFilter: 'blur(10px)',
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
         display: 'flex',
         flexDirection: 'column',
-        gap: '20px',
+        gap: '15px',
         fontFamily: "'Outfit', sans-serif",
         color: 'white',
         transition: 'all 0.3s ease',
@@ -191,18 +191,17 @@ const MusicPlayer = () => {
         e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.4)';
       }}
       >
-
         {/* Track Info Section */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '12px'
+          gap: '10px'
         }}>
           {/* Album Art */}
           <div style={{
-            width: '64px',
-            height: '64px',
-            borderRadius: '16px',
+            width: '50px',
+            height: '50px',
+            borderRadius: '12px',
             background: 'linear-gradient(135deg, #7c3aed, #4c1d95)',
             boxShadow: '0 4px 10px rgba(124, 58, 237, 0.5)',
             flexShrink: 0,
@@ -219,14 +218,14 @@ const MusicPlayer = () => {
             overflow: 'hidden'
           }}>
             <div style={{
-              fontSize: '1.3em',
+              fontSize: '1em',
               fontWeight: '600',
               whiteSpace: 'nowrap',
               textOverflow: 'ellipsis',
               overflow: 'hidden'
             }}>{currentPlaylist.songs[currentTrack]?.title || 'No Track'}</div>
             <div style={{
-              fontSize: '0.9em',
+              fontSize: '0.8em',
               color: '#d1d1d6',
               marginTop: '2px'
             }}>{currentPlaylist.songs[currentTrack]?.artist || 'Unknown Artist'}</div>
@@ -250,7 +249,7 @@ const MusicPlayer = () => {
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
-            fontSize: '0.8em',
+            fontSize: '0.7em',
             color: '#8e8e93'
           }}>
             <span>{formatTime(currentTime)}</span>
@@ -262,7 +261,7 @@ const MusicPlayer = () => {
             onClick={handleProgressClick}
             style={{
               width: '100%',
-              height: '4px',
+              height: '3px',
               backgroundColor: 'rgba(255, 255, 255, 0.1)',
               borderRadius: '2px',
               position: 'relative',
@@ -281,8 +280,8 @@ const MusicPlayer = () => {
               top: '50%',
               left: `${duration ? (currentTime / duration) * 100 : 0}%`,
               transform: 'translate(-50%, -50%)',
-              width: '10px',
-              height: '10px',
+              width: '8px',
+              height: '8px',
               backgroundColor: 'white',
               borderRadius: '50%',
               boxShadow: '0 0 6px rgba(0, 0, 0, 0.5)'
@@ -293,21 +292,21 @@ const MusicPlayer = () => {
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
-            gap: '12px',
+            gap: '8px',
             alignItems: 'center'
           }}>
             {/* Main Control Buttons */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '16px',
-              marginLeft: '10%'
+              gap: '12px',
+              marginLeft: '5%'
             }}>
               <button
                 onClick={prevTrack}
                 style={{
-                  width: '42px',
-                  height: '42px',
+                  width: '36px',
+                  height: '36px',
                   borderRadius: '50%',
                   border: 'none',
                   background: 'none',
@@ -327,14 +326,14 @@ const MusicPlayer = () => {
                   e.currentTarget.style.transform = 'scale(1)';
                 }}
               >
-                <SkipBack style={{ width: '22px', height: '22px' }} fill="currentColor" />
+                <SkipBack style={{ width: '18px', height: '18px' }} fill="currentColor" />
               </button>
               
               <button
                 onClick={togglePlay}
                 style={{
-                  width: '52px',
-                  height: '52px',
+                  width: '44px',
+                  height: '44px',
                   borderRadius: '50%',
                   border: 'none',
                   background: 'none',
@@ -355,17 +354,17 @@ const MusicPlayer = () => {
                 }}
               >
                 {isPlaying ? (
-                  <Pause style={{ width: '30px', height: '30px' }} fill="currentColor" />
+                  <Pause style={{ width: '24px', height: '24px' }} fill="currentColor" />
                 ) : (
-                  <Play style={{ width: '30px', height: '30px' }} fill="currentColor" />
+                  <Play style={{ width: '24px', height: '24px' }} fill="currentColor" />
                 )}
               </button>
               
               <button
                 onClick={nextTrack}
                 style={{
-                  width: '42px',
-                  height: '42px',
+                  width: '36px',
+                  height: '36px',
                   borderRadius: '50%',
                   border: 'none',
                   background: 'none',
@@ -385,20 +384,20 @@ const MusicPlayer = () => {
                   e.currentTarget.style.transform = 'scale(1)';
                 }}
               >
-                <SkipForward style={{ width: '22px', height: '22px' }} fill="currentColor" />
+                <SkipForward style={{ width: '18px', height: '18px' }} fill="currentColor" />
               </button>
             </div>
             
             {/* Action Buttons */}
             <div style={{
               display: 'flex',
-              gap: '8px'
+              gap: '6px'
             }}>
               <button
                 onClick={() => setShowPlaylistModal(true)}
                 style={{
-                  width: '42px',
-                  height: '42px',
+                  width: '36px',
+                  height: '36px',
                   borderRadius: '50%',
                   border: 'none',
                   background: 'none',
@@ -418,14 +417,14 @@ const MusicPlayer = () => {
                   e.currentTarget.style.transform = 'scale(1)';
                 }}
               >
-                <List style={{ width: '20px', height: '20px' }} />
+                <List style={{ width: '16px', height: '16px' }} />
               </button>
               
               <button
                 onClick={() => setShowCreatePlaylistModal(true)}
                 style={{
-                  width: '42px',
-                  height: '42px',
+                  width: '36px',
+                  height: '36px',
                   borderRadius: '50%',
                   border: 'none',
                   background: 'none',
@@ -445,14 +444,14 @@ const MusicPlayer = () => {
                   e.currentTarget.style.transform = 'scale(1)';
                 }}
               >
-                <FolderPlus style={{ width: '20px', height: '20px' }} />
+                <FolderPlus style={{ width: '16px', height: '16px' }} />
               </button>
               
               <button
                 onClick={() => setShowAddSongModal(true)}
                 style={{
-                  width: '42px',
-                  height: '42px',
+                  width: '36px',
+                  height: '36px',
                   borderRadius: '50%',
                   border: 'none',
                   background: 'none',
@@ -472,7 +471,7 @@ const MusicPlayer = () => {
                   e.currentTarget.style.transform = 'scale(1)';
                 }}
               >
-                <Plus style={{ width: '20px', height: '20px' }} />
+                <Plus style={{ width: '16px', height: '16px' }} />
               </button>
             </div>
           </div>
@@ -483,28 +482,30 @@ const MusicPlayer = () => {
       {showPlaylistModal && (
         <div className="modal-overlay">
           <div className="modal-content" style={{
-            maxHeight: '80vh',
+            maxHeight: '50vh',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            maxWidth: '250px',
+            padding: '0.5rem'
           }}>
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: '1.5rem',
-              padding: '0 0.5rem'
+              marginBottom: '0.5rem',
+              padding: '0 0.1rem'
             }}>
               <h3 style={{
-                fontSize: '1.5rem',
-                fontWeight: '700',
+                fontSize: '0.9rem',
+                fontWeight: '600',
                 color: 'white',
                 fontFamily: '-apple-system, system-ui, sans-serif',
                 margin: 0
-              }}>Playlists & Songs</h3>
+              }}>Playlists</h3>
               <button
                 onClick={() => setShowPlaylistModal(false)}
                 style={{
-                  padding: '0.75rem',
+                  padding: '0.3rem',
                   borderRadius: '50%',
                   background: 'rgba(255, 255, 255, 0.1)',
                   transition: 'all 0.2s ease',
@@ -517,13 +518,13 @@ const MusicPlayer = () => {
                 onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'}
                 onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
               >
-                <X style={{ width: '1.5rem', height: '1.5rem', color: 'white' }} />
+                <X style={{ width: '0.9rem', height: '0.9rem', color: 'white' }} />
               </button>
             </div>
             
             <div style={{
               display: 'flex',
-              gap: '1.5rem',
+              gap: '0.5rem',
               flex: 1,
               overflow: 'hidden'
             }}>
@@ -532,24 +533,16 @@ const MusicPlayer = () => {
                 flex: 1,
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '1rem',
-                minWidth: '200px'
+                gap: '0.3rem',
+                minWidth: '80px'
               }}>
-                <h4 style={{
-                  fontSize: '1rem',
-                  fontWeight: '600',
-                  color: '#d1d1d6',
-                  margin: 0,
-                  padding: '0 0.5rem',
-                  fontFamily: '-apple-system, system-ui, sans-serif'
-                }}>Playlists</h4>
                 <div style={{
                   flex: 1,
                   overflowY: 'auto',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.75rem',
-                  padding: '0.5rem'
+                  gap: '0.3rem',
+                  padding: '0.1rem'
                 }}>
                   {playlists.map((playlist, index) => (
                     <button
@@ -557,8 +550,8 @@ const MusicPlayer = () => {
                       onClick={() => switchPlaylist(index)}
                       style={{
                         width: '100%',
-                        padding: '1rem',
-                        borderRadius: '16px',
+                        padding: '0.4rem',
+                        borderRadius: '8px',
                         textAlign: 'left',
                         transition: 'all 0.2s ease',
                         cursor: 'pointer',
@@ -566,7 +559,8 @@ const MusicPlayer = () => {
                         background: currentPlaylistIndex === index
                           ? 'rgba(0, 198, 255, 0.3)'
                           : 'rgba(255, 255, 255, 0.05)',
-                        fontFamily: '-apple-system, system-ui, sans-serif'
+                        fontFamily: '-apple-system, system-ui, sans-serif',
+                        fontSize: '0.7rem'
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.background = currentPlaylistIndex === index
@@ -582,12 +576,12 @@ const MusicPlayer = () => {
                       <div style={{
                         fontWeight: '600',
                         color: 'white',
-                        fontSize: '1rem'
+                        fontSize: '0.7rem'
                       }}>{playlist.name}</div>
                       <div style={{
-                        fontSize: '0.875rem',
+                        fontSize: '0.55rem',
                         color: '#a0a0a0',
-                        marginTop: '0.25rem'
+                        marginTop: '0.05rem'
                       }}>{playlist.songs.length} songs</div>
                     </button>
                   ))}
@@ -596,48 +590,49 @@ const MusicPlayer = () => {
 
               {/* Songs in Current Playlist */}
               <div style={{
-                flex: 2,
+                flex: 1.5,
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '1rem'
+                gap: '0.3rem'
               }}>
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  padding: '0 0.5rem'
+                  padding: '0 0.1rem'
                 }}>
                   <h4 style={{
-                    fontSize: '1rem',
+                    fontSize: '0.7rem',
                     fontWeight: '600',
                     color: '#d1d1d6',
                     margin: 0,
                     fontFamily: '-apple-system, system-ui, sans-serif'
-                  }}>Songs in {currentPlaylist.name}</h4>
+                  }}>Songs</h4>
                   <button
                     onClick={() => setShowAddSongModal(true)}
                     style={{
-                      padding: '0.5rem 1rem',
-                      borderRadius: '12px',
+                      padding: '0.2rem 0.4rem',
+                      borderRadius: '5px',
                       background: 'rgba(0, 198, 255, 0.2)',
                       color: '#00c6ff',
                       border: '1px solid rgba(0, 198, 255, 0.3)',
                       cursor: 'pointer',
                       fontWeight: '600',
                       transition: 'all 0.2s ease',
-                      fontFamily: '-apple-system, system-ui, sans-serif'
+                      fontFamily: '-apple-system, system-ui, sans-serif',
+                      fontSize: '0.55rem'
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.background = 'rgba(0, 198, 255, 0.3)';
-                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.transform = 'translateY(-1px)';
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.background = 'rgba(0, 198, 255, 0.2)';
                       e.currentTarget.style.transform = 'translateY(0)';
                     }}
                   >
-                    <Plus style={{ width: '1rem', height: '1rem', display: 'inline', marginRight: '0.5rem' }} />
-                    Add Song
+                    <Plus style={{ width: '0.5rem', height: '0.5rem', display: 'inline', marginRight: '0.1rem' }} />
+                    Add
                   </button>
                 </div>
                 <div style={{
@@ -645,43 +640,44 @@ const MusicPlayer = () => {
                   overflowY: 'auto',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.75rem',
-                  padding: '0.5rem'
+                  gap: '0.3rem',
+                  padding: '0.1rem'
                 }}>
                   {currentPlaylist.songs.length === 0 ? (
                     <div style={{
-                      padding: '2rem',
+                      padding: '0.5rem',
                       textAlign: 'center',
                       color: '#8e8e93',
-                      fontSize: '1rem',
+                      fontSize: '0.6rem',
                       fontFamily: '-apple-system, system-ui, sans-serif'
                     }}>
-                      <Music style={{ width: '3rem', height: '3rem', margin: '0 auto 1rem', color: '#444' }} />
-                      <div>No songs in this playlist</div>
+                      <Music style={{ width: '1.2rem', height: '1.2rem', margin: '0 auto 0.3rem', color: '#444' }} />
+                      <div>No songs</div>
                       <button
                         onClick={() => setShowAddSongModal(true)}
                         style={{
-                          marginTop: '1rem',
-                          padding: '0.75rem 1.5rem',
-                          borderRadius: '12px',
+                          marginTop: '0.3rem',
+                          padding: '0.3rem 0.6rem',
+                          borderRadius: '5px',
                           background: 'rgba(0, 198, 255, 0.2)',
                           color: '#00c6ff',
                           border: '1px solid rgba(0, 198, 255, 0.3)',
                           cursor: 'pointer',
                           fontWeight: '600',
                           transition: 'all 0.2s ease',
-                          fontFamily: '-apple-system, system-ui, sans-serif'
+                          fontFamily: '-apple-system, system-ui, sans-serif',
+                          fontSize: '0.55rem'
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.background = 'rgba(0, 198, 255, 0.3)';
-                          e.currentTarget.style.transform = 'translateY(-2px)';
+                          e.currentTarget.style.transform = 'translateY(-1px)';
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.background = 'rgba(0, 198, 255, 0.2)';
                           e.currentTarget.style.transform = 'translateY(0)';
                         }}
                       >
-                        Add Your First Song
+                        Add Song
                       </button>
                     </div>
                   ) : (
@@ -691,15 +687,16 @@ const MusicPlayer = () => {
                         onClick={() => selectTrack(index)}
                         style={{
                           width: '100%',
-                          padding: '1rem',
-                          borderRadius: '16px',
+                          padding: '0.4rem',
+                          borderRadius: '8px',
                           textAlign: 'left',
                           transition: 'all 0.2s ease',
                           cursor: 'pointer',
                           border: 'none',
                           background: currentTrack === index
                             ? 'rgba(0, 198, 255, 0.3)'
-                            : 'rgba(255, 255, 255, 0.05)'
+                            : 'rgba(255, 255, 255, 0.05)',
+                          fontSize: '0.6rem'
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.background = currentTrack === index
@@ -715,13 +712,13 @@ const MusicPlayer = () => {
                         <div style={{
                           fontWeight: '600',
                           color: 'white',
-                          fontSize: '1rem',
+                          fontSize: '0.6rem',
                           fontFamily: '-apple-system, system-ui, sans-serif'
                         }}>{track.title}</div>
                         <div style={{
-                          fontSize: '0.875rem',
+                          fontSize: '0.5rem',
                           color: '#d1d1d6',
-                          marginTop: '0.25rem',
+                          marginTop: '0.05rem',
                           fontFamily: '-apple-system, system-ui, sans-serif'
                         }}>{track.artist}</div>
                       </button>
@@ -733,15 +730,15 @@ const MusicPlayer = () => {
             
             {/* Create Playlist Button */}
             <div style={{
-              padding: '1rem 0 0',
+              padding: '0.3rem 0 0',
               borderTop: '1px solid rgba(255, 255, 255, 0.1)'
             }}>
               <button
                 onClick={() => setShowCreatePlaylistModal(true)}
                 style={{
                   width: '100%',
-                  padding: '1rem',
-                  borderRadius: '16px',
+                  padding: '0.4rem',
+                  borderRadius: '8px',
                   background: 'rgba(124, 58, 237, 0.2)',
                   color: '#a78bfa',
                   border: '1px solid rgba(124, 58, 237, 0.3)',
@@ -751,19 +748,20 @@ const MusicPlayer = () => {
                   fontFamily: '-apple-system, system-ui, sans-serif',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
+                  fontSize: '0.65rem'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = 'rgba(124, 58, 237, 0.3)';
-                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = 'rgba(124, 58, 237, 0.2)';
                   e.currentTarget.style.transform = 'translateY(0)';
                 }}
               >
-                <FolderPlus style={{ width: '1.25rem', height: '1.25rem', display: 'inline', marginRight: '0.75rem' }} />
-                Create New Playlist
+                <FolderPlus style={{ width: '0.7rem', height: '0.7rem', display: 'inline', marginRight: '0.3rem' }} />
+                New Playlist
               </button>
             </div>
           </div>
@@ -774,25 +772,26 @@ const MusicPlayer = () => {
       {showAddSongModal && (
         <div className="modal-overlay">
           <div className="modal-content" style={{
-            maxWidth: '500px'
+            maxWidth: '220px',
+            padding: '0.5rem'
           }}>
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: '1.5rem'
+              marginBottom: '0.5rem'
             }}>
               <h3 style={{
-                fontSize: '1.5rem',
-                fontWeight: '700',
+                fontSize: '0.9rem',
+                fontWeight: '600',
                 color: 'white',
                 fontFamily: '-apple-system, system-ui, sans-serif',
                 margin: 0
-              }}>Add Song to {currentPlaylist.name}</h3>
+              }}>Add Song</h3>
               <button
                 onClick={() => setShowAddSongModal(false)}
                 style={{
-                  padding: '0.75rem',
+                  padding: '0.3rem',
                   borderRadius: '50%',
                   background: 'rgba(255, 255, 255, 0.1)',
                   transition: 'all 0.2s ease',
@@ -805,43 +804,44 @@ const MusicPlayer = () => {
                 onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'}
                 onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
               >
-                <X style={{ width: '1.5rem', height: '1.5rem', color: 'white' }} />
+                <X style={{ width: '0.9rem', height: '0.9rem', color: 'white' }} />
               </button>
             </div>
             <div style={{ 
               display: 'flex', 
               flexDirection: 'column', 
-              gap: '1.5rem' 
+              gap: '0.5rem' 
             }}>
               <div>
                 <label style={{
                   display: 'block',
                   color: '#d1d1d6',
-                  marginBottom: '0.75rem',
-                  fontSize: '1rem',
+                  marginBottom: '0.3rem',
+                  fontSize: '0.65rem',
                   fontWeight: '600',
                   fontFamily: '-apple-system, system-ui, sans-serif'
-                }}>Song Title</label>
+                }}>Title</label>
                 <input
                   type="text"
                   value={newSongTitle}
                   onChange={(e) => setNewSongTitle(e.target.value)}
-                  placeholder="Enter song title"
+                  placeholder="Title"
                   style={{
                     width: '100%',
-                    padding: '1rem',
+                    padding: '0.4rem',
                     background: 'rgba(255, 255, 255, 0.05)',
                     border: '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '16px',
+                    borderRadius: '8px',
                     color: 'white',
                     outline: 'none',
                     fontFamily: '-apple-system, system-ui, sans-serif',
-                    fontSize: '1rem',
-                    transition: 'all 0.2s ease'
+                    fontSize: '0.65rem',
+                    transition: 'all 0.2s ease',
+                    boxSizing: 'border-box'
                   }}
                   onFocus={(e) => {
                     e.target.style.borderColor = 'rgba(0, 198, 255, 0.5)';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(0, 198, 255, 0.2)';
+                    e.target.style.boxShadow = '0 0 0 1px rgba(0, 198, 255, 0.2)';
                   }}
                   onBlur={(e) => {
                     e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
@@ -853,31 +853,32 @@ const MusicPlayer = () => {
                 <label style={{
                   display: 'block',
                   color: '#d1d1d6',
-                  marginBottom: '0.75rem',
-                  fontSize: '1rem',
+                  marginBottom: '0.3rem',
+                  fontSize: '0.65rem',
                   fontWeight: '600',
                   fontFamily: '-apple-system, system-ui, sans-serif'
-                }}>Audio URL</label>
+                }}>URL</label>
                 <input
                   type="text"
                   value={newSongUrl}
                   onChange={(e) => setNewSongUrl(e.target.value)}
-                  placeholder="Enter MP3 URL"
+                  placeholder="MP3 URL"
                   style={{
                     width: '100%',
-                    padding: '1rem',
+                    padding: '0.4rem',
                     background: 'rgba(255, 255, 255, 0.05)',
                     border: '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '16px',
+                    borderRadius: '8px',
                     color: 'white',
                     outline: 'none',
                     fontFamily: '-apple-system, system-ui, sans-serif',
-                    fontSize: '1rem',
-                    transition: 'all 0.2s ease'
+                    fontSize: '0.65rem',
+                    transition: 'all 0.2s ease',
+                    boxSizing: 'border-box'
                   }}
                   onFocus={(e) => {
                     e.target.style.borderColor = 'rgba(0, 198, 255, 0.5)';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(0, 198, 255, 0.2)';
+                    e.target.style.boxShadow = '0 0 0 1px rgba(0, 198, 255, 0.2)';
                   }}
                   onBlur={(e) => {
                     e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
@@ -889,25 +890,25 @@ const MusicPlayer = () => {
                 onClick={addSong}
                 style={{
                   width: '100%',
-                  padding: '1rem',
+                  padding: '0.4rem',
                   background: 'linear-gradient(135deg, #00c6ff, #0072ff)',
-                  borderRadius: '16px',
+                  borderRadius: '8px',
                   color: 'white',
                   fontWeight: '600',
                   transition: 'all 0.2s ease',
                   cursor: 'pointer',
                   border: 'none',
-                  fontSize: '1rem',
+                  fontSize: '0.65rem',
                   fontFamily: '-apple-system, system-ui, sans-serif',
-                  boxShadow: '0 4px 20px rgba(0, 198, 255, 0.4)'
+                  boxShadow: '0 2px 10px rgba(0, 198, 255, 0.4)'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 6px 25px rgba(0, 198, 255, 0.5)';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 198, 255, 0.5)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 198, 255, 0.4)';
+                  e.currentTarget.style.boxShadow = '0 2px 10px rgba(0, 198, 255, 0.4)';
                 }}
               >
                 Add to Playlist
@@ -921,25 +922,26 @@ const MusicPlayer = () => {
       {showCreatePlaylistModal && (
         <div className="modal-overlay">
           <div className="modal-content" style={{
-            maxWidth: '500px'
+            maxWidth: '220px',
+            padding: '0.5rem'
           }}>
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: '1.5rem'
+              marginBottom: '0.5rem'
             }}>
               <h3 style={{
-                fontSize: '1.5rem',
-                fontWeight: '700',
+                fontSize: '0.9rem',
+                fontWeight: '600',
                 color: 'white',
                 fontFamily: '-apple-system, system-ui, sans-serif',
                 margin: 0
-              }}>Create New Playlist</h3>
+              }}>New Playlist</h3>
               <button
                 onClick={() => setShowCreatePlaylistModal(false)}
                 style={{
-                  padding: '0.75rem',
+                  padding: '0.3rem',
                   borderRadius: '50%',
                   background: 'rgba(255, 255, 255, 0.1)',
                   transition: 'all 0.2s ease',
@@ -952,43 +954,44 @@ const MusicPlayer = () => {
                 onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'}
                 onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
               >
-                <X style={{ width: '1.5rem', height: '1.5rem', color: 'white' }} />
+                <X style={{ width: '0.9rem', height: '0.9rem', color: 'white' }} />
               </button>
             </div>
             <div style={{ 
               display: 'flex', 
               flexDirection: 'column', 
-              gap: '1.5rem' 
+              gap: '0.5rem' 
             }}>
               <div>
                 <label style={{
                   display: 'block',
                   color: '#d1d1d6',
-                  marginBottom: '0.75rem',
-                  fontSize: '1rem',
+                  marginBottom: '0.3rem',
+                  fontSize: '0.65rem',
                   fontWeight: '600',
                   fontFamily: '-apple-system, system-ui, sans-serif'
-                }}>Playlist Name</label>
+                }}>Name</label>
                 <input
                   type="text"
                   value={newPlaylistName}
                   onChange={(e) => setNewPlaylistName(e.target.value)}
-                  placeholder="Enter playlist name"
+                  placeholder="Playlist name"
                   style={{
                     width: '100%',
-                    padding: '1rem',
+                    padding: '0.4rem',
                     background: 'rgba(255, 255, 255, 0.05)',
                     border: '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '16px',
+                    borderRadius: '8px',
                     color: 'white',
                     outline: 'none',
                     fontFamily: '-apple-system, system-ui, sans-serif',
-                    fontSize: '1rem',
-                    transition: 'all 0.2s ease'
+                    fontSize: '0.65rem',
+                    transition: 'all 0.2s ease',
+                    boxSizing: 'border-box'
                   }}
                   onFocus={(e) => {
                     e.target.style.borderColor = 'rgba(124, 58, 237, 0.5)';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(124, 58, 237, 0.2)';
+                    e.target.style.boxShadow = '0 0 0 1px rgba(124, 58, 237, 0.2)';
                   }}
                   onBlur={(e) => {
                     e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
@@ -1000,25 +1003,25 @@ const MusicPlayer = () => {
                 onClick={createPlaylist}
                 style={{
                   width: '100%',
-                  padding: '1rem',
+                  padding: '0.4rem',
                   background: 'linear-gradient(135deg, #7c3aed, #581c87)',
-                  borderRadius: '16px',
+                  borderRadius: '8px',
                   color: 'white',
                   fontWeight: '600',
                   transition: 'all 0.2s ease',
                   cursor: 'pointer',
                   border: 'none',
-                  fontSize: '1rem',
+                  fontSize: '0.65rem',
                   fontFamily: '-apple-system, system-ui, sans-serif',
-                  boxShadow: '0 4px 20px rgba(124, 58, 237, 0.4)'
+                  boxShadow: '0 2px 10px rgba(124, 58, 237, 0.4)'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 6px 25px rgba(124, 58, 237, 0.5)';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(124, 58, 237, 0.5)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 20px rgba(124, 58, 237, 0.4)';
+                  e.currentTarget.style.boxShadow = '0 2px 10px rgba(124, 58, 237, 0.4)';
                 }}
               >
                 Create Playlist
@@ -1030,8 +1033,8 @@ const MusicPlayer = () => {
       
       <style>{`
         @keyframes bounce {
-          0%, 100% { height: 6px; }
-          50% { height: 26px; }
+          0%, 100% { height: 2px; }
+          50% { height: 12px; }
         }
         
         @keyframes fadeIn {
@@ -1048,15 +1051,15 @@ const MusicPlayer = () => {
         .volume-bars {
           display: flex;
           align-items: flex-end;
-          gap: 2px;
-          width: 38px;
-          height: 32px;
+          gap: 1px;
+          width: 20px;
+          height: 16px;
         }
         
         .volume-bars .bar {
-          width: 3px;
+          width: 1px;
           background: linear-gradient(180deg, #00c6ff, #0072ff);
-          border-radius: 2px;
+          border-radius: 1px;
           animation: bounce 0.8s infinite ease-in-out;
           animation-delay: var(--delay);
           animation-play-state: ${isPlaying ? 'running' : 'paused'};
@@ -1078,9 +1081,9 @@ const MusicPlayer = () => {
         .modal-content {
           background: #000;
           boxShadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
-          borderRadius: 20px;
-          padding: 1.5rem;
-          maxWidth: 450px;
+          borderRadius: 12px;
+          padding: 0.5rem;
+          maxWidth: 220px;
           width: 100%;
           border: 1px solid rgba(255, 255, 255, 0.1);
           animation: fadeIn 0.3s ease-out;

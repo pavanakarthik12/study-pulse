@@ -872,8 +872,16 @@ const Dashboard = () => {
             top: '100px', // Below navbar
             left: '20px', // Left corner
             zIndex: 1100,
-            width: '500px', // Updated to match new size
+            width: '350px', // Updated to match new size
             maxWidth: '90vw'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'scale(1.02)';
+            e.currentTarget.style.boxShadow = '0 15px 35px rgba(0, 0, 0, 0.5)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.boxShadow = 'none';
           }}
         >
           <div style={{
@@ -882,8 +890,16 @@ const Dashboard = () => {
             borderRadius: '16px',
             border: '1px solid rgba(255, 255, 255, 0.18)',
             boxShadow: '0 10px 30px rgba(0, 0, 0, 0.4)',
-            overflow: 'hidden'
-          }}>
+            overflow: 'hidden',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.boxShadow = '0 15px 35px rgba(0, 0, 0, 0.5)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.4)';
+          }}
+          >
             <MusicPlayer />
           </div>
         </motion.div>
