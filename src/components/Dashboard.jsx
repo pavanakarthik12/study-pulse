@@ -492,6 +492,63 @@ const Dashboard = () => {
     setSessionReview(review);
   };
 
+  // Calculate session insights
+  const calculateSessionInsights = (sessionData) => {
+    if (!sessionData) return null;
+    
+    const { completed = [], skipped = [], paused = [] } = sessionData;
+    const totalSessions = completed.length + skipped.length + paused.length;
+    
+    // Calculate completion rate
+    const completionRate = totalSessions > 0 ? (completed.length / totalSessions) * 100 : 0;
+    const skippedRate = totalSessions > 0 ? (skipped.length / totalSessions) * 100 : 0;
+    
+    // Calculate total focused time (assuming 45 min per completed session)
+    const totalFocusedTime = completed.length * 45;
+    
+    // Find patterns in skipped subjects
+    const skippedSubjects = {};
+    skipped.forEach(subject => {
+      skippedSubjects[subject] = (skippedSubjects[subject] || 0) + 1;
+    });
+    
+    // Find consistent subjects
+    const consistentSubjects = completed.filter(subject => !skipped.includes(subject));
+    
+    return {
+      totalSessions,
+      completed: completed.length,
+      skipped: skipped.length,
+      paused: paused.length,
+      completionRate,
+      skippedRate,
+      totalFocusedTime,
+      skippedSubjects,
+      consistentSubjects
+    };
+  };
+
+  // Get personalized insights message
+  const getInsightsMessage = (insights) => {
+    if (!insights) return "";
+    
+    // Check for frequently skipped subjects
+    const frequentSkipped = Object.entries(insights.skippedSubjects)
+      .filter(([subject, count]) => count > 1)
+      .map(([subject, count]) => `${subject} (${count} times)`);
+    
+    if (frequentSkipped.length > 0) {
+      return `You skipped ${frequentSkipped.join(', ')} multiple times — try shorter sessions next time!`;
+    }
+    
+    // Check for consistent subjects
+    if (insights.consistentSubjects.length > 0) {
+      return `You focused consistently during ${insights.consistentSubjects.join(', ')} — great job maintaining momentum!`;
+    }
+    
+    return "Keep up the good work! Consistency is key to success.";
+  };
+
   // Clean up on unmount
   useEffect(() => {
     return () => {
@@ -657,38 +714,286 @@ const Dashboard = () => {
             </motion.div>
           )}
 
-          {/* Welcome Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            style={{
-              marginBottom: '1.5rem',
-              textAlign: 'center'
-            }}
-          >
-            <h1 style={{
-              fontSize: '2rem',
-              fontWeight: 700,
-              color: 'white',
-              margin: 0,
-              marginBottom: '0.5rem',
-              background: 'linear-gradient(135deg, #a78bfa, #c084fc, #f472b6)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              textShadow: '0 0 40px rgba(139, 92, 246, 0.3)'
-            }}>
-              Welcome back! 👋
-            </h1>
-            <p style={{
-              color: 'rgba(255, 255, 255, 0.6)',
-              margin: 0,
-              fontSize: '0.9rem'
-            }}>
-              Let's create your perfect study schedule
-            </p>
-          </motion.div>
+          {/* Welcome Header - hidden during active sessions */}
+          {!focusMode && !sessionReview && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              style={{
+                marginBottom: '1.5rem',
+                textAlign: 'center'
+              }}
+            >
+              <h1 style={{
+                fontSize: '2rem',
+                fontWeight: 700,
+                color: 'white',
+                margin: 0,
+                marginBottom: '0.5rem',
+                background: 'linear-gradient(135deg, #a78bfa, #c084fc, #f472b6)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                textShadow: '0 0 40px rgba(139, 92, 246, 0.3)'
+              }}>
+                Welcome back! 👋
+              </h1>
+              <p style={{
+                color: 'rgba(255, 255, 255, 0.6)',
+                margin: 0,
+                fontSize: '0.9rem'
+              }}>
+                Let's create your perfect study schedule
+              </p>
+            </motion.div>
+          )}
+
+          {/* Session Insights Panel - shown after session completion */}
+          {sessionReview && !focusMode && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              style={{
+                padding: '1.5rem',
+                background: 'rgba(255, 255, 255, 0.03)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                borderRadius: '16px',
+                border: '1px solid rgba(255, 255, 255, 0.18)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+                marginBottom: '1.5rem'
+              }}
+            >
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: 700,
+                color: 'white',
+                margin: 0,
+                marginBottom: '1.25rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem'
+              }}>
+                📊 Session Insights
+              </h3>
+              
+              {/* Session Stats */}
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', 
+                gap: '1rem', 
+                marginBottom: '1.5rem' 
+              }}>
+                <div style={{ 
+                  padding: '1rem', 
+                  background: 'rgba(34, 197, 94, 0.1)', 
+                  border: '1px solid rgba(34, 197, 94, 0.3)', 
+                  borderRadius: '12px',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ 
+                    color: '#4ade80', 
+                    fontWeight: 700, 
+                    marginBottom: '0.25rem',
+                    fontSize: '1.5rem'
+                  }}>
+                    {sessionReview.completed.length}
+                  </div>
+                  <div style={{ 
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    fontSize: '0.875rem'
+                  }}>
+                    Completed
+                  </div>
+                </div>
+                <div style={{ 
+                  padding: '1rem', 
+                  background: 'rgba(239, 68, 68, 0.1)', 
+                  border: '1px solid rgba(239, 68, 68, 0.3)', 
+                  borderRadius: '12px',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ 
+                    color: '#f87171', 
+                    fontWeight: 700, 
+                    marginBottom: '0.25rem',
+                    fontSize: '1.5rem'
+                  }}>
+                    {sessionReview.skipped.length}
+                  </div>
+                  <div style={{ 
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    fontSize: '0.875rem'
+                  }}>
+                    Skipped
+                  </div>
+                </div>
+                <div style={{ 
+                  padding: '1rem', 
+                  background: 'rgba(234, 179, 8, 0.1)', 
+                  border: '1px solid rgba(234, 179, 8, 0.3)', 
+                  borderRadius: '12px',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ 
+                    color: '#fbbf24', 
+                    fontWeight: 700, 
+                    marginBottom: '0.25rem',
+                    fontSize: '1.5rem'
+                  }}>
+                    {sessionReview.paused.length}
+                  </div>
+                  <div style={{ 
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    fontSize: '0.875rem'
+                  }}>
+                    Paused
+                  </div>
+                </div>
+                <div style={{ 
+                  padding: '1rem', 
+                  background: 'rgba(139, 92, 246, 0.1)', 
+                  border: '1px solid rgba(139, 92, 246, 0.3)', 
+                  borderRadius: '12px',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ 
+                    color: '#a78bfa', 
+                    fontWeight: 700, 
+                    marginBottom: '0.25rem',
+                    fontSize: '1.5rem'
+                  }}>
+                    {Math.floor((sessionReview.completed.length * 45) / 60)}h {(sessionReview.completed.length * 45) % 60}m
+                  </div>
+                  <div style={{ 
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    fontSize: '0.875rem'
+                  }}>
+                    Focused Time
+                  </div>
+                </div>
+              </div>
+              
+              {/* Performance Chart */}
+              <div style={{
+                marginBottom: '1.5rem'
+              }}>
+                <h4 style={{
+                  color: 'white',
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  margin: '0 0 0.75rem 0'
+                }}>
+                  Session Completion
+                </h4>
+                <div style={{
+                  height: '8px',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  borderRadius: '4px',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{
+                    height: '100%',
+                    width: `${(sessionReview.completed.length / (sessionReview.completed.length + sessionReview.skipped.length + sessionReview.paused.length)) * 100}%`,
+                    background: 'linear-gradient(90deg, #4ade80, #22c55e)',
+                    borderRadius: '4px'
+                  }}></div>
+                </div>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  marginTop: '0.5rem',
+                  fontSize: '0.75rem',
+                  color: 'rgba(255, 255, 255, 0.6)'
+                }}>
+                  <span>0%</span>
+                  <span>100%</span>
+                </div>
+              </div>
+              
+              {/* Insights Message */}
+              <div style={{
+                padding: '1rem',
+                background: 'rgba(139, 92, 246, 0.1)',
+                border: '1px solid rgba(139, 92, 246, 0.3)',
+                borderRadius: '12px',
+                marginBottom: '1rem'
+              }}>
+                <p style={{
+                  color: '#c4b5fd',
+                  fontSize: '0.9rem',
+                  margin: 0,
+                  fontStyle: 'italic'
+                }}>
+                  {getInsightsMessage(calculateSessionInsights(sessionReview))}
+                </p>
+              </div>
+              
+              {/* Detailed Subject Breakdown */}
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '12px',
+                padding: '1rem'
+              }}>
+                <h4 style={{
+                  color: 'white',
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  margin: '0 0 0.75rem 0'
+                }}>
+                  Subject Breakdown
+                </h4>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.5rem'
+                }}>
+                  {sessionReview.completed.length > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <div style={{
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '50%',
+                        background: '#4ade80'
+                      }}></div>
+                      <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.875rem' }}>
+                        Completed: {sessionReview.completed.join(', ')}
+                      </span>
+                    </div>
+                  )}
+                  {sessionReview.skipped.length > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <div style={{
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '50%',
+                        background: '#f87171'
+                      }}></div>
+                      <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.875rem' }}>
+                        Skipped: {sessionReview.skipped.join(', ')}
+                      </span>
+                    </div>
+                  )}
+                  {sessionReview.paused.length > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <div style={{
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '50%',
+                        background: '#fbbf24'
+                      }}></div>
+                      <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.875rem' }}>
+                        Paused: {sessionReview.paused.join(', ')}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          )}
 
           {/* Schedule Display Area (hidden in focus mode) */}
           {!focusMode && (
@@ -1022,10 +1327,10 @@ const Dashboard = () => {
                 marginBottom: '0.5rem'
               }}>
                 {sessionReview.performanceLevel === 'green' 
-                  ? "🟢 Excellent work — consistency builds success!" 
+                  ? "🟢 Outstanding consistency — keep building your discipline!" 
                   : sessionReview.performanceLevel === 'yellow' 
-                    ? "🟡 Good effort! A bit more focus next time and you'll ace it." 
-                    : "🔴 Don't give up — progress starts when you keep trying."}
+                    ? "🟡 Good progress — stay a bit more consistent next time!" 
+                    : "🔴 Don't worry — each restart makes you stronger. Try again!"}
               </p>
               <p style={{
                 color: 'rgba(255,255,255,0.8)',
