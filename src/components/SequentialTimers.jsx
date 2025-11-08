@@ -1,16 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, SkipForward, X, Coffee, Clock, Target, CheckCircle, Zap, TrendingUp, BookOpen, Bell } from 'lucide-react';
+import { Play, Pause, SkipForward, X, Coffee, Clock, CheckCircle, TrendingUp, BookOpen, Bell, Edit3 } from 'lucide-react';
 import NotificationSidebar from './NotificationSidebar';
 
-const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
+const SequentialTimers = ({ schedule, onComplete, onCancel, onEditSchedule, handleStartSession, isSessionActive, subjects }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [completedSubjects, setCompletedSubjects] = useState([]);
-  const [isBreakTime, setIsBreakTime] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [skippedSubjects, setSkippedSubjects] = useState([]);
   const [pausedSubjects, setPausedSubjects] = useState([]);
@@ -23,7 +22,6 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
   
   // Calculate subject-only items for progress tracking
   const subjectItems = schedule.filter(item => item.subject);
-  const currentSubjectIndex = subjectItems.findIndex(s => s.subject === currentItem?.subject);
   
   // Initialize timer with current item duration
   useEffect(() => {
@@ -31,14 +29,12 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
       if (isCurrentBreak) {
         console.log(`☕ Auto-starting break: ${currentItem.break} minutes`);
         setTimeRemaining(currentItem.break * 60);
-        setIsBreakTime(true);
         // Auto-start breaks immediately
         setIsRunning(true);
         setIsPaused(false);
       } else if (currentItem.subject) {
         console.log(`📚 Starting subject: ${currentItem.subject} (${currentItem.duration} min)`);
         setTimeRemaining(currentItem.duration * 60);
-        setIsBreakTime(false);
       }
     }
   }, [currentIndex, currentItem, isRunning, isCurrentBreak]);
@@ -204,396 +200,372 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
   }
   
   return (
-    <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
-        
-        @keyframes float {
-          0%, 100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-20px);
-          }
-        }
-        
-        @keyframes pulse {
-          0%, 100% {
-            transform: scale(1);
-            opacity: 0.8;
-          }
-          50% {
-            transform: scale(1.05);
-            opacity: 1;
-          }
-        }
-        
-        @keyframes glow {
-          0%, 100% {
-            box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
-          }
-          50% {
-            box-shadow: 0 0 30px rgba(139, 92, 246, 0.8);
-          }
-        }
-        
-        .timer-progress {
-          transition: all 0.3s ease;
-        }
-      `}</style>
+    <div style={{
+      padding: '1.5rem',
+      display: 'flex',
+      flexDirection: 'row',
+      gap: '1.5rem',
+      marginLeft: '20px',
+      maxWidth: 'calc(100% - 20px)'
+    }}>
       
-      {/* Sticky Active Timer Card at the Top */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        style={{
-          position: 'sticky',
-          top: '1rem',
-          zIndex: 100,
-          marginBottom: '2rem',
-          padding: '1.5rem',
-          background: 'rgba(255, 255, 255, 0.05)',
-          backdropFilter: 'blur(22px)',
-          borderRadius: '18px',
-          border: '1px solid rgba(139, 92, 246, 0.32)',
-          boxShadow: '0 14px 36px rgba(0, 0, 0, 0.35)'
-        }}
-      >
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '1rem'
-        }}>
+      {/* Left Panel - Timer */}
+      <div style={{ flex: 1 }}>
+        {/* Sticky Active Timer Card at the Top */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{
+            position: 'sticky',
+            top: '1rem',
+            zIndex: 100,
+            marginBottom: '2rem',
+            padding: '1.5rem',
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(22px)',
+            borderRadius: '18px',
+            border: '1px solid rgba(139, 92, 246, 0.32)',
+            boxShadow: '0 14px 36px rgba(0, 0, 0, 0.35)'
+          }}
+        >
           <div style={{
             display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
-            gap: '0.75rem'
-          }}>
-            {isCurrentBreak ? (
-              <Coffee size={24} color="#4ade80" />
-            ) : (
-              <BookOpen size={24} color="#8b5cf6" />
-            )}
-            <div>
-              <h2 style={{
-                fontSize: '1.25rem',
-                fontWeight: 700,
-                color: 'white',
-                margin: 0
-              }}>
-                {isCurrentBreak ? '☕ Break Time' : currentItem.subject}
-              </h2>
-              <p style={{
-                fontSize: '0.875rem',
-                color: 'rgba(255, 255, 255, 0.7)',
-                margin: 0
-              }}>
-                {isCurrentBreak 
-                  ? `Relax for ${currentItem.break} minutes` 
-                  : `${currentItem.duration} minutes study session`}
-              </p>
-            </div>
-          </div>
-          
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem'
+            marginBottom: '1rem'
           }}>
             <div style={{
-              textAlign: 'right'
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem'
+            }}>
+              {isCurrentBreak ? (
+                <Coffee size={24} color="#4ade80" />
+              ) : (
+                <BookOpen size={24} color="#8b5cf6" />
+              )}
+              <div>
+                <h2 style={{
+                  fontSize: '1.25rem',
+                  fontWeight: 700,
+                  color: 'white',
+                  margin: 0
+                }}>
+                  {isCurrentBreak ? '☕ Break Time' : currentItem.subject}
+                </h2>
+                <p style={{
+                  fontSize: '0.875rem',
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  margin: 0
+                }}>
+                  {isCurrentBreak 
+                    ? `Relax for ${currentItem.break} minutes` 
+                    : `${currentItem.duration} minutes study session`}
+                </p>
+              </div>
+            </div>
+            
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem'
             }}>
               <div style={{
-                fontSize: '0.75rem',
-                color: 'rgba(255, 255, 255, 0.6)',
-                marginBottom: '0.25rem'
+                textAlign: 'right'
               }}>
-                Session {currentIndex + 1} of {schedule.length}
-              </div>
-              <div style={{
-                fontSize: '0.875rem',
-                color: '#a78bfa',
-                fontWeight: 600
-              }}>
-                {currentItem.start} - {currentItem.end}
-              </div>
-            </div>
-            
-            {/* Notification Button */}
-            <button
-              onClick={() => setShowNotifications(true)}
-              style={{
-                padding: '0.5rem',
-                background: 'rgba(139, 92, 246, 0.2)',
-                border: '1px solid rgba(139, 92, 246, 0.3)',
-                borderRadius: '10px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-              onMouseEnter={(e) => e.target.style.background = 'rgba(139, 92, 246, 0.3)'}
-              onMouseLeave={(e) => e.target.style.background = 'rgba(139, 92, 246, 0.2)'}
-            >
-              <Bell size={20} color="#a78bfa" />
-            </button>
-          </div>
-        </div>
-        
-        {/* Circular Progress Timer */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          margin: '1.25rem 0'
-        }}>
-          <div style={{
-            position: 'relative',
-            width: '240px',
-            height: '240px'
-          }}>
-            {/* Background Circle */}
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              borderRadius: '50%',
-              background: 'rgba(255, 255, 255, 0.05)',
-              border: '6px solid rgba(255, 255, 255, 0.1)'
-            }} />
-            
-            {/* Progress Circle */}
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              borderRadius: '50%',
-              background: `conic-gradient(from 0deg, ${isCurrentBreak ? '#4ade80' : '#8b5cf6'} 0%, ${isCurrentBreak ? '#4ade80' : '#8b5cf6'} ${getProgress()}%, transparent ${getProgress()}%, transparent 100%)`,
-              mask: 'radial-gradient(black 55%, transparent 56%)',
-              WebkitMask: 'radial-gradient(black 55%, transparent 56%)'
-            }} />
-            
-            {/* Center Content */}
-            <div style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              textAlign: 'center'
-            }}>
-              <div style={{
-                fontSize: '2.25rem',
-                fontWeight: 700,
-                color: 'white',
-                marginBottom: '0.25rem',
-                fontFamily: 'monospace'
-              }}>
-                {formatTime(timeRemaining)}
-              </div>
-              <div style={{
-                fontSize: '1rem',
-                color: 'rgba(255, 255, 255, 0.6)'
-              }}>
-                {isCurrentBreak ? 'Break Remaining' : 'Time Remaining'}
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Controls */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          gap: '1.25rem'
-        }}>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={isRunning && !isPaused ? pauseTimer : isPaused ? resumeTimer : startTimer}
-            style={{
-              padding: '0.9rem 1.6rem',
-              background: 'linear-gradient(135deg, #8b5cf6, #a78bfa)',
-              border: 'none',
-              borderRadius: '14px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              color: 'white',
-              fontWeight: 600,
-              boxShadow: '0 6px 22px rgba(139, 92, 246, 0.42)'
-            }}
-          >
-            {isRunning && !isPaused ? (
-              <>
-                <Pause size={18} />
-                Pause
-              </>
-            ) : (
-              <>
-                <Play size={18} style={{ marginLeft: '2px' }} />
-                {isPaused ? 'Resume' : 'Start'}
-              </>
-            )}
-          </motion.button>
-          
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={skipSubject}
-            style={{
-              padding: '0.9rem 1.6rem',
-              background: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: '14px',
-              color: 'white',
-              fontSize: '0.95rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}
-          >
-            <SkipForward size={16} />
-            Skip
-          </motion.button>
-          
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={cancelAll}
-            style={{
-              padding: '0.9rem 1.6rem',
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              borderRadius: '14px',
-              color: '#fca5a5',
-              fontSize: '0.95rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}
-          >
-            <X size={16} />
-            Cancel
-          </motion.button>
-        </div>
-      </motion.div>
-      
-      {/* Schedule Overview */}
-      <div style={{
-        padding: '1.5rem',
-        background: 'rgba(255, 255, 255, 0.03)',
-        backdropFilter: 'blur(22px)',
-        borderRadius: '18px',
-        border: '1px solid rgba(255, 255, 255, 0.18)',
-        boxShadow: '0 10px 34px rgba(0, 0, 0, 0.32)'
-      }}>
-        <h3 style={{
-          fontSize: '1.05rem',
-          fontWeight: 700,
-          color: 'white',
-          margin: '0 0 1.1rem 0',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem'
-        }}>
-          <TrendingUp size={18} color="#8b5cf6" />
-          Study Schedule
-        </h3>
-        
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.9rem',
-          maxHeight: '340px',
-          overflowY: 'auto'
-        }}>
-          {schedule.map((item, index) => (
-            <div 
-              key={index}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                padding: '1rem',
-                borderRadius: '14px',
-                background: index === currentIndex 
-                  ? 'rgba(139, 92, 246, 0.2)' 
-                  : index < currentIndex
-                    ? 'rgba(34, 197, 94, 0.1)'
-                    : 'rgba(255, 255, 255, 0.03)',
-                border: index === currentIndex 
-                  ? '1px solid rgba(139, 92, 246, 0.5)' 
-                  : index < currentIndex
-                    ? '1px solid rgba(34, 197, 94, 0.3)'
-                    : '1px solid rgba(255, 255, 255, 0.1)',
-                transition: 'all 0.3s ease'
-              }}
-            >
-              {index < currentIndex ? (
-                <CheckCircle size={18} color="#4ade80" style={{ marginRight: '0.75rem' }} />
-              ) : index === currentIndex ? (
                 <div style={{
-                  width: '18px',
-                  height: '18px',
-                  borderRadius: '50%',
-                  background: '#8b5cf6',
-                  marginRight: '0.75rem',
+                  fontSize: '0.75rem',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  marginBottom: '0.25rem'
+                }}>
+                  Session {currentIndex + 1} of {schedule.length}
+                </div>
+                <div style={{
+                  fontSize: '0.875rem',
+                  color: '#a78bfa',
+                  fontWeight: 600
+                }}>
+                  {currentItem.start} - {currentItem.end}
+                </div>
+              </div>
+              
+              {/* Notification Button */}
+              <button
+                onClick={() => setShowNotifications(true)}
+                style={{
+                  padding: '0.5rem',
+                  background: 'rgba(139, 92, 246, 0.2)',
+                  border: '1px solid rgba(139, 92, 246, 0.3)',
+                  borderRadius: '10px',
+                  cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
-                }}>
-                  <div style={{
-                    width: '8px',
-                    height: '8px',
-                    borderRadius: '50%',
-                    background: 'white'
-                  }} />
-                </div>
-              ) : (
-                <div style={{
-                  width: '18px',
-                  height: '18px',
-                  borderRadius: '50%',
-                  background: 'rgba(255, 255, 255, 0.2)',
-                  marginRight: '0.75rem'
-                }} />
-              )}
+                }}
+                onMouseEnter={(e) => e.target.style.background = 'rgba(139, 92, 246, 0.3)'}
+                onMouseLeave={(e) => e.target.style.background = 'rgba(139, 92, 246, 0.2)'}
+              >
+                <Bell size={20} color="#a78bfa" />
+              </button>
+            </div>
+          </div>
+          
+          {/* Circular Progress Timer */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            margin: '1.25rem 0'
+          }}>
+            <div style={{
+              position: 'relative',
+              width: '240px',
+              height: '240px'
+            }}>
+              {/* Background Circle */}
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                borderRadius: '50%',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '6px solid rgba(255, 255, 255, 0.1)'
+              }} />
               
-              <div style={{ flex: 1 }}>
+              {/* Progress Circle */}
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                borderRadius: '50%',
+                background: `conic-gradient(from 0deg, ${isCurrentBreak ? '#4ade80' : '#8b5cf6'} 0%, ${isCurrentBreak ? '#4ade80' : '#8b5cf6'} ${getProgress()}%, transparent ${getProgress()}%, transparent 100%)`,
+                mask: 'radial-gradient(black 55%, transparent 56%)',
+                WebkitMask: 'radial-gradient(black 55%, transparent 56%)'
+              }} />
+              
+              {/* Center Content */}
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                textAlign: 'center'
+              }}>
                 <div style={{
-                  fontSize: '0.875rem',
-                  fontWeight: index === currentIndex ? 600 : 400,
+                  fontSize: '2.25rem',
+                  fontWeight: 700,
                   color: 'white',
-                  marginBottom: '0.125rem'
+                  marginBottom: '0.25rem',
+                  fontFamily: 'monospace'
                 }}>
-                  {item.break ? `☕ Break (${item.break} min)` : item.subject}
+                  {formatTime(timeRemaining)}
                 </div>
                 <div style={{
-                  fontSize: '0.75rem',
+                  fontSize: '1rem',
                   color: 'rgba(255, 255, 255, 0.6)'
                 }}>
-                  {item.start} - {item.end}
+                  {isCurrentBreak ? 'Break Remaining' : 'Time Remaining'}
                 </div>
               </div>
-              
-              <div style={{
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                color: index < currentIndex ? '#4ade80' : 'rgba(255, 255, 255, 0.6)'
-              }}>
-                {item.duration || item.break} min
-              </div>
             </div>
-          ))}
+          </div>
+          
+          {/* Controls */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '1.25rem'
+          }}>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={isRunning && !isPaused ? pauseTimer : isPaused ? resumeTimer : startTimer}
+              style={{
+                padding: '0.9rem 1.6rem',
+                background: 'linear-gradient(135deg, #8b5cf6, #a78bfa)',
+                border: 'none',
+                borderRadius: '14px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                color: 'white',
+                fontWeight: 600,
+                boxShadow: '0 6px 22px rgba(139, 92, 246, 0.42)'
+              }}
+            >
+              {isRunning && !isPaused ? (
+                <>
+                  <Pause size={18} />
+                  Pause
+                </>
+              ) : (
+                <>
+                  <Play size={18} style={{ marginLeft: '2px' }} />
+                  {isPaused ? 'Resume' : 'Start'}
+                </>
+              )}
+            </motion.button>
+            
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={skipSubject}
+              style={{
+                padding: '0.9rem 1.6rem',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '14px',
+                color: 'white',
+                fontSize: '0.95rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}
+            >
+              <SkipForward size={16} />
+              Skip
+            </motion.button>
+            
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={cancelAll}
+              style={{
+                padding: '0.9rem 1.6rem',
+                background: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                borderRadius: '14px',
+                color: '#fca5a5',
+                fontSize: '0.95rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}
+            >
+              <X size={16} />
+              Cancel
+            </motion.button>
+          </div>
+        </motion.div>
+      </div>
+      
+      {/* Right Panel - Schedule Overview */}
+      <div style={{ flex: 1 }}>
+        <div style={{
+          padding: '1.5rem',
+          background: 'rgba(255, 255, 255, 0.03)',
+          backdropFilter: 'blur(22px)',
+          borderRadius: '18px',
+          border: '1px solid rgba(255, 255, 255, 0.18)',
+          boxShadow: '0 10px 34px rgba(0, 0, 0, 0.32)'
+        }}>
+          <h3 style={{
+            fontSize: '1.05rem',
+            fontWeight: 700,
+            color: 'white',
+            margin: '0 0 1.1rem 0',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <TrendingUp size={18} color="#8b5cf6" />
+            Study Schedule
+          </h3>
+          
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.9rem',
+            maxHeight: '340px',
+            overflowY: 'auto'
+          }}>
+            {schedule.map((item, index) => (
+              <div 
+                key={index}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '1rem',
+                  borderRadius: '14px',
+                  background: index === currentIndex 
+                    ? 'rgba(139, 92, 246, 0.2)' 
+                    : index < currentIndex
+                      ? 'rgba(34, 197, 94, 0.1)'
+                      : 'rgba(255, 255, 255, 0.03)',
+                  border: index === currentIndex 
+                    ? '1px solid rgba(139, 92, 246, 0.5)' 
+                    : index < currentIndex
+                      ? '1px solid rgba(34, 197, 94, 0.3)'
+                      : '1px solid rgba(255, 255, 255, 0.1)',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                {index < currentIndex ? (
+                  <CheckCircle size={18} color="#4ade80" style={{ marginRight: '0.75rem' }} />
+                ) : index === currentIndex ? (
+                  <div style={{
+                    width: '18px',
+                    height: '18px',
+                    borderRadius: '50%',
+                    background: '#8b5cf6',
+                    marginRight: '0.75rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <div style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      background: 'white'
+                    }} />
+                  </div>
+                ) : (
+                  <div style={{
+                    width: '18px',
+                    height: '18px',
+                    borderRadius: '50%',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    marginRight: '0.75rem'
+                  }} />
+                )}
+                
+                <div style={{ flex: 1 }}>
+                  <div style={{
+                    fontSize: '0.875rem',
+                    fontWeight: index === currentIndex ? 600 : 400,
+                    color: 'white',
+                    marginBottom: '0.125rem'
+                  }}>
+                    {item.break ? `☕ Break (${item.break} min)` : item.subject}
+                  </div>
+                  <div style={{
+                    fontSize: '0.75rem',
+                    color: 'rgba(255, 255, 255, 0.6)'
+                  }}>
+                    {item.start} - {item.end}
+                  </div>
+                </div>
+                
+                <div style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  color: index < currentIndex ? '#4ade80' : 'rgba(255, 255, 255, 0.6)'
+                }}>
+                  {item.duration || item.break} min
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
       
@@ -630,7 +602,7 @@ const SequentialTimers = ({ schedule, onComplete, onCancel }) => {
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 };
 

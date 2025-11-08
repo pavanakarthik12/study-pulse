@@ -539,7 +539,8 @@ const Dashboard = () => {
         display: 'grid',
         gridTemplateColumns: focusMode ? '1fr' : (isNarrow ? '1fr' : (sidebarOpen ? '340px 1fr' : '0px 1fr')),
         minHeight: 'calc(100vh - 80px)',
-        gap: '1.5rem'
+        gap: '1.5rem',
+        marginLeft: '20px' // Added margin to shift content right
       }}
       className="dashboard-layout">
         {/* Sidebar - hidden in focus mode */}
@@ -871,7 +872,7 @@ const Dashboard = () => {
             top: '100px', // Below navbar
             left: '20px', // Left corner
             zIndex: 1100,
-            width: '420px', // Original size
+            width: '500px', // Updated to match new size
             maxWidth: '90vw'
           }}
         >
