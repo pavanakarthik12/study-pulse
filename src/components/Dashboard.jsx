@@ -256,16 +256,17 @@ const Dashboard = () => {
       const requestData = {
         subjects: subjectQueue.length > 0 
           ? subjectQueue.map(item => item.subject) 
-          : preferences.subjects,
+          : preferences.studySubjects,
         durations: subjectQueue.length > 0
           ? subjectQueue.map(item => item.duration)
-          : [preferences.preferredDuration],
+          : [preferences.studyDuration],
         breaks: subjectQueue.length > 0
           ? subjectQueue.map(item => item.hasBreak ? item.breakDuration : 0)
           : [0],
-        available_time: `${preferences.availableTimeStart} - ${preferences.availableTimeEnd}`,
-        focus_level: preferences.focusLevel / 10, // Convert 1-10 scale to 0-1
-        past_sessions: preferences.pastSessions
+        available_time: `${preferences.startTime} - ${preferences.endTime}`,
+        focus_level: 0.8, // Default focus level
+        past_sessions: preferences.pastSessions,
+        preferred_duration: preferences.studyDuration
       };
       
       const data = await getStudyRecommendations(requestData);
@@ -553,7 +554,9 @@ const Dashboard = () => {
       background: '#0a0a0f',
       fontFamily: "'Outfit', sans-serif",
       overflow: 'hidden',
-      paddingTop: '80px'
+      paddingTop: '80px',
+      display: 'flex',
+      flexDirection: 'column'
     }}>
       <style>{keyframeAnimations}</style>
       
@@ -565,42 +568,25 @@ const Dashboard = () => {
         {/* Gradient backgrounds */}
         <div style={{
           position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          background: `radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
-                       radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.12) 0%, transparent 50%)`,
-          filter: 'blur(60px)',
-          animation: 'pulseGlow 8s ease-in-out infinite'
-        }} />
-
-        {/* Floating orbs */}
-        <motion.div 
-          style={{
-            position: 'absolute',
-            top: '15%',
-            right: '10%',
-            width: '300px',
-            height: '300px',
-            background: 'radial-gradient(circle, rgba(236, 72, 153, 0.25), transparent)',
-            borderRadius: '50%',
-            filter: 'blur(80px)',
-            pointerEvents: 'none'
-          }}
-          animate={{
-            y: [0, 30, 0],
-            x: [0, -20, 0],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
+          top: '10%',
+          left: '10%',
+          width: '200px',
+          height: '200px',
+          background: 'radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%)',
+          filter: 'blur(60px)'
+        }}></div>
+        
+        <div style={{
+          position: 'absolute',
+          bottom: '10%',
+          right: '10%',
+          width: '200px',
+          height: '200px',
+          background: 'radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%)',
+          filter: 'blur(60px)'
+        }}></div>
       </div>
-
+      
       {/* Main Dashboard Layout - Two Panel Structure */}
       <div style={{
         position: 'relative',
@@ -621,34 +607,26 @@ const Dashboard = () => {
           maxHeight: isNarrow ? 'none' : 'calc(100vh - 80px)',
           zIndex: 900,
           overflow: 'hidden',
-          width: isNarrow ? '100%' : (sidebarOpen ? '340px' : '0px')
+          width: isNarrow ? '100%' : (sidebarOpen ? '340px' : '0px'),
+          minWidth: sidebarOpen ? '340px' : '0px', // Ensure minimum width when open
+          transition: 'width 0.3s ease, minWidth 0.3s ease' // Smooth transition
         }}
         className="sidebar-container">
           <Sidebar 
             user={user}
             sidebarOpen={sidebarOpen}
-            availableSubjects={availableSubjects}
             subjectQueue={subjectQueue}
             setSubjectQueue={setSubjectQueue}
-            plannerStep={plannerStep}
-            setPlannerStep={setPlannerStep}
-            selectedSubjects={selectedSubjects}
-            setSelectedSubjects={setSelectedSubjects}
-            currentDuration={currentDuration}
-            setCurrentDuration={setCurrentDuration}
-            hasBreak={hasBreak}
-            setHasBreak={setHasBreak}
-            breakDuration={breakDuration}
-            setBreakDuration={setBreakDuration}
-            endBreak={endBreak}
-            setEndBreak={setEndBreak}
-            isLoading={isLoading}
-            handleSubmit={handleSubmit}
-            onNavigate={() => navigate('/')}
             recommendations={recommendations}
             showTimers={showTimers}
             handleConfirmSchedule={handleConfirmSchedule}
             handleAdjustSchedule={handleAdjustSchedule}
+            // Add time selection props
+            startTime={preferences.startTime}
+            setStartTime={(time) => setPreferences(prev => ({ ...prev, startTime: time }))}
+            endTime={preferences.endTime}
+            setEndTime={(time) => setPreferences(prev => ({ ...prev, endTime: time }))}
+            handleSubmit={handleSubmit}
           />
         </div>
         )}
@@ -657,12 +635,16 @@ const Dashboard = () => {
         <div style={{
           padding: '1.5rem',
           width: '100%',
-          minHeight: sessionReview ? 'auto' : 'calc(100vh - 160px)' // Adjust height when session summary is shown
+          minHeight: sessionReview && !focusMode ? 'auto' : 'calc(100vh - 160px)', // Adjust height when session summary is shown
+          display: 'flex',
+          flexDirection: 'column'
         }}
         className="main-content">
           <div style={{
             maxWidth: focusMode ? '1200px' : '1000px',
-            margin: '0 auto'
+            margin: '0 auto',
+            width: '100%',
+            flex: 1
           }}>
           {/* Error Message */}
           {error && (
@@ -923,6 +905,7 @@ const Dashboard = () => {
                 justifyContent: focusMode ? 'center' : undefined
               }}
             >
+              {console.log('⏰ Rendering SequentialTimers with schedule:', confirmedSchedule)}
               <SequentialTimers 
                 schedule={confirmedSchedule}
                 onComplete={handleTimersComplete}
@@ -1186,6 +1169,62 @@ const Dashboard = () => {
           onCancel={handleEditorCancel}
         />
       )}
+
+      {/* Footer Section */}
+      <footer style={{
+        padding: '1.5rem',
+        textAlign: 'center',
+        color: 'rgba(255, 255, 255, 0.6)',
+        fontSize: '0.75rem',
+        marginTop: 'auto',
+        zIndex: 20
+      }}>
+        <div style={{ marginBottom: '0.5rem' }}>
+          Made by PavanaKarthikeya
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+          <a 
+            href="https://www.linkedin.com/in/pavan-karthik-a377b632b/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{ 
+              color: 'rgba(255, 255, 255, 0.6)', 
+              textDecoration: 'none',
+              transition: 'color 0.2s ease'
+            }}
+            onMouseEnter={(e) => e.target.style.color = 'rgba(255, 255, 255, 0.8)'}
+            onMouseLeave={(e) => e.target.style.color = 'rgba(255, 255, 255, 0.6)'}
+          >
+            LinkedIn
+          </a>
+          <a 
+            href="https://github.com/pavanakarthik12" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{ 
+              color: 'rgba(255, 255, 255, 0.6)', 
+              textDecoration: 'none',
+              transition: 'color 0.2s ease'
+            }}
+            onMouseEnter={(e) => e.target.style.color = 'rgba(255, 255, 255, 0.8)'}
+            onMouseLeave={(e) => e.target.style.color = 'rgba(255, 255, 255, 0.6)'}
+          >
+            GitHub
+          </a>
+          <a 
+            href="mailto:pavanakarthikeya@gmail.com" 
+            style={{ 
+              color: 'rgba(255, 255, 255, 0.6)', 
+              textDecoration: 'none',
+              transition: 'color 0.2s ease'
+            }}
+            onMouseEnter={(e) => e.target.style.color = 'rgba(255, 255, 255, 0.8)'}
+            onMouseLeave={(e) => e.target.style.color = 'rgba(255, 255, 255, 0.6)'}
+          >
+            Email
+          </a>
+        </div>
+      </footer>
     </div>
   );
 };

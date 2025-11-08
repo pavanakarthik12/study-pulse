@@ -22,7 +22,13 @@ const Sidebar = ({
   recommendations,
   showTimers,
   handleConfirmSchedule,
-  handleAdjustSchedule
+  handleAdjustSchedule,
+  // Add new props for time selection
+  startTime,
+  setStartTime,
+  endTime,
+  setEndTime,
+  handleSubmit
 }) => {
   // State management
   const [subjectName, setSubjectName] = useState('');
@@ -89,12 +95,13 @@ const Sidebar = ({
         durations: subjectQueue.map(s => s.duration),
         breaks: subjectQueue.map(() => 0), // Backend will auto-generate breaks
         focus_level: 0.8, // Default focus level
-        available_time: '09:00 - 18:00', // Default time range
+        available_time: `${startTime} - ${endTime}`, // Use actual time range
         preferred_duration: 45,
         past_sessions: [],
         end_break: endBreak // Include end break preference
       };
 
+      console.log('📤 Sending schedule request with time range:', startTime, 'to', endTime);
       console.log('📤 Sending schedule request:', requestData);
       
       const response = await getStudyRecommendations(requestData);
@@ -157,7 +164,8 @@ const Sidebar = ({
         flexDirection: 'column',
         fontFamily: "'Outfit', sans-serif",
         zIndex: 900,
-        overflow: 'hidden'
+        overflow: 'hidden',
+        boxSizing: 'border-box' // Ensure padding is included in width/height calculations
       }}
     >
       {/* Ambient glow effects */}
@@ -186,7 +194,8 @@ const Sidebar = ({
         scrollbarWidth: 'thin',
         scrollbarColor: 'rgba(139, 92, 246, 0.3) transparent',
         // Ensure content doesn't get cut off
-        paddingBottom: '2rem'
+        paddingBottom: '2rem',
+        boxSizing: 'border-box' // Ensure padding is included in width/height calculations
       }}>
         {/* Custom scrollbar for Webkit browsers */}
         <style>
@@ -218,7 +227,8 @@ const Sidebar = ({
             backdropFilter: 'blur(15px)',
             borderRadius: '16px',
             border: '1px solid rgba(139, 92, 246, 0.3)',
-            boxShadow: '0 4px 20px rgba(139, 92, 246, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+            boxShadow: '0 4px 20px rgba(139, 92, 246, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+            boxSizing: 'border-box'
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
@@ -313,7 +323,8 @@ const Sidebar = ({
           background: 'rgba(255, 255, 255, 0.03)',
           backdropFilter: 'blur(15px)',
           borderRadius: '16px',
-          border: '1px solid rgba(255, 255, 255, 0.18)'
+          border: '1px solid rgba(255, 255, 255, 0.18)',
+          boxSizing: 'border-box'
         }}>
           <h3 style={{
             fontSize: '1rem',
@@ -336,11 +347,88 @@ const Sidebar = ({
               borderRadius: '10px',
               color: '#fca5a5',
               fontSize: '0.75rem',
-              marginBottom: '1rem'
+              marginBottom: '1rem',
+              boxSizing: 'border-box'
             }}>
               {error}
             </div>
           )}
+          
+          {/* Time Selection */}
+          <div style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            gap: '1rem',
+            marginBottom: '1rem',
+            padding: '1rem',
+            background: 'rgba(255, 255, 255, 0.02)',
+            borderRadius: '10px',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            <h4 style={{
+              fontSize: '0.9rem',
+              fontWeight: 600,
+              color: 'white',
+              margin: 0,
+              marginBottom: '0.5rem'
+            }}>
+              Study Time Window
+            </h4>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <div style={{ flex: 1 }}>
+                <label style={{
+                  display: 'block',
+                  fontSize: '0.75rem',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  marginBottom: '0.5rem'
+                }}>
+                  Start Time
+                </label>
+                <input
+                  type="time"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '10px',
+                    color: 'white',
+                    fontSize: '0.875rem',
+                    fontFamily: "'Outfit', sans-serif",
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{
+                  display: 'block',
+                  fontSize: '0.75rem',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  marginBottom: '0.5rem'
+                }}>
+                  End Time
+                </label>
+                <input
+                  type="time"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '10px',
+                    color: 'white',
+                    fontSize: '0.875rem',
+                    fontFamily: "'Outfit', sans-serif",
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+            </div>
+          </div>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div>
@@ -385,7 +473,8 @@ const Sidebar = ({
                     zIndex: 100,
                     border: '1px solid rgba(255, 255, 255, 0.2)',
                     maxHeight: '150px',
-                    overflowY: 'auto'
+                    overflowY: 'auto',
+                    boxSizing: 'border-box'
                   }}>
                     {filteredSuggestions.map((subject, index) => (
                       <div
@@ -400,10 +489,8 @@ const Sidebar = ({
                           fontSize: '0.875rem',
                           color: 'white',
                           borderBottom: index < filteredSuggestions.length - 1 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
-                          fontFamily: "'Outfit', sans-serif"
+                          boxSizing: 'border-box'
                         }}
-                        onMouseEnter={(e) => e.target.style.background = 'rgba(139, 92, 246, 0.2)'}
-                        onMouseLeave={(e) => e.target.style.background = 'transparent'}
                       >
                         {subject}
                       </div>
@@ -424,10 +511,10 @@ const Sidebar = ({
               </label>
               <input
                 type="number"
-                min="5"
-                max="180"
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
+                min="1"
+                max="120"
                 placeholder="45"
                 style={{
                   width: '100%',
@@ -447,7 +534,7 @@ const Sidebar = ({
               onClick={handleAddSubject}
               style={{
                 padding: '0.75rem',
-                background: 'linear-gradient(135deg, #8b5cf6, #a78bfa)',
+                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(168, 85, 247, 0.9))',
                 border: '1px solid rgba(255, 255, 255, 0.2)',
                 borderRadius: '10px',
                 color: 'white',
@@ -460,7 +547,8 @@ const Sidebar = ({
                 gap: '0.5rem',
                 boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4)',
                 fontFamily: "'Outfit', sans-serif",
-                transition: 'all 0.2s ease'
+                transition: 'all 0.2s ease',
+                boxSizing: 'border-box'
               }}
               onMouseEnter={(e) => {
                 e.target.style.transform = 'translateY(-2px)';
@@ -472,65 +560,56 @@ const Sidebar = ({
               }}
             >
               <Plus size={16} />
-              Add to Queue
+              Add Subject
             </button>
           </div>
         </div>
 
         {/* Subject Queue */}
-        <div style={{
-          padding: '1.25rem',
-          background: 'rgba(255, 255, 255, 0.03)',
-          backdropFilter: 'blur(15px)',
-          borderRadius: '16px',
-          border: '1px solid rgba(255, 255, 255, 0.18)'
-        }}>
-          <h3 style={{
-            fontSize: '1rem',
-            fontWeight: 600,
-            color: 'white',
-            margin: '0 0 1rem 0',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
+        {subjectQueue.length > 0 && (
+          <div style={{
+            padding: '1.25rem',
+            background: 'rgba(255, 255, 255, 0.03)',
+            backdropFilter: 'blur(15px)',
+            borderRadius: '16px',
+            border: '1px solid rgba(255, 255, 255, 0.18)',
+            boxSizing: 'border-box'
           }}>
-            <Clock size={18} color="#8b5cf6" />
-            Study Queue ({subjectQueue.length})
-          </h3>
-          
-          {subjectQueue.length === 0 ? (
-            <div style={{
-              textAlign: 'center',
-              padding: '1.5rem',
-              color: 'rgba(255, 255, 255, 0.5)'
+            <h3 style={{
+              fontSize: '1rem',
+              fontWeight: 600,
+              color: 'white',
+              margin: '0 0 1rem 0',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
             }}>
-              <Coffee size={32} color="rgba(255, 255, 255, 0.3)" style={{ marginBottom: '0.75rem' }} />
-              <p style={{ fontSize: '0.875rem', margin: 0 }}>
-                No subjects added yet
-              </p>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <Zap size={18} color="#8b5cf6" />
+              Study Queue ({subjectQueue.length})
+            </h3>
+            
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: '0.75rem',
+              maxHeight: '200px',
+              overflowY: 'auto'
+            }}>
               {subjectQueue.map((subject, index) => (
-                <motion.div
-                  key={subject.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  style={{
-                    padding: '0.875rem',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: '10px',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                  }}
-                >
+                <div key={subject.id} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '0.75rem',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  borderRadius: '10px',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  boxSizing: 'border-box'
+                }}>
                   <div>
                     <div style={{
                       fontSize: '0.875rem',
-                      fontWeight: 600,
+                      fontWeight: 500,
                       color: 'white',
                       marginBottom: '0.25rem'
                     }}>
@@ -550,156 +629,165 @@ const Sidebar = ({
                       background: 'rgba(239, 68, 68, 0.1)',
                       border: '1px solid rgba(239, 68, 68, 0.3)',
                       borderRadius: '8px',
+                      color: '#f87171',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center'
+                      justifyContent: 'center',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.background = 'rgba(239, 68, 68, 0.2)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background = 'rgba(239, 68, 68, 0.1)';
                     }}
                   >
-                    <X size={16} color="#fca5a5" />
+                    <X size={16} />
                   </button>
-                </motion.div>
+                </div>
               ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Generate Schedule Button */}
-        <button
-          onClick={handleGenerateSchedule}
-          disabled={subjectQueue.length === 0 || loading}
-          style={{
-            padding: '0.875rem',
-            background: subjectQueue.length === 0 || loading
-              ? 'rgba(255, 255, 255, 0.05)'
-              : 'linear-gradient(135deg, #8b5cf6, #a78bfa)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            borderRadius: '12px',
-            color: subjectQueue.length === 0 || loading ? 'rgba(255, 255, 255, 0.5)' : 'white',
-            fontSize: '0.875rem',
-            fontWeight: 600,
-            cursor: subjectQueue.length === 0 || loading ? 'not-allowed' : 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.5rem',
-            boxShadow: subjectQueue.length > 0 && !loading 
-              ? '0 4px 20px rgba(139, 92, 246, 0.4)' 
-              : 'none',
-            transition: 'all 0.3s ease',
-            fontFamily: "'Outfit', sans-serif"
-          }}
-        >
-          {loading ? (
-            <>
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                style={{
-                  width: '16px',
-                  height: '16px',
-                  border: '2px solid rgba(255, 255, 255, 0.3)',
-                  borderTop: '2px solid white',
-                  borderRadius: '50%'
-                }}
-              />
-              Generating...
-            </>
-          ) : (
-            <>
-              <Zap size={16} />
-              Generate Schedule
-            </>
-          )}
-        </button>
-
-        {/* ML Recommendations */}
-        {activeRecommendations?.recommended_schedule?.length > 0 && (
+        {subjectQueue.length > 0 && (
           <div style={{
             padding: '1.25rem',
             background: 'rgba(255, 255, 255, 0.03)',
             backdropFilter: 'blur(15px)',
             borderRadius: '16px',
-            border: '1px solid rgba(255, 255, 255, 0.18)'
+            border: '1px solid rgba(255, 255, 255, 0.18)',
+            boxSizing: 'border-box'
           }}>
-            <div style={{
+            <h3 style={{
+              fontSize: '1rem',
+              fontWeight: 600,
+              color: 'white',
+              margin: '0 0 1rem 0',
               display: 'flex',
-              justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: '1rem'
+              gap: '0.5rem'
             }}>
-              <h3 style={{
-                fontSize: '1rem',
-                fontWeight: 600,
-                color: 'white',
-                margin: 0,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}>
-                <Sparkles size={18} color="#8b5cf6" />
-                AI Recommendations
-              </h3>
-              <div style={{
-                padding: '0.25rem 0.5rem',
-                background: 'rgba(139, 92, 246, 0.2)',
-                borderRadius: '20px',
-                fontSize: '0.7rem',
-                fontWeight: 600,
-                color: '#a78bfa'
-              }}>
-                {Math.round(activeRecommendations.confidence * 100)}% confident
-              </div>
+              <Sparkles size={18} color="#8b5cf6" />
+              Generate Schedule
+            </h3>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+              <input
+                type="checkbox"
+                id="endBreak"
+                checked={endBreak}
+                onChange={(e) => setEndBreak(e.target.checked)}
+                style={{ 
+                  width: '18px', 
+                  height: '18px',
+                  accentColor: '#8b5cf6'
+                }}
+              />
+              <label 
+                htmlFor="endBreak"
+                style={{
+                  fontSize: '0.875rem',
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  cursor: 'pointer'
+                }}
+              >
+                Add a break at the end of session
+              </label>
             </div>
             
-            <div style={{
+            <button
+              onClick={handleGenerateSchedule}
+              disabled={loading}
+              style={{
+                width: '100%',
+                padding: '0.875rem',
+                background: loading 
+                  ? 'rgba(139, 92, 246, 0.5)' 
+                  : 'linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(168, 85, 247, 0.9))',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '12px',
+                color: 'white',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                cursor: loading ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4)',
+                fontFamily: "'Outfit', sans-serif",
+                transition: 'all 0.2s ease',
+                boxSizing: 'border-box'
+              }}
+              onMouseEnter={(e) => {
+                if (!loading) {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 6px 25px rgba(139, 92, 246, 0.5)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!loading) {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 4px 20px rgba(139, 92, 246, 0.4)';
+                }
+              }}
+            >
+              {loading ? (
+                <>
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    style={{
+                      width: '16px',
+                      height: '16px',
+                      border: '2px solid rgba(255, 255, 255, 0.3)',
+                      borderTop: '2px solid white',
+                      borderRadius: '50%'
+                    }}
+                  />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Zap size={16} />
+                  Generate AI Schedule
+                </>
+              )}
+            </button>
+          </div>
+        )}
+
+        {/* Generated Schedule Actions */}
+        {internalRecommendations && (
+          <div style={{
+            padding: '1.25rem',
+            background: 'rgba(255, 255, 255, 0.03)',
+            backdropFilter: 'blur(15px)',
+            borderRadius: '16px',
+            border: '1px solid rgba(255, 255, 255, 0.18)',
+            boxSizing: 'border-box'
+          }}>
+            <h3 style={{
+              fontSize: '1rem',
+              fontWeight: 600,
+              color: 'white',
+              margin: '0 0 1rem 0',
               display: 'flex',
-              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              <CheckCircle2 size={18} color="#4ade80" />
+              Schedule Ready
+            </h3>
+            
+            <div style={{ 
+              display: 'flex', 
               gap: '0.75rem',
               marginBottom: '1rem'
             }}>
-              {activeRecommendations.recommended_schedule.slice(0, 3).map((item, index) => (
-                <div
-                  key={index}
-                  style={{
-                    padding: '0.75rem',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: '10px',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    display: 'flex',
-                    justifyContent: 'space-between'
-                  }}
-                >
-                  <div>
-                    <div style={{
-                      fontSize: '0.8rem',
-                      fontWeight: 600,
-                      color: 'white',
-                      marginBottom: '0.125rem'
-                    }}>
-                      {item.subject || 'Break'}
-                    </div>
-                    <div style={{
-                      fontSize: '0.7rem',
-                      color: 'rgba(255, 255, 255, 0.6)'
-                    }}>
-                      {item.start} - {item.end}
-                    </div>
-                  </div>
-                  <div style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    color: 'rgba(255, 255, 255, 0.7)',
-                    display: 'flex',
-                    alignItems: 'center'
-                  }}>
-                    {item.duration || item.break} min
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
               <button
                 onClick={handleStartSession}
                 style={{
@@ -718,7 +806,8 @@ const Sidebar = ({
                   gap: '0.5rem',
                   boxShadow: '0 4px 20px rgba(34, 197, 94, 0.4)',
                   fontFamily: "'Outfit', sans-serif",
-                  transition: 'all 0.2s ease'
+                  transition: 'all 0.2s ease',
+                  boxSizing: 'border-box'
                 }}
                 onMouseEnter={(e) => {
                   e.target.style.transform = 'translateY(-2px)';
@@ -749,7 +838,8 @@ const Sidebar = ({
                   justifyContent: 'center',
                   gap: '0.5rem',
                   fontFamily: "'Outfit', sans-serif",
-                  transition: 'all 0.2s ease'
+                  transition: 'all 0.2s ease',
+                  boxSizing: 'border-box'
                 }}
                 onMouseEnter={(e) => {
                   e.target.style.transform = 'translateY(-2px)';
