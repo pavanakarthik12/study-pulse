@@ -1,4 +1,4 @@
-import React, { useId, useEffect, useState } from 'react';
+import React, { useId, useEffect, useState, useRef } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
