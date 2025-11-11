@@ -1,3 +1,7 @@
+<img width="1629" height="783" alt="image" src="https://github.com/user-attachments/assets/022d295e-fe6c-40b2-a537-fafa38e9c31a" />
+<img width="1720" height="796" alt="image" src="https://github.com/user-attachments/assets/7c5ac15a-7821-4f9c-b8f6-71742af7e75a" />
+<img width="1701" height="797" alt="image" src="https://github.com/user-attachments/assets/6d4720cd-2413-4af7-bc42-94160fb472a0" />
+
 # 📚 Study Pulse - AI-Powered Study Scheduler
 
 > **Your personalized study companion that uses Machine Learning to optimize your learning schedule.**
